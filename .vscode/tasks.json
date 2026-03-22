@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Initialize Cloudflare Worker project",
+			"type": "shell",
+			"command": "npm create cloudflare@latest -- --name trpg-bot --type workers --typescript true",
+			"args": []
+		}
+	]
+}

@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dice-bot/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dice-bot/**'
+
+defaults:
+  run:
+    working-directory: dice-bot
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: dice-bot/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test

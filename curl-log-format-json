@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-28189096-2"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-28189096-2');
+	</script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="Y2p8cdI3bEL3QbHMM2Cxan29rJpItZvJ0kNjQa3v">
+
+			<title>			遠山 陽子(とおやま ようこ)
+	 - キャラクター保管所</title>
+	
+	<!-- Styles -->
+	<!-- link rel="stylesheet" href="//ddfresource.vampire-blood.net/hokanjo/css/app.css" type="text/css" -->
+	<link rel="stylesheet" href="/css/app.css" type="text/css">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Scripts -->
+    <script>
+        window.Laravel = {"csrfToken":"Y2p8cdI3bEL3QbHMM2Cxan29rJpItZvJ0kNjQa3v"}    </script>
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/1.6.5/jquery.contextMenu.min.css" type="text/css" />
+</head>
+<body>
+<div class="inline">
+	<nav class="navbar navbar-expand-md bg-light py-md-1 navbar-light">
+		<a class="navbar-brand" href="https://charasheet.vampire-blood.net">
+			キャラクター保管所
+		</a>
+		<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#app-navbar-collapse" aria-controls="app-navbar-collapse" aria-expanded="false" aria-label="レスポンシブ・ナビゲーションバー">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="app-navbar-collapse">
+			<div class="navbar-nav my-2 my-lg-0 ml-auto">
+												<li class="nav-link"><a href="https://charasheet.vampire-blood.net/4634372?back">バックアップ</a></li>
+		<li class="nav-link"><a href="https://charasheet.vampire-blood.net/list_coc7">リスト</a></li>
+								<li class="nav-link"><a href="https://charasheet.vampire-blood.net/mobile" onclick="event.preventDefault();
+		                                                     document.getElementById('change-mobile-form').submit();">モバイル版</a>
+					<form id="change-mobile-form" action="https://charasheet.vampire-blood.net/mobile" method="POST" style="display: none;">
+						<input type="hidden" name="_token" value="Y2p8cdI3bEL3QbHMM2Cxan29rJpItZvJ0kNjQa3v">
+					</form></li>
+									<li class="nav-link"><a href="https://charasheet.vampire-blood.net/help">ヘルプ</a></li>
+							<!-- Authentication Links -->
+									<li class="nav-link"><a href="https://charasheet.vampire-blood.net/login">ログイン</a></li>
+					<li class="nav-link tw_login"><a href="https://charasheet.vampire-blood.net/login/twitter"><i class="fa fa-twitter" aria-hidden="true"></i>Twitterでログイン</a></li>
+					<li class="nav-link"><a href="https://charasheet.vampire-blood.net/register">登録</a></li>
+							</ul>
+		</div>
+	</nav>
+</div>
+	<div class="head_breadcrumb py-md-0">
+		<div class="inline">
+			<nav aria-label="パンくずリスト">
+				<ul class="breadcrumb">
+					<li class="breadcrumb-item"><a href="http://www.vampire-blood.net/">トップ</a></li>
+					<li class="breadcrumb-item"><a href="http://www.vampire-blood.net/category/service">Webサービス</a></li>
+					<li class="breadcrumb-item"><a href="https://charasheet.vampire-blood.net">キャラクター保管所</a></li>
+						<li class="breadcrumb-item"><a href="https://charasheet.vampire-blood.net/coc7_pc_making.html">
+			新クトゥルフ神話TRPG
+							PC作成ツール
+					</a>
+	</li>
+			<li class="breadcrumb-item"><a href="https://charasheet.vampire-blood.net/4634372">遠山 陽子(とおやま ようこ)</a></li>
+					</ul>
+			</nav>
+		</div>
+	</div>
+
+<div class="inline left_varied_layout">
+			<form action="https://charasheet.vampire-blood.net/sheet/save" method="post" name="MAKING" id="MAKING">
+	
+	
+	<div class="main">
+		<div class="content">
+			<div class="maincontent">
+						
+	
+			<section>
+					<span class="show_id">ID:4634372</span>
+							<span class="show_md">MD:5581dda6da39fc547e6014f994c3bc86</span>
+				<h3>遠山 陽子(とおやま ようこ)</h3>
+		<div>
+										タグ：
+									<a href="list_coc7.html?tag=nagashi_ma_w" class="label label-default"><span class="glyphicon glyphicon-tag"></span> nagashi_ma_w</a>
+									<a href="list_coc7.html?tag=mohikanz" class="label label-default"><span class="glyphicon glyphicon-tag"></span> mohikanz</a>
+							
+		</div>
+		<input type="button" name="deathcheckbutton" onclick="WindowOnLoadAction()" value="対Chrome専用復活ボタン(動作しない時このボタンを押せば改善するかもしれません)" class="full">
+	</section>
+
+		<section id="status_disp">
+	<div class="showbtn">
+		<input name="is_disp_status" id="is_disp_status" value="1" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">生まれ・能力値</h4>
+	</div>
+	<div class="disp"><table class="pc_making">
+<tbody>
+<tr>
+<th colspan="2"></th>
+<th>STR</th>
+<th>CON</th>
+<th>DEX</th>
+<th>APP</th>
+<th>POW</th>
+<th>SIZ</th>
+<th>INT</th>
+<th>EDU</th>
+	<th>MOV</th>
+	<th>HP</th>
+	<th>MP</th>
+</tr>
+<tr>
+<th colspan="2">能力値</th>
+	<td><input type="number" name="NA1" min="10" max="120" value="85" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA2" min="10" max="120" value="50" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA3" min="10" max="120" value="50" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA4" min="10" max="120" value="65" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA5" min="10" max="120" value="50" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA6" min="30" max="120" value="75" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA7" min="30" max="120" value="85" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input type="number" name="NA8" min="30" max="120" value="60" size="5" step="5" onchange="chgBonus()" onkeyup="chgBonus()"></td>
+	<td><input name="NA9" id="NA9" readonly="true" size="3" type="text" value="8"></td>
+<td><input name="NA10" id="NA10" readonly="true" size="3" type="text" value="12"></td>
+<td><input name="NA11" id="NA11" readonly="true" size="3" type="text" value="10"></td>
+</tr>
+<tr>
+	<th colspan="2" nowrap="nowrap">年齢修正</th>
+	<td><input name="NB1" id="NB1" onchange="chgNS(1)" onkeyup="chgNS(1)" size="3" type="text" value></td>
+	<td><input name="NB2" id="NB2" onchange="chgNS(2)" onkeyup="chgNS(2)" size="3" type="text" value></td>
+	<td><input name="NB3" id="NB3" onchange="chgNS(3)" onkeyup="chgNS(3)" size="3" type="text" value></td>
+	<td><input name="NB4" id="NB4" onchange="chgNS(4)" onkeyup="chgNS(4)" size="3" type="text" value></td>
+	<td></td>
+	<td><input name="NB6" id="NB6" onchange="chgNS(6)" onkeyup="chgNS(6)" size="3" type="text" value></td>
+	<td></td>
+	<td><input name="NB8" id="NB8" onchange="chgNS(8)" onkeyup="chgNS(8)" size="3" type="text" value></td>
+	<td><input name="NB9" id="NB9" onchange="chgNS(9)" onkeyup="chgNS(9)" size="3" type="text" value></td>
+	<td colspan="2"></td>
+</tr>
+<tr>
+<th colspan="2" nowrap="nowrap">その他増加分</th>
+<td><input name="NS1" id="NS1" onchange="chgNS(1)" onkeyup="chgNS(1)" size="3" type="text" value></td>
+<td><input name="NS2" id="NS2" onchange="chgNS(2)" onkeyup="chgNS(2)" size="3" type="text" value></td>
+<td><input name="NS3" id="NS3" onchange="chgNS(3)" onkeyup="chgNS(3)" size="3" type="text" value></td>
+<td><input name="NS4" id="NS4" onchange="chgNS(4)" onkeyup="chgNS(4)" size="3" type="text" value></td>
+<td><input name="NS5" id="NS5" onchange="chgNS(5)" onkeyup="chgNS(5)" size="3" type="text" value></td>
+<td><input name="NS6" id="NS6" onchange="chgNS(6)" onkeyup="chgNS(6)" size="3" type="text" value></td>
+<td><input name="NS7" id="NS7" onchange="chgNS(7)" onkeyup="chgNS(7)" size="3" type="text" value></td>
+<td><input name="NS8" id="NS8" onchange="chgNS(8)" onkeyup="chgNS(8)" size="3" type="text" value></td>
+<td><input name="NS9" id="NS9" onchange="chgNS(9)" onkeyup="chgNS(9)" size="3" type="text" value></td>
+<td><input name="NS10" id="NS10" onchange="chgNS(10)" onkeyup="chgNS(10)" size="3" type="text" value></td>
+<td><input name="NS11" id="NS11" onchange="chgNS(11)" onkeyup="chgNS(11)" size="3" type="text" value></td>
+</tr>
+<tr>
+<th colspan="2">一時的増減</th>
+<td><input name="NM1" id="NM1" onchange="chgNM(1)" onkeyup="chgNM(1)" size="3" type="text" value></td>
+<td><input name="NM2" id="NM2" onchange="chgNM(2)" onkeyup="chgNM(2)" size="3" type="text" value></td>
+<td><input name="NM3" id="NM3" onchange="chgNM(3)" onkeyup="chgNM(3)" size="3" type="text" value></td>
+<td><input name="NM4" id="NM4" onchange="chgNM(4)" onkeyup="chgNM(4)" size="3" type="text" value></td>
+<td><input name="NM5" id="NM5" onchange="chgNM(5)" onkeyup="chgNM(5)" size="3" type="text" value></td>
+<td><input name="NM6" id="NM6" onchange="chgNM(6)" onkeyup="chgNM(6)" size="3" type="text" value></td>
+<td><input name="NM7" id="NM7" onchange="chgNM(7)" onkeyup="chgNM(7)" size="3" type="text" value></td>
+<td><input name="NM8" id="NM8" onchange="chgNM(8)" onkeyup="chgNM(8)" size="3" type="text" value></td>
+<td><input name="NM9" id="NM9" onchange="chgNM(9)" onkeyup="chgNM(9)" size="3" type="text" value></td>
+<td><input name="NM10" id="NM10" onchange="chgNM(10)" onkeyup="chgNM(10)" size="3" type="text" value></td>
+<td><input name="NM11" id="NM11" onchange="chgNM(11)" onkeyup="chgNM(11)" size="3" type="text" value></td>
+</tr>
+<tr>
+<th colspan="2">現在値</th>
+<td class="sumTD"><input name="NP1" id="NP1" value="85" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP2" id="NP2" value="50" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP3" id="NP3" value="50" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP4" id="NP4" value="65" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP5" id="NP5" value="50" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP6" id="NP6" value="75" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP7" id="NP7" value="85" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP8" id="NP8" value="60" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP9" id="NP9" value="8" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP10" id="NP10" value="12" size="3" readonly="true" type="text"></td>
+<td class="sumTD"><input name="NP11" id="NP11" value="10" size="3" readonly="true" type="text"></td>
+</tr>
+<tr>
+	<th colspan="2">1/2(ハード)</th>
+	<td class="sumTD"><span id="NH1">0</span></td>
+	<td class="sumTD"><span id="NH2">0</span></td>
+	<td class="sumTD"><span id="NH3">0</span></td>
+	<td class="sumTD"><span id="NH4">0</span></td>
+	<td class="sumTD"><span id="NH5">0</span></td>
+	<td class="sumTD"><span id="NH6">0</span></td>
+	<td class="sumTD"><span id="NH7">0</span></td>
+	<td class="sumTD"><span id="NH8">0</span></td>
+	<th rowspan="3">MOV</th>
+	<th rowspan="3">HP</th>
+	<th rowspan="3">MP</th>
+</tr>
+<tr>
+	<th colspan="2">1/5(エクストリーム)</th>
+	<td class="sumTD"><span id="NE1">0</span></td>
+	<td class="sumTD"><span id="NE2">0</span></td>
+	<td class="sumTD"><span id="NE3">0</span></td>
+	<td class="sumTD"><span id="NE4">0</span></td>
+	<td class="sumTD"><span id="NE5">0</span></td>
+	<td class="sumTD"><span id="NE6">0</span></td>
+	<td class="sumTD"><span id="NE7">0</span></td>
+	<td class="sumTD"><span id="NE8">0</span></td>
+</tr>
+<tr>
+	<th colspan="2"></th>
+	<th>STR</th>
+	<th>CON</th>
+	<th>DEX</th>
+	<th>APP</th>
+	<th>POW</th>
+	<th>SIZ</th>
+	<th>INT</th>
+	<th>EDU</th>
+</tr>
+</tbody></table>
+
+	</div>
+		<a href="#top">↑ページ上部へ</a>
+	</section>	<section id="san_disp">
+	<div class="showbtn">
+		<input name="is_disp_san" id="is_disp_san" value="1" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">SANと幸運値</h4>
+	</div>
+	<div class="disp"><table class="pc_making">
+	<tr>
+		<th></th>
+		<th>現在</th>
+		<th>開始時</th>
+		<th>最大</th>
+		<th colspan="2"></th>
+	</tr>
+<tr>
+    <th>SAN</th>
+	<td><input type="text" name="SAN_Left" value="42" size="3" onchange="chgSAN()" onkeyup="chgSAN()"></td>
+	<td>/<input type="text" name="SAN_start" value="50" size="3" onchange="chgSAN()" onkeyup="chgSAN()"></td>
+    <td class="sumTD">/<input type="text" name="SAN_Max" value="99" size="3" readonly="true"></td>
+    <th>(不定の狂気：</th><td class="sumTD"><input type="text" name="SAN_Danger" value="40" size="3" readonly="true">)</td>
+</tr>
+	<tr>
+		<th>幸運</th>
+		<td><input type="text" name="Luck_Left" value="65" size="3"></td>
+		<td>/<input type="text" name="Luck_start" value="65" size="3"></td>
+		<td class="sumTD">/99</td>
+		<th colspan="2"></th>
+	</tr>
+</table>
+
+	</div>
+		<a href="#top">↑ページ上部へ</a>
+	</section>	<section id="power_disp">
+	<div class="showbtn">
+		<input name="is_disp_power" id="is_disp_power" value="1" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">技能</h4>
+	</div>
+	<div class="disp"><table class="pc_making">
+<tr>
+    <th>職業P</th><td><select name="works_param" onchange="chgSkillParameter()">
+            <option value="0">クイックスタート基準</option>
+            <option value="1">STR</option>
+            <option value="2">CON</option>
+            <option value="3">DEX</option>
+            <option value="4">APP</option>
+            <option value="5">POW</option>
+            <option value="6">SIZ</option>
+            <option value="7">INT</option>
+            <option value="8">EDU</option>
+        </select><input name="V_works_param" type="hidden" value="8"></td><td class="sumTD"><input type="text" name="TS_Total" value="240" size="3" readonly="true"></td>
+    <th>/<input type="text" name="TS_Maximum" value="240" size="3" readonly="true"></th>
+    <td>(うち追加分：<input type="text" name="TS_Add" size="3" onchange="calcSkillPoint()" onkeyup="calcSkillPoint()" value>)</td>
+    <th colspan="2">興味P</th><td class="sumTD"><input type="text" name="TK_Total" value="170" size="3" readonly="true"></td>
+    <th>/<input type="text" name="TK_Maximum" value="170" size="3" readonly="true"></th>
+    <td>(うち追加分：<input type="text" name="TK_Add" size="3" onchange="calcSkillPoint()" onkeyup="calcSkillPoint()" value>)</td>
+</tr>
+</table>
+
+    <section id="peffect_disp">
+	<div class="showbtn">
+		<input name="is_disp_peffect" id="is_disp_peffect" value="1" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">拡張ツール</h4>
+	</div>
+	<div class="disp"><table class="pc_making">
+    <tr>
+        <th>技能の追加</th>
+        <td><select name="kihon_parts">
+                <option value="0"></option>
+                <option value="1">リセット</option>
+                <optgroup label="複数技能">
+                <option value="2">全技能(現代)</option>
+                <option value="3">全技能(1920年代)</option>
+                <option value="4">戦闘系全部</option>
+                <option value="5">探索系全部</option>
+                <option value="6">踏破系全部</option>
+                <option value="7">行動系全部</option>
+                <option value="8">交渉系全部</option>
+                <option value="9">知識系全部</option>
+                </optgroup>
+                <optgroup label="特定技能">
+                <option value="116">芸術/制作</option>
+                <option value="109">科学</option>
+                <option value="120">サバイバル</option>
+                <option value="104">運転</option>
+                <option value="131">操縦</option>
+                <option value="138">伝承</option>
+                </optgroup>
+            </select>
+        </td>
+        <td><input type="button" value="を追加" onclick="ResetParts()"></td>
+        <th>攻撃系技能の追加</th>
+        <td><select id="attack_parts">
+                <option value="0"></option>
+                <optgroup label="近接戦闘">
+                    <option value="13">斧</option>
+                    <option value="14">格闘</option>
+                    <option value="15">絞殺ひも</option>
+                    <option value="16">チェーンソー</option>
+                    <option value="17">刀剣</option>
+                    <option value="18">フレイル</option>
+                    <option value="19">むち</option>
+                    <option value="20">槍</option>
+                </optgroup>
+                <optgroup label="射撃">
+                    <option value="28">火炎放射器</option>
+                    <option value="29">拳銃</option>
+                    <option value="30">サブマシンガン</option>
+                    <option value="31">重火器</option>
+                    <option value="32">マシンガン</option>
+                    <option value="33">弓</option>
+                    <option value="34">ライフル/ショットガン</option>
+                </optgroup>
+            </select>
+        </td>
+        <td><input type="button" value="を追加" onclick="AddBattleParts()"></td>
+        <th>ソート</th>
+        <td>
+            <select name="kihon_sort">
+                <option value="0"></option>
+                <option value="1">技能名あいうえお順</option>
+                <option value="2">サブ名称あいうえお順</option>
+                <option value="3">カテゴリ順</option>
+            </select>
+        </td>
+        <td><input type="button" value="でソート" onclick="ResetParts()"></td>
+    </tr>
+    <tr>
+    <th>よみがな</th>
+    <td colspan="6">
+        <label><input type="checkbox" name="a_parts" onclick="chgArtsVisible()">あ行</label>
+        <label><input type="checkbox" name="ka_parts" onclick="chgArtsVisible()">か行</label>
+        <label><input type="checkbox" name="sa_parts" onclick="chgArtsVisible()">さ行</label>
+        <label><input type="checkbox" name="ta_parts" onclick="chgArtsVisible()">た行</label>
+        <label><input type="checkbox" name="na_parts" onclick="chgArtsVisible()">な行</label>
+        <label><input type="checkbox" name="ha_parts" onclick="chgArtsVisible()">は行</label>
+        <label><input type="checkbox" name="ma_parts" onclick="chgArtsVisible()">ま行</label>
+        <label><input type="checkbox" name="ya_parts" onclick="chgArtsVisible()">や行</label>
+        <label><input type="checkbox" name="ra_parts" onclick="chgArtsVisible()">ら行</label>
+        <label><input type="checkbox" name="wa_parts" onclick="chgArtsVisible()">わ行</label>
+    </td>
+        <td colspan="2">
+            <input type="button" value="全部チェック" onclick="chgAParts(true)">
+            <input type="button" value="全部消す" onclick="chgAParts(false)">
+        </td>
+</tr>
+    <tr>
+        <th>タイプ</th>
+        <td colspan="6">
+            <label><input type="checkbox" name="battle_parts" onclick="chgArtsVisible()">戦闘系技能</label>
+            <label><input type="checkbox" name="find_parts" onclick="chgArtsVisible()">探索系技能</label>
+            <label><input type="checkbox" name="move_parts" onclick="chgArtsVisible()">踏破系技能</label>
+            <label><input type="checkbox" name="action_parts" onclick="chgArtsVisible()">行動系技能</label>
+            <label><input type="checkbox" name="talk_parts" onclick="chgArtsVisible()">交渉系技能</label>
+            <label><input type="checkbox" name="knowledge_parts" onclick="chgArtsVisible()">知識系技能</label>
+        </td>
+        <td colspan="2">
+            <input type="button" value="全部チェック" onclick="chgCParts(true)">
+            <input type="button" value="全部消す" onclick="chgCParts(false)">
+        </td>
+    </tr>
+    <tr>
+        <th>その他</th>
+        <td colspan="2">
+            <label><input type="checkbox" name="TS_Skill_HideMind" value="1" onclick="chgArtsVisible()" checked>初期値の技能を隠す</label></td>
+        <td colspan="3">
+            <label><input type="checkbox" name="TS_Numable_Seicho" value="1" onclick="chkNumableSeicho()">複数回成長モード</label>
+        </td>
+        <td colspan="3"></td>
+    </tr>
+    <tr><th>サーチ</th><td colspan="7" class="left"><input name="search" type="text" class="str full" onchange="chgArtsVisible()" onkeyup="chgArtsVisible()" value></td><td><button type="button" onclick="resetSearchText()">リセット</button></td></tr>
+</table>
+サーチは完全一致。,や、などの区切り文字列で複数検索可能
+	</div>
+	</section><br>
+    <table class="pc_making" id="Table_arts">
+        <tr class="nodrag nodrop"><th>成長</th><th colspan="2">カテゴリ</th><th>名称</th><th>付記</th><th>初期値</th><th>職業P</th>
+            <th>興味P</th><th>成長分</th><th>その他</th><th>合計</th><th>1/2</th><th>1/5</th>
+        </tr>
+        <tr class="">
+            <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+            <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                    <option value="0">あ行</option>
+                    <option value="1">か行</option>
+                    <option value="2">さ行</option>
+                    <option value="3">た行</option>
+                    <option value="4">な行</option>
+                    <option value="5">は行</option>
+                    <option value="6">ま行</option>
+                    <option value="7">や行</option>
+                    <option value="8">ら行</option>
+                    <option value="9">わ行</option>
+                </select><input type="hidden" name="SKLN[]" value="0"></td>
+            <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                    <option value="0">戦闘</option>
+                    <option value="1">探索</option>
+                    <option value="2">踏破</option>
+                    <option value="3">行動</option>
+                    <option value="4">交渉</option>
+                    <option value="5">知識</option>
+                </select><input type="hidden" name="SKTP[]" value="4"></td>
+            <td><input type="text" name="SKAN[]" size="14" class="str" value="威圧"></td>
+            <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+            <td><input type="text" name="SKAD[]" value="15" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+            <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+            <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+            <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+            <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+            <td class="sumTD"><input type="text" name="SKAP[]" value="15" size="3" readonly="true"></td>
+            <td class="sumTD"><input type="text" name="SKAH[]" value="7" size="3" readonly="true"></td>
+            <td class="sumTD"><input type="text" name="SKAE[]" value="3" size="3" readonly="true"></td>
+        </tr>
+        <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="0"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="4"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="言いくるめ"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="0"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="医学"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="0"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="運転"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="自動車"></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value="15" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="35" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="17" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="7" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="0"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="応急手当"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="30" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="30" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="15" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="6" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="0"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="オカルト"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="0"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="1"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="隠密"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="回避"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="25" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="25" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="12" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="5" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="科学"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="1"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="鍵開け"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="1"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="鑑定"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="機械修理"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="1"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="聞き耳"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value="9" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="59" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="29" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="11" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="近接戦闘"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="クトゥルフ神話"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="0" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="芸術/製作"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="経理"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="15" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="考古学"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="1"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="コンピューター"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="40" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value="30" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="75" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="37" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="15" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="サバイバル"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="自然"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="射撃"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="重機械操作"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="乗馬"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="4"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="信用"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="0" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="35" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="35" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="17" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="7" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="心理学"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="人類学"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="水泳"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="精神分析"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value="40" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="41" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="8" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="4"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="説得"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="2"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="操縦"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="ダイビング"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="跳躍"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="追跡"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="手さばき"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value="30" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="40" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="8" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="電気修理"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="電子工学"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="21" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="伝承"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="投擲"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="登攀"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="動物使い"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="読唇術"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="3"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="1"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="図書館"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="20" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="50" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="70" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="35" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="14" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="4"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="2"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="ナビゲート"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="10" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="2" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="爆破"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="ヒプノーシス"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="3"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="変装"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="砲"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="1" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="0" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="0" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="法律"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="15" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="10" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="4" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="母国語"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value="*"></td>
+        <td><input type="text" name="SKAD[]" value="60" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="60" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="30" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="12" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="5"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="英語"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="1" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="40" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="41" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="20" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="8" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="6"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="4"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="魅惑"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="15" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="15" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="7" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="3" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="6"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="1"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="目星"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="25" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value="15" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value="35" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="75" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="37" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="15" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value="8"></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="5"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="歴史"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="5" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="2" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="1" size="3" readonly="true"></td>
+    </tr>
+    <tr class="">
+        <td><input type="checkbox" name="V_SKAU" onclick="chgGinouTAU()"><input type="text" name="SKAU[]" style="display:none;" size="3" value></td>
+        <td class="sumTD"><select name="SL_skill_line" onchange="chgSkillColor()">
+                <option value="0">あ行</option>
+                <option value="1">か行</option>
+                <option value="2">さ行</option>
+                <option value="3">た行</option>
+                <option value="4">な行</option>
+                <option value="5">は行</option>
+                <option value="6">ま行</option>
+                <option value="7">や行</option>
+                <option value="8">ら行</option>
+                <option value="9">わ行</option>
+            </select><input type="hidden" name="SKLN[]" value></td>
+        <td class="sumTD"><select name="SL_skill_type" onchange="chgSkillColor()">
+                <option value="0">戦闘</option>
+                <option value="1">探索</option>
+                <option value="2">踏破</option>
+                <option value="3">行動</option>
+                <option value="4">交渉</option>
+                <option value="5">知識</option>
+            </select><input type="hidden" name="SKTP[]" value="0"></td>
+        <td><input type="text" name="SKAN[]" size="14" class="str" value="芸術（ 格闘ゲーム）"></td>
+        <td><input type="text" name="SKAM[]" size="6" class="str" value></td>
+        <td><input type="text" name="SKAD[]" value="5" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAS[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAK[]" value size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAA[]" value="4" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td><input type="text" name="SKAO[]" value="60" size="3" onchange="chgGinouTA()" onkeyup="chgGinouTA()"></td>
+        <td class="sumTD"><input type="text" name="SKAP[]" value="69" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAH[]" value="34" size="3" readonly="true"></td>
+        <td class="sumTD"><input type="text" name="SKAE[]" value="13" size="3" readonly="true"></td>
+    </tr>
+</table><input type="hidden" name="TBAS_Total" value="0"><input type="hidden" name="TBAK_Total" value="0">
+    <input name="btnAddLineArts" id="btnAddLineArts" onclick="addLineArts();" value="＋増やす" style="text-align: center;" type="button">&nbsp;<input name="btnDelLineArts" id="btnDelLineArts" onclick="delLineArts();" value="－減らす" style="text-align: center;" type="button">
+
+	</div>
+		<a href="#top">↑ページ上部へ</a>
+	</section>	<section id="battle_disp">
+	<div class="showbtn">
+		<input name="is_disp_battle" id="is_disp_battle" value="0" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">戦闘・武器・防具</h4>
+	</div>
+	<div class="disp">ダメージボーナス：<input type="text" name="dmg_bonus" size="15" readonly="true" value="1d4">
+    ビルド：<input type="text" name="build_bonus" size="15" readonly="true" value="1">
+<table class="pc_making" id="Table_arms">
+<tr class="nodrag nodrop"><th>名前</th><th>成功率</th><th>ダメージ</th>
+    <th>射程</th><th>攻撃回数</th><th>装弾数</th><th>故障#</th><th>その他</th>
+</tr>
+<tr>
+    <td><input name="arms_name[]" id="arms_name[]" size="20" type="text" class="str" value></td>
+    <td><input type="text" name="arms_hit[]" size="3" value>%</td>
+    <td><input name="arms_damage[]" id="arms_damage[]" size="10" type="text" class="method" value></td>
+    <td><input name="arms_range[]" id="arms_range[]" size="6" type="text" class="method" value></td>
+    <td><input name="arms_attack_count[]" id="arms_attack_count[]" size="6" type="text" value></td>
+    <td><input name="arms_last_shot[]" id="arms_last_shot[]" size="4" type="text" value></td>
+    <td><input name="arms_vitality[]" id="arms_vitality[]" size="4" type="text" value></td>
+    <td><input name="arms_sonota[]" id="arms_sonota[]" size="40" type="text" class="str" value></td>
+</tr>
+<tr>
+    <td><input name="arms_name[]" id="arms_name[]" size="20" type="text" class="str" value></td>
+    <td><input type="text" name="arms_hit[]" size="3" value>%</td>
+    <td><input name="arms_damage[]" id="arms_damage[]" size="10" type="text" class="method" value></td>
+    <td><input name="arms_range[]" id="arms_range[]" size="6" type="text" class="method" value></td>
+    <td><input name="arms_attack_count[]" id="arms_attack_count[]" size="6" type="text" value></td>
+    <td><input name="arms_last_shot[]" id="arms_last_shot[]" size="4" type="text" value></td>
+    <td><input name="arms_vitality[]" id="arms_vitality[]" size="4" type="text" value></td>
+    <td><input name="arms_sonota[]" id="arms_sonota[]" size="40" type="text" class="str" value></td>
+</tr>
+</table>
+<input name="btnAddLineArmsSelect" id="btnAddLineArmsSelect" onclick="addLineArmsSelect()" value="＋増やす" style="text-align: center;" type="button">&nbsp;<input name="btnDelLineArmsSelect" id="btnDelLineArmsSelect" onclick="delLineArmsSelect()" value="－減らす" style="text-align: center;" type="button">
+
+	</div>
+		<a href="#top">↑ページ上部へ</a>
+	</section>	<section id="item_disp">
+	<div class="showbtn">
+		<input name="is_disp_item" id="is_disp_item" value="0" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">所持品・所持金</h4>
+	</div>
+	<div class="disp"><table class="pc_making" id="Table_item">
+<tbody><tr class="nodrag nodrop">
+<th>名称</th>
+<th>単価</th>
+<th>個</th>
+<th>価格</th>
+<th>効果・備考など</th>
+</tr>
+<tr>
+<td><input name="item_name[]" class="str" id="item_name[]" size="32" type="text" value></td>
+<td><input name="item_tanka[]" id="item_tanka[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" size="8" type="text" value></td>
+<td><input name="item_num[]" id="item_num[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" value="1" size="2" type="text"></td>
+<td><input name="item_price[]" id="item_price[]" onchange="chgItemPrice()" onkeyup="chgItemPrice()" value="0" size="8" type="text"></td>
+<td><input name="item_memo[]" id="item_memo[]" size="60" class="str" type="text" value></td>
+</tr>
+<tr>
+<td><input name="item_name[]" class="str" id="item_name[]" size="32" type="text" value></td>
+<td><input name="item_tanka[]" id="item_tanka[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" size="8" type="text" value></td>
+<td><input name="item_num[]" id="item_num[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" value="1" size="2" type="text"></td>
+<td><input name="item_price[]" id="item_price[]" onchange="chgItemPrice()" onkeyup="chgItemPrice()" value="0" size="8" type="text"></td>
+<td><input name="item_memo[]" id="item_memo[]" size="60" class="str" type="text" value></td>
+</tr>
+<tr>
+<td><input name="item_name[]" class="str" id="item_name[]" size="32" type="text" value></td>
+<td><input name="item_tanka[]" id="item_tanka[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" size="8" type="text" value></td>
+<td><input name="item_num[]" id="item_num[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" value="1" size="2" type="text"></td>
+<td><input name="item_price[]" id="item_price[]" onchange="chgItemPrice()" onkeyup="chgItemPrice()" value="0" size="8" type="text"></td>
+<td><input name="item_memo[]" id="item_memo[]" size="60" class="str" type="text" value></td>
+</tr>
+<tr>
+<td><input name="item_name[]" class="str" id="item_name[]" size="32" type="text" value></td>
+<td><input name="item_tanka[]" id="item_tanka[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" size="8" type="text" value></td>
+<td><input name="item_num[]" id="item_num[]" onchange="chgItemTankaKosu()" onkeyup="chgItemTankaKosu()" value="1" size="2" type="text"></td>
+<td><input name="item_price[]" id="item_price[]" onchange="chgItemPrice()" onkeyup="chgItemPrice()" value="0" size="8" type="text"></td>
+<td><input name="item_memo[]" id="item_memo[]" size="60" class="str" type="text" value></td>
+</tr>
+<tr class="nodrag nodrop append">
+<th colspan="3" nowrap="nowrap">&nbsp;</th>
+<td class="sumTD">&nbsp;</td>
+<td><input name="btnAddLineItem" id="btnAddLineItem" onclick="addLineItem();" value="＋増やす" style="text-align: center;" type="button">&nbsp;<input name="btnDelLineItem" id="btnDelLineItem" onclick="delLineItem();" value="－減らす" style="text-align: center;" type="button"></td>
+</tr>
+<tr class="nodrag nodrop">
+<th colspan="3">価格総計</th>
+<td class="sumTD"><input name="price_item_sum" id="price_item_sum" value="0" size="8" readonly="true" type="text"></td>
+<td>
+生活レベル：<input name="money_lv" id="money_lv" size="8" type="text" value>、
+所持金：<input name="money" id="money" size="8" type="text" value></td>
+</tr>
+</tbody></table>
+
+	</div>
+		<a href="#top">↑ページ上部へ</a>
+	</section>	<section id="personal_disp">
+	<div class="showbtn">
+		<input name="is_disp_personal" id="is_disp_personal" value="1" type="hidden">
+		<span class="none_disp btn tab-btn btn-xs"><b class="fa fa-ban m-0 p-0" aria-hidden="true"></b>非表示</span>
+		<span class="data_disp btn tab-btn btn-xs"><b class="fa fa-eye m-0 p-0" aria-hidden="true"></b>簡易表示</span>
+		<span class="normal_disp btn tab-btn btn-xs"><b class="fa fa-pencil m-0 p-0" aria-hidden="true"></b>通常表示</span>
+		<h4 class="clickable">パーソナルデータ</h4>
+	</div>
+	<div class="disp"><table class="pc_making">
+<tbody><tr>
+<th colspan="2">キャラクター名</th>
+<td colspan="4"><input name="pc_name" class="str" id="pc_name" size="55" type="text" value="遠山 陽子(とおやま ようこ)"></td>
+</tr><tr>
+<th colspan="2">タグ</th>
+<td colspan="4"><input name="pc_tags" class="str" id="pc_tags" size="55" type="text" value="nagashi_ma_w mohikanz"></td>
+</tr>
+<tr>
+<th>職業</th>
+<td><input name="shuzoku" class="str" id="shuzoku" size="16" type="text" value="大学生"></td>
+<th>年齢</th>
+<td><input name="age" class="str" id="age" size="16" type="text" value="21"></td>
+<th>性別</th>
+<td><input name="sex" class="str" id="sex" size="16" type="text" value="女"></td>
+</tr>
+<tr>
+<th>身長</th>
+<td><input name="pc_height" class="str" id="pc_height" size="16" type="text" value="167"></td>
+<th>体重</th>
+<td><input name="pc_weight" class="str" id="pc_weight" size="16" type="text" value></td>
+<th>出身</th>
+<td><input name="pc_kigen" class="str" id="pc_kigen" size="16" type="text" value></td>
+</tr>
+<tr>
+<th>髪の色</th>
+<td><input name="color_hair" class="str" id="color_hair" size="16" type="text" value></td>
+<th>瞳の色</th>
+<td><input name="color_eye" class="str" id="color_eye" size="16" type="text" value></td>
+<th>肌の色</th>
+<td><input name="color_skin" class="str" id="color_skin" size="16" type="text" value></td>
+</tr>
+</tbody></table>
+
+	</div>
+		<a href="#top">↑ページ上部へ</a>
+	</section>
+	<section><h4>その他メモ</h4>
+		<div>
+			<textarea name="pc_making_memo" class="full" rows="6">趣味以外は一般的な中堅私立大学に通う理系の女子大生。
+格ゲーを自分でやるのも好きだが、某チンパンジーが跋扈するロボット系格闘ゲームではプログラムを組んでネット対戦させたりしている。
+インターン先で内々定が出ているので就活はやっていない。
+
+
+
+以下秘匿HO（99月99日 HO2）
+=====
+あなたは黒種のことをどうしようもない屑だと思っている。
+平気で嘘をつき、 自分に得があるように動こうとする。
+しかし、 その嘘はいつもすぐに見抜かれてしまう。
+その詰めの甘さは傍から見ていて面白く、 なぜか彼女のことは憎めないと思っている。
+得意なゲーム ： 格闘ゲーム
+芸術（ 格闘ゲーム） に＋ 60％する。</textarea>
+			
+			<br>
+			<input name onclick="chgPcMemoRows(2);" value="＋広げる" type="button"> <input onclick="chgPcMemoRows(-2);" value="－狭める" type="button"><input name="pc_making_memo_rows" id="pc_making_memo_rows" value="8" type="hidden"><br>
+			※<a href="https://charasheet.vampire-blood.net/help/kiyaku#lyrics_denied">歌詞を引用、及び記載することは禁止となりました</a>(Youtubeや歌詞サイトのURLだけ書くことをお勧めします)。<br>
+			<a href="#top">↑ページ上部へ</a></div>
+	</section>
+	<section>
+		<h4>エラーメッセージ</h4>
+		<p>
+			<textarea name="message" class="full" rows="2" readonly="true" id="message"></textarea>
+		</p>
+	</section>
+	<p>「クトゥルフ神話TRPG」は<a href="http://www.chaosium.com/">ケイオシアム社</a>の著作物です。
+</p><table cellpadding="0" cellspacing="0" width="100%">
+<tbody><tr>
+<td width="200">クトゥルフ神話TRPG</td>
+<td style="padding-left: 5px;" valign="bottom"></td>
+</tr>
+</tbody></table>
+	<p><a href="../coc_pc_making.html">旧版はこちら</a></p>
+			</div>
+		</div>
+	</div>
+
+	<aside class="leftsidebar  fixed">
+			<section class="sideheader">
+		<input onclick="return submitDataSave(0)" value="保
+存
+す
+る" type="submit" style="width:100%;">保<br>存<br>し<br>た<br>い<br>時<br>は<br>こ<br>こ<br>に<br>マ<br>ウ<br>ス<br>を<br>合<br>わ<br>せ<br>る</section>
+	<section>
+		<h4>保存する</h4>
+		<input type="hidden" name="_token" value="Y2p8cdI3bEL3QbHMM2Cxan29rJpItZvJ0kNjQa3v">
+		<input name="mode" id="mode" type="hidden">
+		<input name="game" id="game" value="coc7" type="hidden">
+		<input name="data_id" id="data_id" value="4634372" type="hidden">
+		<input name="phrase" id="phrase" value="5581dda6da39fc547e6014f994c3bc86" type="hidden">
+		<input name="is_readed" value="0" type="hidden">
+		<input name="passcode_type" value="account" type="hidden">
+		<input name="old_passcode_type" type="hidden">
+		<div>
+			Title:<input name="data_title" id="data_title" size="20" type="text" value="遠山 陽子"><br>
+
+							<a id="savetype_chg_a" href="javascript:void(0);" onclick="ShowAccountSaveTypeChange(this)"></a>
+				<span id="savetype_chg_span" style="display:none;">
+            	                		                <label rel="tooltip"
+		                       data-toggle="tooltip"
+		                       title="あなたのアカウントに関連付け、他人に上書き、削除できないようにします。"><input type="radio" name="save_limitate" value="account" onclick="ChgInputedPass()">アカウントに関連付ける</label><br>
+	                
+			        <label rel="tooltip"
+			               data-toggle="tooltip"
+			               title="パスワードを入力し、それが合っていないと上書き、削除できないようにします。"
+			        ><input type="radio" value="password" name="save_limitate" onclick="ChgInputedPass()">パスワードで保護する</label><br>
+
+				    <label rel="tooltip"
+				           data-toggle="tooltip"
+				           title="誰でも上書き、削除ができるようにします。"><input type="radio" name="save_limitate" onclick="ChgInputedPass()" value="none">
+			        			            保護を解除する
+									    </label><br>
+			</span>
+						<span style="display: none;" id="input_pw">
+                            パス:<input name="password" size="20" maxlength="32" type="text"></span>
+			<br>
+			<label rel="tooltip"
+			       data-toggle="tooltip"
+			       title="ログインしているか、パスワードを入力しないとデータが見れないようになります。<br />また、他シートや別スクリプトとの連携もできなくなります。"><input name="block_account" value="1" type="checkbox">自分以外から隠す</label>
+										<button onclick="return submitDataSave(1)" type="submit" class="full btn btn-warning">
+								<span class="glyphicon glyphicon-floppy-disk"></span>
+								ログインして保存
+							</button>
+							<label><input type="checkbox" name="new_save" value="1">複製を保存する(ログイン不要)</label>
+					</div>
+	</section>
+				<section>
+			<h4>チャットパレット</h4>
+			<div>
+				<input onclick="DoChatPalette()" value=" → 作成 " type="button" class="halffull btn btn-warning"><input onclick="SaveCPD()" value=" → 保存 " type="button" class="halffull btn btn-info">
+			</div>
+		</section>
+		<section>
+		<h4>どどんとふ連携用</h4>
+		<div>
+<span rel="tooltip"
+      data-toggle="tooltip"
+      title="どどんとふのURLを決めます。カスタムで自由設定可能です。<br>
+ログインしていれば右上の設定からリストの項目を追加できます。<br>
+いつも使うどどんとふを一番上にできるので、ぜひ試してみてください。">対象：<select name="dodontof_send_to" onchange="chgDodontofSend()">
+							<option value="https://ddntf.museru.com/DodontoF/DodontoF.swf">むせる</option>
+					<option value="https://www.taruki.com/DodontoF_srv1/DodontoF.swf">公式 第壱鯖</option>
+					<option value="https://www.taruki.com/DodontoF_srv2/DodontoF.swf">公式 第弐鯖</option>
+					<option value="https://www.taruki.com/DodontoF_srv3/DodontoF.swf">公式 第参鯖</option>
+					<option value="https://www.taruki.com/DodontoF_srv4/DodontoF.swf">公式 第四鯖</option>
+					<option value="https://d1.trpg.net/DodontoF.swf">TRPG.NET #1</option>
+					<option value="https://d2.trpg.net/DodontoF.swf">TRPG.NET #2</option>
+					<option value="https://d3.trpg.net/DodontoF.swf">TRPG.NET #3</option>
+				<option value="">カスタム</option>
+</select></span><br>
+			<span id="heya_custom" style="display:none;">URL:<input type="text" name="dodontof_url" value size="16"><br></span>
+			<span rel="tooltip"
+			      data-toggle="tooltip"
+			      data-html="true"
+			      title="コマを追加する部屋の番号を決めます。<br>詳しくはGMに聞いてください。">部屋番号：<input type="text" min="0" max="9999" step="1" name="dodontof_room" value size="16"></span><br>
+			パス：<span id="ddf_passname" onclick="showddfTextChange('ddf_passname','dodontof_pass')">なし(クリックで設定)</span>
+			<input type="text" name="dodontof_pass" size="16" onBlur="endddfTextChange('ddf_passname',this);" style="display:none;"><br>
+			コマ名：<span id="ddf_komaname" onclick="showddfTextChange('ddf_komaname','koma_name');">PC名と同じ(クリックで変更)</span>
+			<input type="text" name="koma_name" value size="16" style="display:none;" onBlur="endddfTextChange('ddf_komaname',this)"><br>
+						画像：<input type="text" name="dodontof_image" value size="20">
+			<br><label><input type="checkbox" onclick="chgDDFGazouselect(this)">画像を選択する</label>
+			<span id="koma_images" style="display:none;"><br>
+通常のコマ：<select name="dodontof_sc_colors" onchange="dodontof_imgchgcolor(this)">
+<option value="" style="">-</option>
+<option value="image/defaultImageSet/pawn/pawnBlack.png" style="color:black;">●</option>
+<option value="image/defaultImageSet/pawn/pawnBlue.png" style="color: blue;">●</option>
+<option value="image/defaultImageSet/pawn/pawnGreen.png" style="color: lime;">●</option>
+<option value="image/defaultImageSet/pawn/pawnLightBlue.png" style="color: aqua;">●</option>
+<option value="image/defaultImageSet/pawn/pawnOrange.png" style="color: orange;">●</option>
+<option value="image/defaultImageSet/pawn/pawnPink.png" style="color: pink;">●</option>
+<option value="image/defaultImageSet/pawn/pawnPurple.png" style="color: #FF00FF;">●</option>
+<option value="image/defaultImageSet/pawn/pawnRed.png" style="color: red;">●</option>
+<option value="image/defaultImageSet/pawn/pawnWhite.png" style="color:black;">○</option>
+<option value="image/defaultImageSet/pawn/pawnYellow.png" style="color: yellow;">●</option>
+</select><br>
+エリュシオン：<select id="elysion" name="elysion" style="width:80px;display:none;" onchange="dodontof_imgchgcolor(this)">
+        <option value="">&nbsp;</option>
+    </select><br>
+ネクロニカ：<select id="nechro" name="nechro" style="width:80px;display:none;" onchange="dodontof_imgchgcolor(this)">
+        <option value="">&nbsp;</option>
+    </select>
+</span>
+			<br>
+			<label rel="tooltip"
+			       data-toggle="tooltip"
+			       data-html="true"
+			       title="パラメータを強制的に保管所のデフォルトに置き換えます。<br />
+			       通常は必要ありません。<br><strong>GMからの指示のない限りチェックしない</strong>でください！"><input type="checkbox" value="1" name="dodontof_param_auto_change">パラメータを強制的に変更する</label><br>
+	<input type="button" value="コマを作成" onclick="MakeCharactorKoma()" class="full">
+		</aside>
+
+			<aside class="rightsidebar">
+				<section>
+		<h4>管理者に連絡</h4>
+		<a href="http://www.vampire-blood.net/forums/forum/charasheets">サポート掲示板</a><br>
+		<a id="twitter_renraku" href="https://twitter.com/intent/tweet?screen_name=kurumi_tetu" class="twitter-mention-button" data-lang="ja" data-related="kurumi_tetu">Tweet to @kurumi_tetu</a>
+	</section>
+	<section>
+		<h3>Donation</h3>
+		<a href="https://www.amazon.co.jp/registry/wishlist/3CQNUY9MZRS06?sort=priority">Amazon ウィッシュリスト</a>
+	</section>
+						<script type="text/javascript">amzn_assoc_ad_type ="responsive_search_widget"; amzn_assoc_tracking_id ="kurumitetu-22"; amzn_assoc_marketplace ="amazon"; amzn_assoc_region ="JP"; amzn_assoc_placement =""; amzn_assoc_search_type = "search_widget";amzn_assoc_width ="160"; amzn_assoc_height ="600"; amzn_assoc_default_search_category ="Books"; amzn_assoc_default_search_key ="%E6%96%B0%E3%82%AF%E3%83%88%E3%82%A5%E3%83%AB%E3%83%95%E7%A5%9E%E8%A9%B1TRPG";amzn_assoc_theme ="light"; amzn_assoc_bg_color ="FFFFFF"; </script>
+		<script src="//z-fe.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&Operation=GetScript&ID=OneJS&WS=1&Marketplace=JP"></script>
+				</aside>
+	
+			</form>
+	</div>
+<aside class="footbar">
+	</aside>
+
+<footer>
+	<hr>
+	<p>&copy; 2008-2013 Copyright by くるみ＠鉄村</p>
+</footer>
+<!-- script src="//ddfresource.vampire-blood.net/hokanjo/js/app.js"></script -->
+<script src="/js/app.js"></script>
+	<script type="text/javascript" src="//ddfresource.vampire-blood.net/hokanjo/js/jquery.tablednd.js"></script>
+			<script type="text/javascript" src="https://charasheet.vampire-blood.net/coc7_template.js"></script>
+		<script type="text/javascript" src="//ddfresource.vampire-blood.net/hokanjo/js/fhconvert.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.4.2/jquery.contextMenu.js"></script>
+</body>
+</html>

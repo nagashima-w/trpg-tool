@@ -1,0 +1,20 @@
+{
+  "name": "coc-dice-bot",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "register": "npx ts-node register-commands.ts",
+    "db:init": "wrangler d1 execute coc-dice-bot-db --file=./schema.sql",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240208.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.28.2",
+    "ts-node": "^10.9.2",
+    "vitest": "^2.0.0"
+  }
+}

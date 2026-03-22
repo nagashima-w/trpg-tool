@@ -1,0 +1,16 @@
+name = "coc-dice-bot"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding     = "DB"
+database_name = "coc-dice-bot-db"
+database_id   = "YOUR_D1_DATABASE_ID"  # wrangler d1 create coc-dice-bot-db で取得
+
+[vars]
+DISCORD_PUBLIC_KEY = "YOUR_DISCORD_PUBLIC_KEY"
+DISCORD_APPLICATION_ID = "YOUR_DISCORD_APPLICATION_ID"
+
+# シークレット（wrangler secret put で設定）
+# DISCORD_BOT_TOKEN
