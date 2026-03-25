@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'dice-bot/**'
+    path-ignore:
+      - 'dice-bot/README.md' 
+      - 'dice-bot/DEPLOYMENT.md'
   workflow_dispatch:
 
 defaults:

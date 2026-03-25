@@ -5,10 +5,16 @@ on:
     branches: [main]
     paths:
       - 'dice-bot/**'
+    path-ignore:
+      - 'dice-bot/README.md' 
+      - 'dice-bot/DEPLOYMENT.md'
   pull_request:
     branches: [main]
     paths:
       - 'dice-bot/**'
+    path-ignore:
+      - 'dice-bot/README.md' 
+      - 'dice-bot/DEPLOYMENT.md'
 
 defaults:
   run:
