@@ -109,14 +109,13 @@ async function handleCharUpdate(
     return { message: '増減値は数値で指定してください。例: `/char update HP -2`', ephemeral: true }
   }
 
+  let newVal: number
   try {
-    await updateCharacterStat(db, userId, targetLower, delta)
+    newVal = await updateCharacterStat(db, userId, targetLower, delta)
   } catch (e) {
     return { message: (e as Error).message, ephemeral: true }
   }
 
-  const char = await getActiveCharacter(db, userId)
-  const newVal = char?.[targetLower] ?? '?'
   const sign = delta >= 0 ? `+${delta}` : String(delta)
 
   return {

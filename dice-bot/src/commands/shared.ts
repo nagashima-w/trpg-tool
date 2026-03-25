@@ -2,9 +2,21 @@
 // コマンドハンドラ共通型・ユーティリティ
 // ============================================================
 
+import type { ResultLevel } from '../dice.ts'
+
+/** ダイスログとして記録すべき情報（/cc・/sc のみ付与） */
+export interface DiceLogDetail {
+  skillName: string
+  targetValue: number
+  finalDice: number
+  resultLevel: ResultLevel
+  isSecret: boolean
+}
+
 export interface CommandResult {
   message: string
   ephemeral: boolean
+  diceLog?: DiceLogDetail  // セッション中にDBへ記録する情報
 }
 
 /** args文字列から "secret" キーワードを検出・除去して返す */

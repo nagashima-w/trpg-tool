@@ -45,14 +45,6 @@ function rollOnes(): number {
   return randInt(1, 10)
 }
 
-/** tens + ones → 1〜100 に変換（tens=90, ones=10 → 100） */
-function combine(tens: number, ones: number): number {
-  const v = tens + ones
-  return v === 0 ? 100 : v  // tens=0, ones=10 のみ10だが tens=0,ones=1〜9はそのまま
-  // ※ ones は1〜10なので tens=0,ones=10 → 10 となる（100ではない）
-  // 100になるのは tens=90, ones=10 のみ
-}
-
 // ── 公開API ───────────────────────────────────────────────────
 
 /**

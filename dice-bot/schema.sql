@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS Active_Characters (
 
 CREATE TABLE IF NOT EXISTS Sessions (
   id          TEXT     PRIMARY KEY,
+  guild_id    TEXT     NOT NULL,             -- Discordサーバー単位で管理
   name        TEXT     NOT NULL,
   kp_user_id  TEXT     NOT NULL,
   status      TEXT     NOT NULL DEFAULT 'active', -- 'active' | 'completed'
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS Dice_Logs (
   FOREIGN KEY (session_id) REFERENCES Sessions(id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_dice_logs_session ON Dice_Logs(session_id);
-CREATE INDEX IF NOT EXISTS idx_dice_logs_user    ON Dice_Logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_characters_user   ON Characters(user_id);
+CREATE INDEX IF NOT EXISTS idx_dice_logs_session  ON Dice_Logs(session_id);
+CREATE INDEX IF NOT EXISTS idx_dice_logs_user     ON Dice_Logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_characters_user    ON Characters(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_guild     ON Sessions(guild_id, status);

@@ -2,19 +2,14 @@
 // Cloudflare D1 アクセス層
 // ============================================================
 
-import type { CharacterRecord } from './charasheet'
-import type { ResultLevel } from './dice'
+import type { CharacterRecord } from './charasheet.ts'
+import type { ResultLevel } from './dice.ts'
 
-// Cloudflare Workers環境のD1型（テスト時はモックで差し替え）
-export type D1Database = {
-  prepare(query: string): D1PreparedStatement
-}
-type D1PreparedStatement = {
-  bind(...values: unknown[]): D1PreparedStatement
-  first<T = unknown>(): Promise<T | null>
-  run(): Promise<{ success: boolean }>
-  all<T = unknown>(): Promise<{ results: T[] }>
-}
+// Cloudflare Workers環境のD1型
+// 本番: tsconfig の types=["@cloudflare/workers-types"] で公式型が使われる
+// テスト(Node.js): src/types/d1.d.ts のシム定義を使用
+import type { D1Database } from './types/d1.d.ts'
+export type { D1Database }
 
 // ── 内部型 ────────────────────────────────────────────────────
 
@@ -31,11 +26,14 @@ interface CharacterRow {
   updated_at: string
 }
 
+export type SessionStatus = 'active' | 'completed'
+
 export interface SessionRow {
   id: string
+  guild_id: string
   name: string
   kp_user_id: string
-  status: string
+  status: SessionStatus
   started_at: string
   ended_at: string | null
 }
@@ -153,33 +151,41 @@ export async function setActiveCharacter(
 
 /**
  * アクティブキャラクターのステータス（hp/mp/san/luck）を増減する。
- * アクティブキャラがない場合はエラーをthrow。
+ * 更新後の値を返す。アクティブキャラがない場合はエラーをthrow。
  */
 export async function updateCharacterStat(
   db: D1Database,
   userId: string,
   stat: 'hp' | 'mp' | 'san' | 'luck',
   delta: number,
-): Promise<void> {
+): Promise<number> {
   const char = await getActiveCharacter(db, userId)
   if (!char) throw new Error('アクティブキャラクターが設定されていません。`/char set` で登録してください。')
 
+  // カラム名ホワイトリストでSQLインジェクション対策（⑤も合わせて対応）
+  const STAT_COL = { hp: 'hp', mp: 'mp', san: 'san', luck: 'luck' } as const
+  const col = STAT_COL[stat]
+
   await db
-    .prepare(`UPDATE Characters SET ${stat} = ${stat} + ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+    .prepare(`UPDATE Characters SET ${col} = ${col} + ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
     .bind(delta, char.id)
     .run()
+
+  return char[stat] + delta
 }
 
 // ── セッション操作 ────────────────────────────────────────────
 
 /**
- * activeなセッションを返す。なければnull。
+ * guildのactiveなセッションを返す。なければnull。
  */
 export async function getActiveSession(
   db: D1Database,
+  guildId: string,
 ): Promise<SessionRow | null> {
   return db
-    .prepare(`SELECT * FROM Sessions WHERE status = 'active' LIMIT 1`)
+    .prepare(`SELECT * FROM Sessions WHERE guild_id = ? AND status = 'active' LIMIT 1`)
+    .bind(guildId)
     .first<SessionRow>()
 }
 
@@ -188,16 +194,17 @@ export async function getActiveSession(
  */
 export async function startSession(
   db: D1Database,
+  guildId: string,
   name: string,
   kpUserId: string,
 ): Promise<string> {
   const id = generateId()
   await db
     .prepare(`
-      INSERT INTO Sessions (id, name, kp_user_id, status, started_at)
-      VALUES (?, ?, ?, 'active', CURRENT_TIMESTAMP)
+      INSERT INTO Sessions (id, guild_id, name, kp_user_id, status, started_at)
+      VALUES (?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
     `)
-    .bind(id, name, kpUserId)
+    .bind(id, guildId, name, kpUserId)
     .run()
   return id
 }

@@ -41,15 +41,13 @@ const RESULT_LABEL: Record<ResultLevel, string> = {
 }
 
 function isSuccess(level: ResultLevel): boolean {
-  return ['critical', 'extreme', 'hard', 'regular'].includes(level)
+  return level !== 'failure' && level !== 'fumble'
 }
 
 function formatTimestamp(iso: string): string {
-  // "2024-01-01T10:30:00Z" → "10:30"
+  // "2024-01-01T10:30:00Z" → "19:30"（JST=UTC+9）
   const d = new Date(iso)
-  const h = String(d.getUTCHours()).padStart(2, '0')
-  const m = String(d.getUTCMinutes()).padStart(2, '0')
-  return `${h}:${m}`
+  return d.toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 function calcAverage(sum: number, count: number): string {

@@ -4,27 +4,28 @@
 
 import {
   getActiveSession, startSession, endSession,
-  getDiceLogsForSession, getActiveCharacter,
+  getDiceLogsForSession,
 } from '../db.ts'
 import { generateReport } from '../report.ts'
 import type { D1Database } from '../db.ts'
 import type { CommandResult } from './shared.ts'
 
 export interface SessionCommandResult extends CommandResult {
-  file?: { name: string; content: string } // /session end 時のレポートファイル
+  file?: { name: string; content: string }
 }
 
 export async function handleSession(
   db: D1Database,
   userId: string,
+  guildId: string,
   rawArgs: string,
 ): Promise<SessionCommandResult> {
   const parts = rawArgs.trim().split(/\s+/)
   const subcommand = parts[0]?.toLowerCase()
 
   switch (subcommand) {
-    case 'start': return handleSessionStart(db, userId, parts.slice(1).join(' '))
-    case 'end':   return handleSessionEnd(db, userId)
+    case 'start': return handleSessionStart(db, userId, guildId, parts.slice(1).join(' '))
+    case 'end':   return handleSessionEnd(db, guildId)
     default:
       return {
         message: '使い方: `/session start <セッション名>` / `/session end`',
@@ -38,13 +39,14 @@ export async function handleSession(
 async function handleSessionStart(
   db: D1Database,
   kpUserId: string,
+  guildId: string,
   name: string,
 ): Promise<SessionCommandResult> {
   if (!name) {
     return { message: 'セッション名を指定してください。例: `/session start 呪われた村`', ephemeral: true }
   }
 
-  const existing = await getActiveSession(db)
+  const existing = await getActiveSession(db, guildId)
   if (existing) {
     return {
       message: `既にセッション「${existing.name}」が進行中です。先に \`/session end\` で終了してください。`,
@@ -52,7 +54,7 @@ async function handleSessionStart(
     }
   }
 
-  await startSession(db, name, kpUserId)
+  await startSession(db, guildId, name, kpUserId)
 
   return {
     message: `🎮 セッション「**${name}**」を開始しました！\nこれ以降のダイスロールはログに記録されます。`,
@@ -64,9 +66,9 @@ async function handleSessionStart(
 
 async function handleSessionEnd(
   db: D1Database,
-  userId: string,
+  guildId: string,
 ): Promise<SessionCommandResult> {
-  const session = await getActiveSession(db)
+  const session = await getActiveSession(db, guildId)
   if (!session) {
     return { message: '進行中のセッションがありません。', ephemeral: true }
   }

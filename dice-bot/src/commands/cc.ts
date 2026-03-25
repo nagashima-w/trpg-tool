@@ -68,5 +68,11 @@ export async function handleCc(
     lines.push(`結果：**${final}** ＞ ${resultLabel(level)}`)
   }
 
-  return { message: lines.join('\n'), ephemeral: isSecret }
+  return { message: lines.join('\n'), ephemeral: isSecret, diceLog: {
+    skillName: resolvedName,
+    targetValue,
+    finalDice: final,
+    resultLevel: level,
+    isSecret,
+  }}
 }

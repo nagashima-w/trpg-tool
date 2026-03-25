@@ -68,5 +68,11 @@ export async function handleSc(
   lines.push(`SAN減少：${lossExpr}${lossExpr !== String(loss) ? ` → ${loss}` : ''}`)
   lines.push(`SAN: ${currentSan} → **${newSan}**`)
 
-  return { message: lines.join('\n'), ephemeral: isSecret }
+  return { message: lines.join('\n'), ephemeral: isSecret, diceLog: {
+    skillName: 'SANチェック',
+    targetValue: currentSan,
+    finalDice: base.total,
+    resultLevel: level,
+    isSecret,
+  }}
 }

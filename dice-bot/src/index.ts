@@ -3,13 +3,13 @@
 // Discord Interactions Endpoint（署名検証 + コマンドルーティング）
 // ============================================================
 
-import { handleCc } from './commands/cc'
-import { handleSc } from './commands/sc'
-import { handleRoll } from './commands/roll'
-import { handleChar } from './commands/char'
-import { handleSession } from './commands/session'
-import { insertDiceLog, getActiveSession, getActiveCharacter } from './db'
-import type { D1Database } from './db'
+import { handleCc } from './commands/cc.ts'
+import { handleSc } from './commands/sc.ts'
+import { handleRoll } from './commands/roll.ts'
+import { handleChar } from './commands/char.ts'
+import { handleSession } from './commands/session.ts'
+import { insertDiceLog, getActiveSession, getActiveCharacter } from './db.ts'
+import type { D1Database } from './db.ts'
 
 export interface Env {
   DB: D1Database
@@ -18,11 +18,8 @@ export interface Env {
   DISCORD_BOT_TOKEN: string
 }
 
-// Discord Interaction Types
 const PING = 1
 const APPLICATION_COMMAND = 2
-
-// Discord Interaction Response Types
 const PONG = 1
 const CHANNEL_MESSAGE_WITH_SOURCE = 4
 const EPHEMERAL_FLAG = 64
@@ -84,33 +81,54 @@ function messageResponse(content: string, ephemeral: boolean): Response {
 // ── ダイスログの自動記録 ─────────────────────────────────────
 
 async function tryRecordDiceLog(
-  env: Env,
+  db: D1Database,
+  guildId: string,
   userId: string,
   skillName: string,
   targetValue: number,
   finalDice: number,
-  resultLevel: string,
+  resultLevel: Parameters<typeof insertDiceLog>[1]['result_level'],
   isSecret: boolean,
 ): Promise<void> {
   try {
-    const session = await getActiveSession(env.DB)
+    const session = await getActiveSession(db, guildId)
     if (!session) return
 
-    const char = await getActiveCharacter(env.DB, userId)
+    const char = await getActiveCharacter(db, userId)
     if (!char) return
 
-    await insertDiceLog(env.DB, {
+    await insertDiceLog(db, {
       session_id:     session.id,
       user_id:        userId,
       character_name: char.name,
       skill_name:     skillName,
       target_value:   targetValue,
       final_dice:     finalDice,
-      result_level:   resultLevel as Parameters<typeof insertDiceLog>[1]['result_level'],
+      result_level:   resultLevel,
       is_secret:      isSecret,
     })
   } catch {
     // ログ記録失敗は無視（本体の返答を妨げない）
+  }
+}
+
+// ── セッションレポートのフォローアップ送信 ───────────────────
+
+async function sendFollowupFile(
+  appId: string,
+  interactionToken: string,
+  file: { name: string; content: string },
+): Promise<void> {
+  const url = `https://discord.com/api/v10/webhooks/${appId}/${interactionToken}`
+
+  const blob = new Blob([file.content], { type: 'text/markdown' })
+  const form = new FormData()
+  form.append('file[0]', blob, file.name)
+  form.append('payload_json', JSON.stringify({ content: '' }))
+
+  const res = await fetch(url, { method: 'POST', body: form })
+  if (!res.ok) {
+    console.error(`[report] followup failed: ${res.status} ${await res.text()}`)
   }
 }
 
@@ -120,15 +138,37 @@ async function routeCommand(
   env: Env,
   commandName: string,
   userId: string,
+  guildId: string,
   args: string,
+  interactionToken: string,
 ): Promise<Response> {
   switch (commandName) {
     case 'cc': {
       const result = await handleCc(env.DB, userId, args)
+      if (result.diceLog) {
+        await tryRecordDiceLog(
+          env.DB, guildId, userId,
+          result.diceLog.skillName,
+          result.diceLog.targetValue,
+          result.diceLog.finalDice,
+          result.diceLog.resultLevel,
+          result.diceLog.isSecret,
+        )
+      }
       return messageResponse(result.message, result.ephemeral)
     }
     case 'sc': {
       const result = await handleSc(env.DB, userId, args)
+      if (result.diceLog) {
+        await tryRecordDiceLog(
+          env.DB, guildId, userId,
+          result.diceLog.skillName,
+          result.diceLog.targetValue,
+          result.diceLog.finalDice,
+          result.diceLog.resultLevel,
+          result.diceLog.isSecret,
+        )
+      }
       return messageResponse(result.message, result.ephemeral)
     }
     case 'roll': {
@@ -140,33 +180,15 @@ async function routeCommand(
       return messageResponse(result.message, result.ephemeral)
     }
     case 'session': {
-      const result = await handleSession(env.DB, userId, args)
+      const result = await handleSession(env.DB, userId, guildId, args)
       if (result.file) {
-        // レポートファイルをDiscord APIに別途送信（Webhookで添付）
-        // Interactions EndpointではファイルをmultipartでPOSTする必要があるため
-        // ここではメッセージのみ返し、ファイルはフォローアップで送信
-        await sendFollowupFile(env, userId, result.file)
+        await sendFollowupFile(env.DISCORD_APPLICATION_ID, interactionToken, result.file)
       }
       return messageResponse(result.message, result.ephemeral)
     }
     default:
       return messageResponse('未知のコマンドです。', true)
   }
-}
-
-// ── セッションレポートのフォローアップ送信 ───────────────────
-
-async function sendFollowupFile(
-  env: Env,
-  _userId: string,
-  file: { name: string; content: string },
-): Promise<void> {
-  // Discord Webhook経由でファイル添付（フォローアップメッセージ）
-  // 実装: interactions/tokens を使ったフォローアップAPI
-  // ここでは webhook_token は interaction token を別途持ち回す設計が必要だが、
-  // Workers の context 上では interaction token を保持してフォローアップに使う
-  // (現状はログに記録するのみ - 本番ではinteraction tokenを渡す設計にする)
-  console.log(`[report] File ready: ${file.name} (${file.content.length} chars)`)
 }
 
 // ── メインハンドラ ────────────────────────────────────────────
@@ -179,7 +201,6 @@ export default {
 
     const body = await request.text()
 
-    // 署名検証
     const valid = await verifySignature(request, env.DISCORD_PUBLIC_KEY, body)
     if (!valid) {
       return new Response('Unauthorized', { status: 401 })
@@ -187,18 +208,18 @@ export default {
 
     const interaction = JSON.parse(body)
 
-    // PING（Discord からの疎通確認）
     if (interaction.type === PING) {
       return jsonResponse({ type: PONG })
     }
 
-    // スラッシュコマンド
     if (interaction.type === APPLICATION_COMMAND) {
-      const commandName = interaction.data.name as string
-      const userId      = interaction.member?.user?.id ?? interaction.user?.id ?? ''
-      const args        = (interaction.data.options?.[0]?.value as string | undefined) ?? ''
+      const commandName      = interaction.data.name as string
+      const userId           = interaction.member?.user?.id ?? interaction.user?.id ?? ''
+      const guildId          = interaction.guild_id as string ?? ''
+      const args             = (interaction.data.options?.[0]?.value as string | undefined) ?? ''
+      const interactionToken = interaction.token as string
 
-      return routeCommand(env, commandName, userId, args)
+      return routeCommand(env, commandName, userId, guildId, args, interactionToken)
     }
 
     return new Response('Bad Request', { status: 400 })
