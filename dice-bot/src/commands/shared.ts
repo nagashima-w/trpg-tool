@@ -39,7 +39,7 @@ export function extractModifier(args: string): { args: string; modifier: number 
   }
 }
 
-const RESULT_LABEL: Record<string, string> = {
+const RESULT_LABEL: Record<ResultLevel, string> = {
   critical: 'クリティカル！',
   extreme:  'イクストリーム成功！',
   hard:     'ハード成功！',
@@ -48,6 +48,6 @@ const RESULT_LABEL: Record<string, string> = {
   fumble:   'ファンブル…',
 }
 
-export function resultLabel(level: string): string {
-  return RESULT_LABEL[level] ?? level
+export function resultLabel(level: ResultLevel): string {
+  return RESULT_LABEL[level]
 }

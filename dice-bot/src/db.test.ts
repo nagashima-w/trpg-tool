@@ -38,6 +38,7 @@ const MOCK_CHAR = {
 
 const MOCK_SESSION = {
   id: 'session-uuid-1',
+  guild_id: 'guild-123',
   name: 'テストセッション',
   kp_user_id: 'kp-user-456',
   status: 'active',
@@ -98,11 +99,11 @@ describe('upsertCharacter', () => {
       skills: { '目星': 50 },
     })
     const calls = db._stmt.bind.mock.calls[0]
-    // stats と skills が JSON 文字列で渡されている
-    expect(typeof calls[5]).toBe('string') // stats
-    expect(typeof calls[6]).toBe('string') // skills
-    expect(JSON.parse(calls[5])).toHaveProperty('STR')
-    expect(JSON.parse(calls[6])).toHaveProperty('目星')
+    // stats と skills が JSON 文字列で渡されている (id, user_id, name, hp, mp, san, luck, stats, skills)
+    expect(typeof calls[7]).toBe('string') // stats
+    expect(typeof calls[8]).toBe('string') // skills
+    expect(JSON.parse(calls[7])).toHaveProperty('STR')
+    expect(JSON.parse(calls[8])).toHaveProperty('目星')
   })
 })
 
@@ -146,14 +147,14 @@ describe('updateCharacterStat', () => {
 describe('getActiveSession', () => {
   it('activeなセッションを返す', async () => {
     const db = makeDb(MOCK_SESSION)
-    const result = await getActiveSession(db)
+    const result = await getActiveSession(db, 'guild-123')
     expect(result?.id).toBe('session-uuid-1')
     expect(result?.status).toBe('active')
   })
 
   it('activeなセッションがない場合はnullを返す', async () => {
     const db = makeDb(null)
-    expect(await getActiveSession(db)).toBeNull()
+    expect(await getActiveSession(db, 'guild-123')).toBeNull()
   })
 })
 
@@ -162,7 +163,7 @@ describe('getActiveSession', () => {
 describe('startSession', () => {
   it('セッションを作成してIDを返す', async () => {
     const db = makeDb()
-    const id = await startSession(db, 'テストセッション', 'kp-user-456')
+    const id = await startSession(db, 'guild-123', 'テストセッション', 'kp-user-456')
     expect(typeof id).toBe('string')
     expect(id.length).toBeGreaterThan(0)
     expect(db._stmt.run).toHaveBeenCalled()

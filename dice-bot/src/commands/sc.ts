@@ -17,14 +17,14 @@ function parseSanArgs(args: string): { success: string; failure: string } | null
 }
 
 /**
- * ダイス式または固定値を評価して数値を返す
+ * ダイス式または固定値を評価して数値を返す。不正な式はnullを返す。
  */
-function evalSanValue(expr: string): number {
+function evalSanValue(expr: string): number | null {
   // 固定値
   if (/^\d+$/.test(expr)) return parseInt(expr, 10)
   // ダイス式
   const r = evalRollExpression(expr)
-  return r?.total ?? 0
+  return r?.total ?? null
 }
 
 export async function handleSc(
@@ -57,15 +57,22 @@ export async function handleSc(
 
   const lossExpr = isSuccessRoll ? parsed.success : parsed.failure
   const loss = evalSanValue(lossExpr)
+  if (loss === null) {
+    return {
+      message: `SAN減少値「${lossExpr}」のダイス式が正しくありません。`,
+      ephemeral: true,
+    }
+  }
 
-  // SAN減算
-  await updateCharacterStat(db, userId, 'san', -loss)
-  const newSan = currentSan - loss
+  // SAN減算（SAN最小値は0）
+  const actualLoss = Math.min(loss, currentSan)
+  await updateCharacterStat(db, userId, 'san', -actualLoss)
+  const newSan = currentSan - actualLoss
 
   const lines: string[] = []
   lines.push(`🧠 **SANチェック** (現在SAN: ${currentSan})`)
   lines.push(`出目：**${base.total}** ＞ ${resultLabel(level)}`)
-  lines.push(`SAN減少：${lossExpr}${lossExpr !== String(loss) ? ` → ${loss}` : ''}`)
+  lines.push(`SAN減少：${lossExpr}${lossExpr !== String(actualLoss) ? ` → ${actualLoss}` : ''}`)
   lines.push(`SAN: ${currentSan} → **${newSan}**`)
 
   return { message: lines.join('\n'), ephemeral: isSecret, diceLog: {

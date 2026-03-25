@@ -108,6 +108,9 @@ async function handleCharUpdate(
   if (isNaN(delta)) {
     return { message: '増減値は数値で指定してください。例: `/char update HP -2`', ephemeral: true }
   }
+  if (Math.abs(delta) > 9999) {
+    return { message: '増減値は±9999以内で指定してください。', ephemeral: true }
+  }
 
   let newVal: number
   try {

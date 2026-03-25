@@ -88,7 +88,16 @@ export function parseCharasheetUrl(url: string): ParsedUrl | null {
  */
 export async function fetchCharasheet(id: string): Promise<CharasheetData> {
   const url = `https://${CHARASHEET_HOST}/${id}.json`
-  const res = await fetch(url)
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 10_000)
+  let res: Response
+  try {
+    res = await fetch(url, { signal: controller.signal })
+  } catch (e) {
+    throw new Error('キャラクター保管所へのアクセスがタイムアウトまたは失敗しました。')
+  } finally {
+    clearTimeout(timeoutId)
+  }
   if (!res.ok) {
     throw new Error(`キャラクター保管所へのアクセスに失敗しました (HTTP ${res.status})`)
   }
@@ -103,34 +112,40 @@ export async function fetchCharasheet(id: string): Promise<CharasheetData> {
 export function mapToCharacter(data: CharasheetData, userId: string): CharacterRecord | null {
   if (data.game !== 'coc7') return null
 
-  // 技能マッピング: 値が空文字のものはスキップ
+  // 技能マッピング: 値が空文字・NaNのものはスキップ
   const skills: Record<string, number> = {}
   for (let i = 0; i < data.SKAN.length; i++) {
     const name = data.SKAN[i]
     const val  = data.SKAP[i]
     if (name && val !== '') {
-      skills[name] = parseInt(val, 10)
+      const n = parseInt(val, 10)
+      if (!isNaN(n)) skills[name] = n
     }
+  }
+
+  const safeInt = (val: string): number => {
+    const n = parseInt(val, 10)
+    return isNaN(n) ? 0 : n
   }
 
   return {
     id:      String(data.data_id),
     user_id: userId,
     name:    data.pc_name,
-    hp:      parseInt(data.NP10, 10),
-    mp:      parseInt(data.NP11, 10),
-    san:     parseInt(data.SAN_Left, 10),
-    luck:    parseInt(data.Luck_Left, 10),
+    hp:      safeInt(data.NP10),
+    mp:      safeInt(data.NP11),
+    san:     safeInt(data.SAN_Left),
+    luck:    safeInt(data.Luck_Left),
     stats: {
-      STR: parseInt(data.NP1, 10),
-      CON: parseInt(data.NP2, 10),
-      DEX: parseInt(data.NP3, 10),
-      APP: parseInt(data.NP4, 10),
-      POW: parseInt(data.NP5, 10),
-      SIZ: parseInt(data.NP6, 10),
-      INT: parseInt(data.NP7, 10),
-      EDU: parseInt(data.NP8, 10),
-      MOV: parseInt(data.NP9, 10),
+      STR: safeInt(data.NP1),
+      CON: safeInt(data.NP2),
+      DEX: safeInt(data.NP3),
+      APP: safeInt(data.NP4),
+      POW: safeInt(data.NP5),
+      SIZ: safeInt(data.NP6),
+      INT: safeInt(data.NP7),
+      EDU: safeInt(data.NP8),
+      MOV: safeInt(data.NP9),
     },
     skills,
   }

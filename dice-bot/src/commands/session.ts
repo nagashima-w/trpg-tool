@@ -97,7 +97,11 @@ async function handleSessionEnd(
     participants,
   })
 
-  const fileName = `${session.name.replace(/\s+/g, '_')}_report.md`
+  const safeName = session.name
+    .replace(/[^\p{L}\p{N}\s\-_]/gu, '')
+    .replace(/\s+/g, '_')
+    .slice(0, 100) || 'session'
+  const fileName = `${safeName}_report.md`
 
   return {
     message: `✅ セッション「**${session.name}**」を終了しました。レポートを添付します。`,
