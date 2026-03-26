@@ -6,7 +6,7 @@ on:
       guild_id:
         description: 'ギルドID（指定するとそのサーバーのみに即時登録。空白でグローバル登録）'
         required: false
-        default: ''
+        default: '1486717882183454740'
 
 defaults:
   run:
