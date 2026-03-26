@@ -235,48 +235,34 @@
 
 ## 8. Cloudflare のセットアップ
 
-### 8-1. Wrangler CLIのインストール・ログイン
+### 8-1. D1 データベースの作成
 
-```bash
-npm install -g wrangler
-wrangler login   # ブラウザが開きCloudflareアカウントと連携
-```
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) にログイン
+2. 左メニューの **「Workers & Pages」→「D1 SQL Database」** を開く
+3. **「Create」** をクリックし、データベース名に `coc-dice-bot-db` を入力して作成
+4. 作成後の概要ページに表示される **「Database ID」** を控える
 
-### 8-2. D1 データベースの作成
+### 8-2. wrangler.toml への反映
 
-```bash
-# D1データベースを作成（出力されたdatabase_idをwrangler.tomlに記載）
-wrangler d1 create coc-dice-bot-db
-
-# スキーマを流す（本番）
-wrangler d1 execute coc-dice-bot-db --file=./schema.sql
-
-# スキーマを流す（ローカル開発用）
-wrangler d1 execute coc-dice-bot-db --local --file=./schema.sql
-```
-
-出力例:
-```
-✅ Successfully created DB 'coc-dice-bot-db' in region APAC
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  ← wrangler.tomlに記載
-```
-
-### 8-3. シークレットの登録
-
-環境変数のうち機密情報は `wrangler secret` で登録する（コードやwrangler.tomlに書かない）。
-
-```bash
-wrangler secret put DISCORD_BOT_TOKEN
-# → プロンプトが表示されるので貼り付けてEnter
-```
-
-`wrangler.toml` の `[vars]` には非機密の値だけを記載：
+`dice-bot/wrangler.toml` の `database_id` に控えた値を記入する：
 
 ```toml
-[vars]
-DISCORD_PUBLIC_KEY      = "取得したPUBLIC_KEY"
-DISCORD_APPLICATION_ID  = "取得したAPPLICATION_ID"
+[[d1_databases]]
+binding       = "DB"
+database_name = "coc-dice-bot-db"
+database_id   = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  ← ここに貼り付け
 ```
+
+### 8-3. スキーマの適用
+
+1. D1 データベースの概要ページで **「Console」** タブを開く
+2. `schema.sql` の内容をすべてコピーしてコンソールに貼り付け、**「Execute」** を実行
+
+### 8-4. DISCORD_BOT_TOKEN のシークレット登録
+
+`DISCORD_BOT_TOKEN` は GitHub Actions の deploy 時に自動で Cloudflare に登録されるため、**GitHub の Environment secrets（production）** に登録するだけで OK。
+
+> Settings → Environments → production → Environment secrets → `DISCORD_BOT_TOKEN` を追加
 
 ---
 
