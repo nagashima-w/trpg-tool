@@ -282,7 +282,21 @@ CREATE TABLE IF NOT EXISTS Dice_Logs (id INTEGER PRIMARY KEY AUTOINCREMENT, sess
 CREATE INDEX IF NOT EXISTS idx_dice_logs_session ON Dice_Logs(session_id); CREATE INDEX IF NOT EXISTS idx_dice_logs_user ON Dice_Logs(user_id); CREATE INDEX IF NOT EXISTS idx_characters_user ON Characters(user_id); CREATE INDEX IF NOT EXISTS idx_sessions_guild ON Sessions(guild_id, status);
 ```
 
-### 8-4. DISCORD_BOT_TOKEN のシークレット登録
+### 8-4. Cloudflare API トークンの取得
+
+GitHub Actions から Cloudflare にデプロイするために必要なトークンを発行する。
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) の右上のアイコン → **「My Profile」** を開く
+2. 左メニューの **「API Tokens」** → **「Create Token」** をクリック
+3. **「Edit Cloudflare Workers」** テンプレートの **「Use template」** をクリック
+4. 内容はデフォルトのままで **「Continue to summary」→「Create Token」** をクリック
+5. 表示されたトークンをコピーして安全な場所に保存（**一度しか表示されない**）
+
+取得したトークンを GitHub の Environment secrets に登録する：
+
+> Settings → Environments → production → Environment secrets → `CLOUDFLARE_API_TOKEN` を追加
+
+### 8-5. DISCORD_BOT_TOKEN のシークレット登録
 
 `DISCORD_BOT_TOKEN` は GitHub Actions の deploy 時に自動で Cloudflare に登録されるため、**GitHub の Environment secrets（production）** に登録するだけで OK。
 
