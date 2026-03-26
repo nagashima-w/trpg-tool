@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "register": "npx ts-node register-commands.ts",
+    "register": "npx ts-node --project tsconfig.node.json register-commands.ts",
     "db:init": "wrangler d1 execute coc-dice-bot-db --file=./schema.sql",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240208.0",
+    "@types/node": "^20.0.0",
     "typescript": "^5.3.3",
     "wrangler": "^3.28.2",
     "ts-node": "^10.9.2",
