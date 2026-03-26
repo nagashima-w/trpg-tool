@@ -69,10 +69,22 @@ const commands = [
     description: 'セッション管理',
     options: [
       {
-        name: 'args',
-        description: 'start <セッション名> / end',
-        type: 3,
-        required: true,
+        name: 'start',
+        description: 'セッションを開始する',
+        type: 1, // SUB_COMMAND
+        options: [
+          {
+            name: 'name',
+            description: 'セッション名 例: 呪われた村',
+            type: 3, // STRING
+            required: true,
+          },
+        ],
+      },
+      {
+        name: 'end',
+        description: 'セッションを終了してレポートを出力する',
+        type: 1, // SUB_COMMAND
       },
     ],
   },

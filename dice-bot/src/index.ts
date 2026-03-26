@@ -180,7 +180,14 @@ async function routeCommand(
       return messageResponse(result.message, result.ephemeral)
     }
     case 'session': {
-      const result = await handleSession(env.DB, userId, guildId, args)
+      // サブコマンド構造からargs文字列を再構築
+      // Discord送信形式: options[0] = { name: "start"|"end", options?: [{name: "name", value: "..."}] }
+      const sessionOpts = (interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined
+      const subCmd      = sessionOpts?.[0]?.name as string ?? ''
+      const subCmdOpts  = sessionOpts?.[0]?.options as Array<Record<string, unknown>> | undefined
+      const sessionName = subCmdOpts?.[0]?.value as string ?? ''
+      const sessionArgs = sessionName ? `${subCmd} ${sessionName}` : subCmd
+      const result = await handleSession(env.DB, userId, guildId, sessionArgs)
       if (result.file) {
         await sendFollowupFile(env.DISCORD_APPLICATION_ID, interactionToken, result.file)
       }
