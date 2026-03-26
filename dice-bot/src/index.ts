@@ -206,17 +206,27 @@ export default {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const interaction = JSON.parse(body)
+    let interaction: Record<string, unknown>
+    try {
+      interaction = JSON.parse(body)
+    } catch {
+      return new Response('Bad Request', { status: 400 })
+    }
 
     if (interaction.type === PING) {
       return jsonResponse({ type: PONG })
     }
 
     if (interaction.type === APPLICATION_COMMAND) {
-      const commandName      = interaction.data.name as string
-      const userId           = interaction.member?.user?.id ?? interaction.user?.id ?? ''
-      const guildId          = interaction.guild_id as string ?? ''
-      const args             = (interaction.data.options?.[0]?.value as string | undefined) ?? ''
+      const commandName      = (interaction.data as Record<string, unknown>)?.name as string
+      const userId           = (interaction.member as Record<string, Record<string, string>> | undefined)?.user?.id
+                               ?? (interaction.user as Record<string, string> | undefined)?.id
+                               ?? ''
+      if (!userId) {
+        return new Response('Bad Request', { status: 400 })
+      }
+      const guildId          = (interaction.guild_id as string) ?? ''
+      const args             = ((interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined)?.[0]?.value as string ?? ''
       const interactionToken = interaction.token as string
 
       return routeCommand(env, commandName, userId, guildId, args, interactionToken)

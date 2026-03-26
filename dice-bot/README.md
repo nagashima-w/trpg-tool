@@ -224,55 +224,83 @@
    - 「Privileged Gateway Intents」は今回不要（Interactions Endpoint方式のため）
 5. **「OAuth2 → URL Generator」** タブを開く
    - **Scopes**: `bot` と `applications.commands` にチェック
-   - **Bot Permissions**: `Send Messages`、`Use Slash Commands` にチェック
+   - **Bot Permissions**: 以下にチェック
+     | 権限 | 用途 |
+     |:---|:---|
+     | `Send Messages` | コマンド結果の返信 |
+     | `Attach Files` | `/session end` 時のレポートファイル（.md）送信 |
    - 生成されたURLをブラウザで開き、Botを導入したいサーバーを選択してインストール
 
 ---
 
 ## 8. Cloudflare のセットアップ
 
-### 8-1. Wrangler CLIのインストール・ログイン
+### 8-1. D1 データベースの作成
 
-```bash
-npm install -g wrangler
-wrangler login   # ブラウザが開きCloudflareアカウントと連携
-```
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) にログイン
+2. 左メニューの **「Workers & Pages」→「D1 SQL Database」** を開く
+3. **「Create」** をクリックし、データベース名に `coc-dice-bot-db` を入力して作成
+4. 作成後の概要ページに表示される **「Database ID」** を控える
 
-### 8-2. D1 データベースの作成
+### 8-2. wrangler.toml への反映
 
-```bash
-# D1データベースを作成（出力されたdatabase_idをwrangler.tomlに記載）
-wrangler d1 create coc-dice-bot-db
-
-# スキーマを流す（本番）
-wrangler d1 execute coc-dice-bot-db --file=./schema.sql
-
-# スキーマを流す（ローカル開発用）
-wrangler d1 execute coc-dice-bot-db --local --file=./schema.sql
-```
-
-出力例:
-```
-✅ Successfully created DB 'coc-dice-bot-db' in region APAC
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  ← wrangler.tomlに記載
-```
-
-### 8-3. シークレットの登録
-
-環境変数のうち機密情報は `wrangler secret` で登録する（コードやwrangler.tomlに書かない）。
-
-```bash
-wrangler secret put DISCORD_BOT_TOKEN
-# → プロンプトが表示されるので貼り付けてEnter
-```
-
-`wrangler.toml` の `[vars]` には非機密の値だけを記載：
+`dice-bot/wrangler.toml` の `database_id` に控えた値を記入する：
 
 ```toml
-[vars]
-DISCORD_PUBLIC_KEY      = "取得したPUBLIC_KEY"
-DISCORD_APPLICATION_ID  = "取得したAPPLICATION_ID"
+[[d1_databases]]
+binding       = "DB"
+database_name = "coc-dice-bot-db"
+database_id   = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  ← ここに貼り付け
 ```
+
+### 8-3. スキーマの適用
+
+D1 データベースの概要ページで **「Console」** タブを開き、以下のSQLを**1つずつ**貼り付けて「実行」する。
+
+**① Characters テーブル**
+```sql
+CREATE TABLE IF NOT EXISTS Characters (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, hp INTEGER NOT NULL DEFAULT 0, mp INTEGER NOT NULL DEFAULT 0, san INTEGER NOT NULL DEFAULT 0, luck INTEGER NOT NULL DEFAULT 0, stats TEXT NOT NULL DEFAULT '{}', skills TEXT NOT NULL DEFAULT '{}', updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
+```
+
+**② Active_Characters テーブル**
+```sql
+CREATE TABLE IF NOT EXISTS Active_Characters (user_id TEXT PRIMARY KEY, character_id TEXT NOT NULL, FOREIGN KEY (character_id) REFERENCES Characters(id));
+```
+
+**③ Sessions テーブル**
+```sql
+CREATE TABLE IF NOT EXISTS Sessions (id TEXT PRIMARY KEY, guild_id TEXT NOT NULL, name TEXT NOT NULL, kp_user_id TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'active', started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ended_at DATETIME);
+```
+
+**④ Dice_Logs テーブル**
+```sql
+CREATE TABLE IF NOT EXISTS Dice_Logs (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, user_id TEXT NOT NULL, character_name TEXT NOT NULL, skill_name TEXT NOT NULL, target_value INTEGER NOT NULL, final_dice INTEGER NOT NULL, result_level TEXT NOT NULL, is_secret INTEGER NOT NULL DEFAULT 0, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (session_id) REFERENCES Sessions(id));
+```
+
+**⑤ インデックス**
+```sql
+CREATE INDEX IF NOT EXISTS idx_dice_logs_session ON Dice_Logs(session_id); CREATE INDEX IF NOT EXISTS idx_dice_logs_user ON Dice_Logs(user_id); CREATE INDEX IF NOT EXISTS idx_characters_user ON Characters(user_id); CREATE INDEX IF NOT EXISTS idx_sessions_guild ON Sessions(guild_id, status);
+```
+
+### 8-4. Cloudflare API トークンの取得
+
+GitHub Actions から Cloudflare にデプロイするために必要なトークンを発行する。
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) の右上のアイコン → **「My Profile」** を開く
+2. 左メニューの **「API Tokens」** → **「Create Token」** をクリック
+3. **「Edit Cloudflare Workers」** テンプレートの **「Use template」** をクリック
+4. 内容はデフォルトのままで **「Continue to summary」→「Create Token」** をクリック
+5. 表示されたトークンをコピーして安全な場所に保存（**一度しか表示されない**）
+
+取得したトークンを GitHub の Environment secrets に登録する：
+
+> Settings → Environments → production → Environment secrets → `CLOUDFLARE_API_TOKEN` を追加
+
+### 8-5. DISCORD_BOT_TOKEN のシークレット登録
+
+`DISCORD_BOT_TOKEN` は GitHub Actions の deploy 時に自動で Cloudflare に登録されるため、**GitHub の Environment secrets（production）** に登録するだけで OK。
+
+> Settings → Environments → production → Environment secrets → `DISCORD_BOT_TOKEN` を追加
 
 ---
 

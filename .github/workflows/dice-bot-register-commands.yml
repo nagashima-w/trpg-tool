@@ -1,0 +1,38 @@
+name: スラッシュコマンド登録
+
+on:
+  workflow_dispatch:
+    inputs:
+      guild_id:
+        description: 'ギルドID（指定するとそのサーバーのみに即時登録。空白でグローバル登録）'
+        required: false
+        default: '1486717882183454740'
+
+defaults:
+  run:
+    working-directory: dice-bot
+
+jobs:
+  register:
+    name: スラッシュコマンドを登録
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: dice-bot/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: コマンドを登録
+        run: npm run register
+        env:
+          DISCORD_APPLICATION_ID: '1486714649054285864'
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_GUILD_ID: ${{ inputs.guild_id }}

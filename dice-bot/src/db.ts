@@ -65,6 +65,14 @@ export interface InsertDiceLogParams {
 // ── ユーティリティ ────────────────────────────────────────────
 
 function parseCharacterRow(row: CharacterRow): CharacterRecord {
+  let stats: CharacterRecord['stats']
+  let skills: CharacterRecord['skills']
+  try {
+    stats  = JSON.parse(row.stats)
+    skills = JSON.parse(row.skills)
+  } catch {
+    throw new Error('キャラクターデータが破損しています。再度 `/char set` で登録してください。')
+  }
   return {
     id:      row.id,
     user_id: row.user_id,
@@ -73,8 +81,8 @@ function parseCharacterRow(row: CharacterRow): CharacterRecord {
     mp:      row.mp,
     san:     row.san,
     luck:    row.luck,
-    stats:   JSON.parse(row.stats),
-    skills:  JSON.parse(row.skills),
+    stats,
+    skills,
   }
 }
 

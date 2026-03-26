@@ -83,7 +83,7 @@ describe('judgeResult - イクストリーム', () => {
 describe('judgeResult - ハード', () => {
   it('出目が目標値の1/2以下（端数切り捨て）はハード', () => {
     expect(judgeResult(25, 50)).toBe('hard')  // 50/2=25
-    expect(judgeResult(11, 50)).toBe('extreme') // 1/5以下なのでextreme優先
+    expect(judgeResult(10, 50)).toBe('extreme') // 50/5=10なのでextreme優先
     expect(judgeResult(30, 60)).toBe('hard')  // 60/2=30
     expect(judgeResult(31, 60)).not.toBe('hard')
   })
