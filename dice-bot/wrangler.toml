@@ -2,6 +2,7 @@ name = "coc-dice-bot"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
+account_id = "8bf739e7189a37dbd719ed763e956fc8"
 
 [[d1_databases]]
 binding     = "DB"
