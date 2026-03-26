@@ -224,7 +224,11 @@
    - 「Privileged Gateway Intents」は今回不要（Interactions Endpoint方式のため）
 5. **「OAuth2 → URL Generator」** タブを開く
    - **Scopes**: `bot` と `applications.commands` にチェック
-   - **Bot Permissions**: `Send Messages`、`Use Slash Commands` にチェック
+   - **Bot Permissions**: 以下にチェック
+     | 権限 | 用途 |
+     |:---|:---|
+     | `Send Messages` | コマンド結果の返信 |
+     | `Attach Files` | `/session end` 時のレポートファイル（.md）送信 |
    - 生成されたURLをブラウザで開き、Botを導入したいサーバーを選択してインストール
 
 ---
