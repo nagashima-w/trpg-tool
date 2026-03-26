@@ -9,8 +9,8 @@ database_name = "coc-dice-bot-db"
 database_id   = "YOUR_D1_DATABASE_ID"  # wrangler d1 create coc-dice-bot-db で取得
 
 [vars]
-DISCORD_PUBLIC_KEY = "YOUR_DISCORD_PUBLIC_KEY"
-DISCORD_APPLICATION_ID = "YOUR_DISCORD_APPLICATION_ID"
+DISCORD_PUBLIC_KEY = "86507feb63fd64eda0fe40f89da677a5733c228661f26fa48c5e877b90d410bc"
+DISCORD_APPLICATION_ID = "1486714649054285864"
 
 # シークレット（wrangler secret put で設定）
 # DISCORD_BOT_TOKEN
