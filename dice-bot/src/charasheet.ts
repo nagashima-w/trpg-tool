@@ -76,7 +76,7 @@ export function parseCharasheetUrl(url: string): ParsedUrl | null {
   }
 
   if (/^m[0-9a-f]{32}$/.test(segment)) {
-    return { id: segment.slice(1), type: 'hash' }
+    return { id: segment, type: 'hash' }
   }
 
   return null

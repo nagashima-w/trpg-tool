@@ -8,6 +8,7 @@ import { handleSc } from './commands/sc.ts'
 import { handleRoll } from './commands/roll.ts'
 import { handleChar } from './commands/char.ts'
 import { handleSession } from './commands/session.ts'
+import { handleHelp } from './commands/help.ts'
 import { insertDiceLog, getActiveSession, getActiveCharacter } from './db.ts'
 import type { D1Database } from './db.ts'
 
@@ -191,6 +192,10 @@ async function routeCommand(
       if (result.file) {
         await sendFollowupFile(env.DISCORD_APPLICATION_ID, interactionToken, result.file)
       }
+      return messageResponse(result.message, result.ephemeral)
+    }
+    case 'help': {
+      const result = handleHelp()
       return messageResponse(result.message, result.ephemeral)
     }
     default:

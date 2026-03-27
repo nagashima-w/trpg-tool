@@ -15,9 +15,9 @@ describe('parseCharasheetUrl', () => {
     expect(result).toEqual({ id: '4634372', type: 'numeric' })
   })
 
-  it('ハッシュIDのURLからIDを抽出する（mプレフィックスを除去）', () => {
+  it('ハッシュIDのURLからIDを抽出する（mプレフィックスを保持）', () => {
     const result = parseCharasheetUrl('https://charasheet.vampire-blood.net/m5581dda6da39fc547e6014f994c3bc86')
-    expect(result).toEqual({ id: '5581dda6da39fc547e6014f994c3bc86', type: 'hash' })
+    expect(result).toEqual({ id: 'm5581dda6da39fc547e6014f994c3bc86', type: 'hash' })
   })
 
   it('末尾スラッシュ付きでも動作する', () => {

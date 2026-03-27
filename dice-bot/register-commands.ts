@@ -65,6 +65,10 @@ const commands = [
     ],
   },
   {
+    name: 'help',
+    description: 'コマンドの使い方を表示する',
+  },
+  {
     name: 'session',
     description: 'セッション管理',
     options: [
