@@ -86,6 +86,27 @@ describe('handleCc', () => {
     expect(result.ephemeral).toBe(false)
   })
 
+  it('幸運で判定できる（char.luckを使用）', async () => {
+    const result = await handleCc(makeDb(), 'user-A', '幸運')
+    expect(result.message).toContain('65') // MOCK_CHAR_ROW.luck = 65
+    expect(result.diceLog?.targetValue).toBe(65)
+  })
+
+  it('LUCK（英語）で判定できる', async () => {
+    const result = await handleCc(makeDb(), 'user-A', 'LUCK')
+    expect(result.diceLog?.targetValue).toBe(65)
+  })
+
+  it('HPで判定できる（char.hpを使用）', async () => {
+    const result = await handleCc(makeDb(), 'user-A', 'HP')
+    expect(result.diceLog?.targetValue).toBe(12) // MOCK_CHAR_ROW.hp = 12
+  })
+
+  it('SANで判定できる（char.sanを使用）', async () => {
+    const result = await handleCc(makeDb(), 'user-A', 'SAN')
+    expect(result.diceLog?.targetValue).toBe(42) // MOCK_CHAR_ROW.san = 42
+  })
+
   it('存在しない技能はエラーメッセージを返す', async () => {
     const result = await handleCc(makeDb(), 'user-A', '存在しない技能')
     expect(result.message).toContain('見つかりません')

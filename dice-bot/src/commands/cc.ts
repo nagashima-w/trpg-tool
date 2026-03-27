@@ -7,7 +7,17 @@ import { getActiveCharacter } from '../db.ts'
 import { extractSecret, extractModifier, resultLabel, type CommandResult } from './shared.ts'
 import type { D1Database } from '../db.ts'
 
-const STAT_KEYS = ['STR','CON','DEX','APP','POW','SIZ','INT','EDU','MOV','HP','MP'] as const
+// char.stats に存在する能力値キー（英語大文字）
+const STAT_KEYS = ['STR','CON','DEX','APP','POW','SIZ','INT','EDU','MOV'] as const
+
+// char 直接フィールドへのエイリアス（英語・日本語両対応）
+// HP/MP/SAN/LUCK は char.stats ではなく char の直接プロパティに格納されている
+const SPECIAL_FIELD_ALIASES: Record<string, 'hp' | 'mp' | 'san' | 'luck'> = {
+  'HP': 'hp',
+  'MP': 'mp',
+  'SAN': 'san',
+  'LUCK': 'luck', '幸運': 'luck',
+}
 
 export async function handleCc(
   db: D1Database,
@@ -33,13 +43,19 @@ export async function handleCc(
   let targetValue: number | undefined
   let resolvedName = skillName
 
-  // 能力値チェック
+  // 1. 能力値チェック (STR/CON/DEX/APP/POW/SIZ/INT/EDU/MOV)
   if (STAT_KEYS.includes(upperKey as typeof STAT_KEYS[number])) {
-    const statKey = upperKey as keyof typeof char.stats
-    targetValue = (char.stats as Record<string, number>)[statKey]
+    targetValue = (char.stats as Record<string, number>)[upperKey]
     resolvedName = upperKey
-  } else {
-    // 技能チェック（部分一致なし・完全一致）
+  }
+  // 2. 特殊フィールドチェック (HP/MP/SAN/LUCK/幸運)
+  //    大文字変換後と元のキー名の両方をチェック
+  else if (SPECIAL_FIELD_ALIASES[upperKey] !== undefined || SPECIAL_FIELD_ALIASES[skillName] !== undefined) {
+    const field = SPECIAL_FIELD_ALIASES[upperKey] ?? SPECIAL_FIELD_ALIASES[skillName]
+    targetValue = char[field]
+  }
+  // 3. 技能チェック（完全一致）
+  else {
     targetValue = char.skills[skillName]
   }
 
