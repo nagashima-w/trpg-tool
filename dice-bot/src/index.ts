@@ -23,6 +23,8 @@ const PING = 1
 const APPLICATION_COMMAND = 2
 const PONG = 1
 const CHANNEL_MESSAGE_WITH_SOURCE = 4
+// セッション終了など時間のかかる処理に使用する遅延応答タイプ
+const DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5
 const EPHEMERAL_FLAG = 64
 
 // ── 署名検証 ─────────────────────────────────────────────────
@@ -133,10 +135,29 @@ async function sendFollowupFile(
   }
 }
 
+// ── deferred応答（type:5）の内容を後から差し替える ────────────
+
+async function editOriginalResponse(
+  appId: string,
+  interactionToken: string,
+  content: string,
+): Promise<void> {
+  const url = `https://discord.com/api/v10/webhooks/${appId}/${interactionToken}/messages/@original`
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  })
+  if (!res.ok) {
+    console.error(`[session] edit original failed: ${res.status} ${await res.text()}`)
+  }
+}
+
 // ── コマンドルーター ──────────────────────────────────────────
 
 async function routeCommand(
   env: Env,
+  ctx: ExecutionContext,
   commandName: string,
   userId: string,
   guildId: string,
@@ -181,17 +202,28 @@ async function routeCommand(
       return messageResponse(result.message, result.ephemeral)
     }
     case 'session': {
-      // サブコマンド構造からargs文字列を再構築
-      // Discord送信形式: options[0] = { name: "start"|"end", options?: [{name: "name", value: "..."}] }
-      const sessionOpts = (interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined
-      const subCmd      = sessionOpts?.[0]?.name as string ?? ''
-      const subCmdOpts  = sessionOpts?.[0]?.options as Array<Record<string, unknown>> | undefined
-      const sessionName = subCmdOpts?.[0]?.value as string ?? ''
-      const sessionArgs = sessionName ? `${subCmd} ${sessionName}` : subCmd
-      const result = await handleSession(env.DB, userId, guildId, sessionArgs)
-      if (result.file) {
-        await sendFollowupFile(env.DISCORD_APPLICATION_ID, interactionToken, result.file)
+      if (args === 'end') {
+        // レポート生成・ファイル送信はDiscordの3秒制限を超える可能性があるため
+        // deferred応答（type:5）で即時ACKし、waitUntilでバックグラウンド処理する
+        ctx.waitUntil((async () => {
+          try {
+            const result = await handleSession(env.DB, userId, guildId, 'end')
+            await editOriginalResponse(env.DISCORD_APPLICATION_ID, interactionToken, result.message)
+            if (result.file) {
+              await sendFollowupFile(env.DISCORD_APPLICATION_ID, interactionToken, result.file)
+            }
+          } catch (e) {
+            console.error('[session end] error:', e)
+            await editOriginalResponse(
+              env.DISCORD_APPLICATION_ID, interactionToken,
+              'セッション終了処理中にエラーが発生しました。',
+            ).catch(() => {})
+          }
+        })())
+        return jsonResponse({ type: DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })
       }
+
+      const result = await handleSession(env.DB, userId, guildId, args)
       return messageResponse(result.message, result.ephemeral)
     }
     case 'help': {
@@ -206,7 +238,7 @@ async function routeCommand(
 // ── メインハンドラ ────────────────────────────────────────────
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method !== 'POST') {
       return new Response('Method Not Allowed', { status: 405 })
     }
@@ -238,10 +270,22 @@ export default {
         return new Response('Bad Request', { status: 400 })
       }
       const guildId          = (interaction.guild_id as string) ?? ''
-      const args             = ((interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined)?.[0]?.value as string ?? ''
       const interactionToken = interaction.token as string
 
-      return routeCommand(env, commandName, userId, guildId, args, interactionToken)
+      // session はサブコマンド構造（options[0] が SUB_COMMAND）のため個別にパース
+      // その他のコマンドは options[0].value に文字列引数が入る
+      const dataOptions = (interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined
+      let args: string
+      if (commandName === 'session') {
+        const subCmd      = dataOptions?.[0]?.name as string ?? ''
+        const subCmdOpts  = dataOptions?.[0]?.options as Array<Record<string, unknown>> | undefined
+        const sessionName = subCmdOpts?.[0]?.value as string ?? ''
+        args = sessionName ? `${subCmd} ${sessionName}` : subCmd
+      } else {
+        args = dataOptions?.[0]?.value as string ?? ''
+      }
+
+      return routeCommand(env, ctx, commandName, userId, guildId, args, interactionToken)
     }
 
     return new Response('Bad Request', { status: 400 })
