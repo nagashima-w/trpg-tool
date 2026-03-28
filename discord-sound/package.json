@@ -1,0 +1,29 @@
+{
+  "name": "discord-sound-player",
+  "version": "0.1.0",
+  "description": "TRPG用Discordサウンドプレイヤー",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "package:win": "npm run build && electron-builder --win",
+    "package:mac": "npm run build && electron-builder --mac",
+    "package:linux": "npm run build && electron-builder --linux"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.17.0",
+    "discord.js": "^14.16.0",
+    "ffmpeg-static": "^5.2.0",
+    "libsodium-wrappers": "^0.7.15",
+    "opusscript": "^0.1.1"
+  },
+  "devDependencies": {
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/libsodium-wrappers": "^0.7.14",
+    "@types/node": "^20.0.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,15 @@
+appId: com.trpg-tool.discord-sound-player
+productName: Discord Sound Player
+files:
+  - out/**/*
+  - node_modules/**/*
+  - package.json
+directories:
+  buildResources: build
+  output: dist
+win:
+  target: nsis
+mac:
+  target: dmg
+linux:
+  target: AppImage

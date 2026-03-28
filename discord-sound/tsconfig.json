@@ -1,0 +1,12 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "out"
+  }
+}
