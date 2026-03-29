@@ -34,12 +34,15 @@ const electronAPI = {
 
   // Events
   onStatusChange: (cb: (status: ConnectionStatus) => void): void => {
+    ipcRenderer.removeAllListeners('discord:statusChange');
     ipcRenderer.on('discord:statusChange', (_event, status) => cb(status));
   },
   onPlaybackChange: (cb: (state: PlaybackState) => void): void => {
+    ipcRenderer.removeAllListeners('discord:playbackChange');
     ipcRenderer.on('discord:playbackChange', (_event, state) => cb(state));
   },
   onForcedDisconnect: (cb: () => void): void => {
+    ipcRenderer.removeAllListeners('discord:forcedDisconnect');
     ipcRenderer.on('discord:forcedDisconnect', () => cb());
   },
 };

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, basename } from 'path';
 import { randomUUID } from 'crypto';
 import type { Track } from '../shared/types';
@@ -16,14 +16,10 @@ export class TrackManager {
 
   private load(): Track[] {
     try {
-      if (existsSync(this.tracksPath)) {
-        const raw = readFileSync(this.tracksPath, 'utf-8');
-        return JSON.parse(raw) as Track[];
-      }
-    } catch (err) {
-      console.error('Failed to load tracks:', err);
+      return JSON.parse(readFileSync(this.tracksPath, 'utf-8')) as Track[];
+    } catch {
+      return [];
     }
-    return [];
   }
 
   private save(): void {
@@ -67,7 +63,13 @@ export class TrackManager {
     try {
       const entries = readdirSync(folderPath);
       const filePaths = entries
-        .filter((entry) => SUPPORTED_EXTENSIONS.includes(extname(entry).toLowerCase()))
+        .filter((entry) => {
+          const fullPath = join(folderPath, entry);
+          return (
+            SUPPORTED_EXTENSIONS.includes(extname(entry).toLowerCase()) &&
+            statSync(fullPath).isFile()
+          );
+        })
         .map((entry) => join(folderPath, entry));
       return this.addFiles(filePaths);
     } catch (err) {

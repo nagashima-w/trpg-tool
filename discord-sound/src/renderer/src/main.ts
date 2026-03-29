@@ -35,13 +35,17 @@ const cancelSettingsBtn = document.getElementById('cancel-settings-btn') as HTML
 // Selected track for playback
 let selectedTrackId: string | null = null
 
+function statusLabel(status: ConnectionStatus): string {
+  if (status === 'connected') return '接続済み'
+  if (status === 'connecting') return '接続中...'
+  return '切断済み'
+}
+
 function updateStatusBadge(status: ConnectionStatus): void {
-  statusBadge.textContent = status === 'connected' ? '接続済み' : status === 'connecting' ? '接続中...' : '切断済み'
+  const label = statusLabel(status)
+  statusBadge.textContent = label
   statusBadge.className = `status-badge status-${status}`
-
-  const footerLabel = status === 'connected' ? '接続済み' : status === 'connecting' ? '接続中...' : '切断済み'
-  footerStatusText.textContent = `ステータス: ${footerLabel}`
-
+  footerStatusText.textContent = `ステータス: ${label}`
   connectBtn.disabled = status === 'connected' || status === 'connecting'
   disconnectBtn.disabled = status !== 'connected'
 }
@@ -271,10 +275,12 @@ stopBtn.addEventListener('click', async () => {
   await api.playbackStop()
 })
 
-volumeSlider.addEventListener('input', async () => {
-  const vol = Number(volumeSlider.value)
-  volumeDisplay.textContent = `${vol}%`
-  await api.playbackSetVolume(vol)
+volumeSlider.addEventListener('input', () => {
+  volumeDisplay.textContent = `${volumeSlider.value}%`
+})
+
+volumeSlider.addEventListener('change', async () => {
+  await api.playbackSetVolume(Number(volumeSlider.value))
 })
 
 settingsBtn.addEventListener('click', () => {
@@ -319,9 +325,6 @@ saveSettingsBtn.addEventListener('click', async () => {
 api.onStatusChange((status: ConnectionStatus) => {
   currentStatus = status
   updateStatusBadge(status)
-  if (status === 'connected') {
-    loadGuilds()
-  }
 })
 
 api.onPlaybackChange((state: PlaybackState) => {

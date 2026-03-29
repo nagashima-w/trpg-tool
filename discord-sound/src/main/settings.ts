@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import type { Settings } from '../shared/types';
 
@@ -21,19 +21,18 @@ export class SettingsManager {
 
   private load(): Settings {
     try {
-      if (existsSync(this.settingsPath)) {
-        const raw = readFileSync(this.settingsPath, 'utf-8');
-        const parsed = JSON.parse(raw) as Partial<Settings>;
-        return { ...DEFAULT_SETTINGS, ...parsed };
-      }
-    } catch (err) {
-      console.error('Failed to load settings:', err);
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(readFileSync(this.settingsPath, 'utf-8')) as Partial<Settings> };
+    } catch {
+      return { ...DEFAULT_SETTINGS };
     }
-    return { ...DEFAULT_SETTINGS };
   }
 
   get(): Settings {
     return { ...this.settings };
+  }
+
+  update(patch: Partial<Settings>): void {
+    this.save({ ...this.settings, ...patch });
   }
 
   save(settings: Settings): void {

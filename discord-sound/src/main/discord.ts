@@ -20,7 +20,7 @@ import {
   type AudioPlayer,
   type AudioResource,
 } from '@discordjs/voice';
-import type { Guild, VoiceChannel, ConnectionStatus, PlaybackState } from '../shared/types';
+import type { Guild, VoiceChannel, PlaybackState } from '../shared/types';
 
 export class DiscordManager extends EventEmitter {
   private client: Client | null = null;
@@ -32,6 +32,7 @@ export class DiscordManager extends EventEmitter {
   private volume: number = 80;
   private looping: boolean = true;
   private playbackStatus: 'idle' | 'playing' | 'paused' = 'idle';
+  private isDestroyingIntentionally = false;
 
   async login(token: string): Promise<void> {
     if (this.client) {
@@ -64,7 +65,7 @@ export class DiscordManager extends EventEmitter {
     const guild = this.client.guilds.cache.get(guildId);
     if (!guild) throw new Error('Guild not found');
 
-    this.emit('statusChange', 'connecting' as ConnectionStatus);
+    this.emit('statusChange', 'connecting');
 
     const connection = joinVoiceChannel({
       channelId,
@@ -76,7 +77,7 @@ export class DiscordManager extends EventEmitter {
       await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
     } catch (err) {
       connection.destroy();
-      this.emit('statusChange', 'disconnected' as ConnectionStatus);
+      this.emit('statusChange', 'disconnected');
       throw err;
     }
 
@@ -86,8 +87,7 @@ export class DiscordManager extends EventEmitter {
 
     this.player.on(AudioPlayerStatus.Idle, () => {
       if (this.looping && this.currentTrackId && this.currentFilePath) {
-        // Re-play for loop
-        this._startPlayback(this.currentTrackId, this.currentFilePath);
+        this.play(this.currentTrackId, this.currentFilePath);
       } else {
         this.playbackStatus = 'idle';
         this.currentTrackId = null;
@@ -102,56 +102,53 @@ export class DiscordManager extends EventEmitter {
           entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
           entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
         ]);
-        // Reconnecting
       } catch {
         connection.destroy();
       }
     });
 
     connection.on(VoiceConnectionStatus.Destroyed, () => {
+      if (this.isDestroyingIntentionally) {
+        this.isDestroyingIntentionally = false;
+        return;
+      }
       this._handleForcedDisconnect();
     });
 
-    this.emit('statusChange', 'connected' as ConnectionStatus);
+    this.emit('statusChange', 'connected');
   }
 
   disconnect(): void {
-    if (this.player) {
-      this.player.stop(true);
-      this.player = null;
-    }
+    this._resetState();
     if (this.connection) {
+      this.isDestroyingIntentionally = true;
       this.connection.destroy();
       this.connection = null;
     }
-    this.currentResource = null;
-    this.currentTrackId = null;
-    this.currentFilePath = null;
-    this.playbackStatus = 'idle';
-    this.emit('statusChange', 'disconnected' as ConnectionStatus);
+    this.emit('statusChange', 'disconnected');
     this.emit('playbackChange', this.getState());
   }
 
-  private _handleForcedDisconnect(): void {
+  private _resetState(): void {
     if (this.player) {
       this.player.stop(true);
       this.player = null;
     }
-    this.connection = null;
     this.currentResource = null;
     this.currentTrackId = null;
     this.currentFilePath = null;
     this.playbackStatus = 'idle';
-    this.emit('statusChange', 'disconnected' as ConnectionStatus);
+  }
+
+  private _handleForcedDisconnect(): void {
+    this._resetState();
+    this.connection = null;
+    this.emit('statusChange', 'disconnected');
     this.emit('playbackChange', this.getState());
     this.emit('forcedDisconnect');
   }
 
   play(trackId: string, filePath: string): void {
-    this._startPlayback(trackId, filePath);
-  }
-
-  private _startPlayback(trackId: string, filePath: string): void {
     if (!this.player || !this.connection) return;
 
     this.currentTrackId = trackId;

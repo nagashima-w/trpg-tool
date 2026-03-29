@@ -55,8 +55,7 @@ function setupIpcHandlers(): void {
 
   ipcMain.handle('discord-login', async (_event, token: string) => {
     await discordManager.login(token);
-    const current = settingsManager.get();
-    settingsManager.save({ ...current, token });
+    settingsManager.update({ token });
   });
 
   ipcMain.handle('discord-get-guilds', () => {
@@ -69,8 +68,7 @@ function setupIpcHandlers(): void {
 
   ipcMain.handle('discord-connect', async (_event, guildId: string, channelId: string) => {
     await discordManager.connect(guildId, channelId);
-    const current = settingsManager.get();
-    settingsManager.save({ ...current, lastGuildId: guildId, lastChannelId: channelId });
+    settingsManager.update({ lastGuildId: guildId, lastChannelId: channelId });
   });
 
   ipcMain.handle('discord-disconnect', () => {
