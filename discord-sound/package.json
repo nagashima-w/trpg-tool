@@ -11,19 +11,18 @@
     "package:linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
-    "@discordjs/voice": "^0.17.0",
-    "discord.js": "^14.16.0",
-    "ffmpeg-static": "^5.2.0",
-    "libsodium-wrappers": "^0.7.15",
+    "@discordjs/voice": "^0.19.2",
+    "discord.js": "^14.25.1",
+    "ffmpeg-static": "^5.3.0",
+    "libsodium-wrappers": "^0.8.2",
     "opusscript": "^0.1.1"
   },
   "devDependencies": {
-    "@electron-toolkit/tsconfig": "^1.0.1",
-    "@types/libsodium-wrappers": "^0.7.14",
-    "@types/node": "^20.0.0",
-    "electron": "^33.0.0",
-    "electron-builder": "^25.0.0",
-    "electron-vite": "^2.3.0",
-    "typescript": "^5.7.0"
+    "@electron-toolkit/tsconfig": "^2.0.0",
+    "@types/node": "^25.5.0",
+    "electron": "^41.1.0",
+    "electron-builder": "^26.8.1",
+    "electron-vite": "^5.0.0",
+    "typescript": "^5.9.3"
   }
 }
