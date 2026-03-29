@@ -9,8 +9,6 @@ on:
       - 'discord-sound/electron*.ts'
       - 'discord-sound/tsconfig*.json'
       - 'discord-sound/electron-builder.yml'
-    tags:
-      - 'discord-sound-v*'
   workflow_dispatch:
 
 defaults:
@@ -35,9 +33,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
@@ -59,9 +57,8 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Create Release
+    name: Update Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/discord-sound-v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -73,8 +70,12 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Create GitHub Release
+      - name: Create or update latest release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: discord-sound-latest
+          name: Discord Sound Player (latest)
+          body: |
+            mainブランチの最新ビルドです。
           files: artifacts/**
-          generate_release_notes: true
+          make_latest: true
