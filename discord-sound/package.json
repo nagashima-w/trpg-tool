@@ -2,6 +2,11 @@
   "name": "discord-sound-player",
   "version": "0.1.0",
   "description": "TRPG用Discordサウンドプレイヤー",
+  "author": "nagashima-w",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nagashima-w/trpg-tool"
+  },
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
