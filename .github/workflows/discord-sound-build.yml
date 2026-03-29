@@ -27,9 +27,6 @@ jobs:
           - os: macos-latest
             script: package:mac
             artifact: dist/*.dmg
-          - os: ubuntu-latest
-            script: package:linux
-            artifact: dist/*.AppImage
     runs-on: ${{ matrix.os }}
 
     steps:
