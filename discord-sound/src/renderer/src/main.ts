@@ -22,6 +22,7 @@ const pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement
 const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement
 const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement
 const volumeDisplay = document.getElementById('volume-display') as HTMLSpanElement
+const refreshGuildsBtn = document.getElementById('refresh-guilds-btn') as HTMLButtonElement
 const settingsBtn = document.getElementById('settings-btn') as HTMLButtonElement
 const footerStatusText = document.getElementById('footer-status-text') as HTMLSpanElement
 const settingsModal = document.getElementById('settings-modal') as HTMLDivElement
@@ -215,6 +216,11 @@ function hideSettingsModal(): void {
 }
 
 // Event listeners
+refreshGuildsBtn.addEventListener('click', async () => {
+  await loadGuilds()
+  channelSelect.innerHTML = '<option value="">-- チャンネルを選択 --</option>'
+})
+
 guildSelect.addEventListener('change', async () => {
   const guildId = guildSelect.value
   channelSelect.innerHTML = '<option value="">-- チャンネルを選択 --</option>'
