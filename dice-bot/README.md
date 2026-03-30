@@ -1,3 +1,5 @@
+<img width="256" height="256" alt="Gemini_Generated_Image_iue7z5iue7z5iue7" src="https://github.com/user-attachments/assets/d8e0e346-5add-4ead-bcbf-b2dfe9da4d4e" />
+
 # 🎲 新クトゥルフ神話TRPG（第7版）用 Discordセッション管理Bot 仕様書
 
 ## 1. システム構成（インフラ）
