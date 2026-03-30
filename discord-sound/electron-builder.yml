@@ -6,7 +6,6 @@ files:
   - package.json
 asarUnpack:
   - node_modules/ffmpeg-static/**
-  - node_modules/@discordjs/opus/**
 directories:
   buildResources: build
   output: dist
