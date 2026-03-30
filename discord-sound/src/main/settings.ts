@@ -7,7 +7,7 @@ const DEFAULT_SETTINGS: Settings = {
   defaultVolume: 80,
   lastGuildId: '',
   lastChannelId: '',
-  restoreLastConnection: true,
+  restoreLastConnection: false,
 };
 
 export class SettingsManager {

@@ -6,6 +6,8 @@ const api = window.electronAPI
 let tracks: Track[] = []
 let currentStatus: ConnectionStatus = 'disconnected'
 let currentPlayback: PlaybackState = { status: 'idle', currentTrackId: null, volume: 80 }
+let savedLastGuildId = ''
+let savedLastChannelId = ''
 
 // DOM references
 const guildSelect = document.getElementById('guild-select') as HTMLSelectElement
@@ -328,9 +330,23 @@ saveSettingsBtn.addEventListener('click', async () => {
 })
 
 // IPC event listeners
-api.onStatusChange((status: ConnectionStatus) => {
+api.onStatusChange(async (status: ConnectionStatus) => {
+  const previous = currentStatus
   currentStatus = status
   updateStatusBadge(status)
+  // When connection is established (e.g. after startup auto-connect), reload the
+  // guild list so the selects reflect the actual state even if init() ran before
+  // the bot had finished logging in.
+  if (status === 'connected' && previous !== 'connected') {
+    await loadGuilds()
+    if (savedLastGuildId) {
+      guildSelect.value = savedLastGuildId
+      await loadChannels(savedLastGuildId)
+      if (savedLastChannelId) {
+        channelSelect.value = savedLastChannelId
+      }
+    }
+  }
 })
 
 api.onPlaybackChange((state: PlaybackState) => {
@@ -371,10 +387,13 @@ async function init(): Promise<void> {
   const state = await api.playbackGetState()
   updatePlaybackUI(state)
 
-  // Load guilds if logged in
+  // Remember last connection for use when 'connected' event fires after auto-connect
+  savedLastGuildId = settings.lastGuildId
+  savedLastChannelId = settings.lastChannelId
+
+  // Load guilds if already logged in (non-auto-connect case or manual login)
   if (settings.token) {
     await loadGuilds()
-    // Restore guild/channel selection
     if (settings.lastGuildId) {
       guildSelect.value = settings.lastGuildId
       await loadChannels(settings.lastGuildId)
