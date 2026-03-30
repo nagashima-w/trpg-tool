@@ -1,3 +1,5 @@
+<img width="256" height="256" alt="Gemini_Generated_Image_32iili32iili32ii" src="https://github.com/user-attachments/assets/c2a881dc-7d10-4946-8023-2eec1d20a56d" />
+
 # Discord Sound Player 仕様書
 
 TRPG セッション中に Discord ボイスチャンネルへ BGM を流すための Electron デスクトップアプリ。
