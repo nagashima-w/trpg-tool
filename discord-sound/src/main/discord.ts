@@ -9,6 +9,7 @@ if (ffmpegPath) {
 }
 
 import { EventEmitter } from 'events';
+import { createReadStream } from 'fs';
 import { Client, GatewayIntentBits } from 'discord.js';
 import {
   joinVoiceChannel,
@@ -16,6 +17,7 @@ import {
   createAudioResource,
   AudioPlayerStatus,
   VoiceConnectionStatus,
+  StreamType,
   entersState,
   type VoiceConnection,
   type AudioPlayer,
@@ -61,12 +63,13 @@ export class DiscordManager extends EventEmitter {
       .map((c) => ({ id: c.id, name: c.name }));
   }
 
-  async connect(guildId: string, channelId: string): Promise<void> {
+  // quiet=true suppresses the intermediate 'connecting' event (used for startup auto-connect)
+  async connect(guildId: string, channelId: string, quiet = false): Promise<void> {
     if (!this.client) throw new Error('Not logged in');
     const guild = this.client.guilds.cache.get(guildId);
     if (!guild) throw new Error('Guild not found');
 
-    this.emit('statusChange', 'connecting');
+    if (!quiet) this.emit('statusChange', 'connecting');
 
     const connection = joinVoiceChannel({
       channelId,
@@ -77,6 +80,9 @@ export class DiscordManager extends EventEmitter {
     try {
       await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
     } catch (err) {
+      // Prevent the Destroyed event from triggering _handleForcedDisconnect
+      // (which would wrongly show the "kicked from channel" alert on a failed connect).
+      this.isDestroyingIntentionally = true;
       connection.destroy();
       this.emit('statusChange', 'disconnected');
       throw err;
@@ -155,9 +161,11 @@ export class DiscordManager extends EventEmitter {
     this.currentTrackId = trackId;
     this.currentFilePath = filePath;
 
-    // Pass the file path directly so ffmpeg can use -i <path> for reliable
-    // format detection (avoids seek issues when piping a stream).
-    const resource = createAudioResource(filePath, {
+    // Use createReadStream so the file content is piped to ffmpeg via stdin.
+    // Passing a file path directly to ffmpeg as a CLI argument can silently fail
+    // on Windows when the path contains non-ASCII characters (e.g. Japanese).
+    const resource = createAudioResource(createReadStream(filePath), {
+      inputType: StreamType.Arbitrary,
       inlineVolume: true,
     });
     resource.volume?.setVolume(this.volume / 100);

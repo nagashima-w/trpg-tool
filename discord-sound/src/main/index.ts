@@ -153,7 +153,8 @@ app.whenReady().then(async () => {
         settings.lastChannelId
       ) {
         try {
-          await discordManager.connect(settings.lastGuildId, settings.lastChannelId);
+          // quiet=true: don't emit 'connecting' during startup auto-connect
+        await discordManager.connect(settings.lastGuildId, settings.lastChannelId, true);
         } catch (err) {
           console.error('Failed to auto-connect:', err);
         }
