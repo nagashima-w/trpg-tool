@@ -9,7 +9,6 @@ if (ffmpegPath) {
 }
 
 import { EventEmitter } from 'events';
-import { createReadStream } from 'fs';
 import { Client, GatewayIntentBits } from 'discord.js';
 import {
   joinVoiceChannel,
@@ -18,7 +17,6 @@ import {
   AudioPlayerStatus,
   VoiceConnectionStatus,
   entersState,
-  StreamType,
   type VoiceConnection,
   type AudioPlayer,
   type AudioResource,
@@ -157,8 +155,9 @@ export class DiscordManager extends EventEmitter {
     this.currentTrackId = trackId;
     this.currentFilePath = filePath;
 
-    const resource = createAudioResource(createReadStream(filePath), {
-      inputType: StreamType.Arbitrary,
+    // Pass the file path directly so ffmpeg can use -i <path> for reliable
+    // format detection (avoids seek issues when piping a stream).
+    const resource = createAudioResource(filePath, {
       inlineVolume: true,
     });
     resource.volume?.setVolume(this.volume / 100);
