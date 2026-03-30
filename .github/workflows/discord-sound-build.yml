@@ -1,0 +1,87 @@
+name: Discord Sound Player Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'discord-sound/src/**'
+      - 'discord-sound/package*.json'
+      - 'discord-sound/electron*.ts'
+      - 'discord-sound/tsconfig*.json'
+      - 'discord-sound/electron-builder.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'discord-sound/src/**'
+      - 'discord-sound/package*.json'
+      - 'discord-sound/electron*.ts'
+      - 'discord-sound/tsconfig*.json'
+      - 'discord-sound/electron-builder.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: discord-sound
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            script: package:win
+            artifact: dist/*.exe
+          - os: macos-latest
+            script: package:mac
+            artifact: dist/*.dmg
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: discord-sound/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package
+        run: npm run ${{ matrix.script }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: discord-sound-player-${{ matrix.os }}
+          path: discord-sound/${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    name: Update Release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create or update latest release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: discord-sound-latest
+          name: Discord Sound Player (latest)
+          body: |
+            mainブランチの最新ビルドです。
+          files: artifacts/**
+          make_latest: true

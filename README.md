@@ -9,8 +9,8 @@ Discordで使う用のダイスボット。
 
 [README](./dice-bot/README.md)
 
-## sound-player
+## discord-sound
 
 Discordで使う用のサウンドプレイヤー。
 
-TBD。
+[README](./discord-sound/README.md)

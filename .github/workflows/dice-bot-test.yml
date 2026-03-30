@@ -4,17 +4,23 @@ on:
   push:
     branches: [main]
     paths:
-      - 'dice-bot/**'
-    path-ignore:
-      - 'dice-bot/README.md' 
-      - 'dice-bot/DEPLOYMENT.md'
+      - 'dice-bot/src/**'
+      - 'dice-bot/package*.json'
+      - 'dice-bot/tsconfig*.json'
+      - 'dice-bot/vitest.config.*'
+      - 'dice-bot/wrangler.toml'
+      - 'dice-bot/schema.sql'
+      - 'dice-bot/register-commands.ts'
   pull_request:
     branches: [main]
     paths:
-      - 'dice-bot/**'
-    path-ignore:
-      - 'dice-bot/README.md' 
-      - 'dice-bot/DEPLOYMENT.md'
+      - 'dice-bot/src/**'
+      - 'dice-bot/package*.json'
+      - 'dice-bot/tsconfig*.json'
+      - 'dice-bot/vitest.config.*'
+      - 'dice-bot/wrangler.toml'
+      - 'dice-bot/schema.sql'
+      - 'dice-bot/register-commands.ts'
 
 defaults:
   run:

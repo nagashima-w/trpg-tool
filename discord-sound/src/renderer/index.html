@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discord Sound Player</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Connection bar -->
+      <header class="connection-bar">
+        <span class="app-title">Discord Sound Player</span>
+        <div class="connection-controls">
+          <select id="guild-select">
+            <option value="">-- サーバーを選択 --</option>
+          </select>
+          <select id="channel-select">
+            <option value="">-- チャンネルを選択 --</option>
+          </select>
+          <button id="connect-btn" class="btn btn-primary">接続</button>
+          <button id="disconnect-btn" class="btn btn-danger" disabled>切断</button>
+          <span id="status-badge" class="status-badge status-disconnected">切断済み</span>
+        </div>
+      </header>
+
+      <!-- Main area -->
+      <main class="main-area">
+        <!-- Track list -->
+        <section class="track-panel">
+          <div class="panel-header">
+            <h2>トラック一覧</h2>
+          </div>
+          <div id="track-list" class="track-list">
+            <!-- Tracks rendered here -->
+          </div>
+          <div class="track-actions">
+            <button id="add-files-btn" class="btn btn-secondary">+ 追加</button>
+            <button id="add-folder-btn" class="btn btn-secondary">フォルダ一括登録</button>
+          </div>
+        </section>
+
+        <!-- Playback controls -->
+        <section class="playback-panel">
+          <div class="panel-header">
+            <h2>再生コントロール</h2>
+          </div>
+          <div class="now-playing">
+            <div class="now-playing-label">再生中:</div>
+            <div id="now-playing-name" class="now-playing-name">--</div>
+            <div class="loop-indicator">&#x1F501; ループ再生</div>
+          </div>
+          <div class="playback-buttons">
+            <button id="play-btn" class="btn btn-icon" title="再生" disabled>&#9654;</button>
+            <button id="pause-btn" class="btn btn-icon" title="一時停止" disabled>&#9646;&#9646;</button>
+            <button id="stop-btn" class="btn btn-icon" title="停止" disabled>&#9632;</button>
+          </div>
+          <div class="volume-control">
+            <label for="volume-slider">音量:</label>
+            <input type="range" id="volume-slider" min="0" max="100" value="80" />
+            <span id="volume-display">80%</span>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <button id="settings-btn" class="btn btn-ghost">&#9881; 設定</button>
+        <div class="footer-status">
+          <span id="footer-status-text">ステータス: 切断済み</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Settings modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>設定</h3>
+          <button id="modal-close-btn" class="btn btn-ghost modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="token-input">Bot トークン</label>
+            <input type="password" id="token-input" placeholder="Discord Bot Token" />
+          </div>
+          <div class="form-group">
+            <label for="default-volume-input">デフォルト音量</label>
+            <input type="number" id="default-volume-input" min="0" max="100" value="80" />
+          </div>
+          <div class="form-group form-group-checkbox">
+            <input type="checkbox" id="restore-connection-input" checked />
+            <label for="restore-connection-input">前回の接続先を復元</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="save-settings-btn" class="btn btn-primary">保存して接続</button>
+          <button id="cancel-settings-btn" class="btn btn-ghost">キャンセル</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
