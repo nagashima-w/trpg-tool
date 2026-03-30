@@ -4,9 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'dice-bot/**'
-    path-ignore:
-      - 'dice-bot/README.md'
+      - 'dice-bot/src/**'
+      - 'dice-bot/package*.json'
+      - 'dice-bot/tsconfig*.json'
+      - 'dice-bot/vitest.config.*'
+      - 'dice-bot/wrangler.toml'
+      - 'dice-bot/schema.sql'
+      - 'dice-bot/register-commands.ts'
   workflow_dispatch:
 
 defaults:
