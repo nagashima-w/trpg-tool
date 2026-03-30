@@ -1,7 +1,10 @@
 import ffmpegPath from 'ffmpeg-static';
 import { sep } from 'path';
 if (ffmpegPath) {
-  const dir = ffmpegPath.substring(0, ffmpegPath.lastIndexOf(sep));
+  // In a packaged Electron app, ffmpeg-static is unpacked from the asar archive.
+  // Replace app.asar with app.asar.unpacked so the binary can actually be executed.
+  const resolvedPath = ffmpegPath.replace(/app\.asar([/\\])/, 'app.asar.unpacked$1');
+  const dir = resolvedPath.substring(0, resolvedPath.lastIndexOf(sep));
   process.env.PATH = dir + (process.platform === 'win32' ? ';' : ':') + (process.env.PATH ?? '');
 }
 
