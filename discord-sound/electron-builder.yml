@@ -6,6 +6,7 @@ files:
   - package.json
 asarUnpack:
   - node_modules/ffmpeg-static/**
+  - node_modules/opusscript/**
 directories:
   buildResources: build
   output: dist
