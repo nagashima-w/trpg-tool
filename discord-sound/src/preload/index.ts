@@ -45,6 +45,10 @@ const electronAPI = {
     ipcRenderer.removeAllListeners('discord:forcedDisconnect');
     ipcRenderer.on('discord:forcedDisconnect', () => cb());
   },
+  onUdpBlocked: (cb: () => void): void => {
+    ipcRenderer.removeAllListeners('discord:udpBlocked');
+    ipcRenderer.on('discord:udpBlocked', () => cb());
+  },
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

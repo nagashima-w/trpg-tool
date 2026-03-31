@@ -48,6 +48,9 @@ function setupDiscordEvents(): void {
   discordManager.on('forcedDisconnect', () => {
     mainWindow?.webContents.send('discord:forcedDisconnect');
   });
+  discordManager.on('udpBlocked', () => {
+    mainWindow?.webContents.send('discord:udpBlocked');
+  });
 }
 
 function setupIpcHandlers(): void {
