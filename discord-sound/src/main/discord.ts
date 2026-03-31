@@ -27,6 +27,7 @@ import {
   entersState,
   type VoiceConnection,
   type AudioPlayer,
+  type AudioResource,
 } from '@discordjs/voice';
 import type { Guild, VoiceChannel, PlaybackState } from '../shared/types';
 
@@ -102,6 +103,18 @@ export class DiscordManager extends EventEmitter {
     this.player = createAudioPlayer();
     connection.subscribe(this.player);
     log.info('[discord] audio player created and subscribed');
+
+    // Diagnostic: report which encryption library @discordjs/voice will use.
+    for (const lib of ['sodium-native', 'libsodium-wrappers', '@noble/ciphers']) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require(lib);
+        log.info(`[discord] encryption library loaded: ${lib}`);
+        break;
+      } catch {
+        log.debug(`[discord] encryption library not available: ${lib}`);
+      }
+    }
 
     this.player.on(AudioPlayerStatus.Idle, () => {
       log.info(`[discord] player Idle (looping=${this.looping}, track=${this.currentTrackId})`);
@@ -213,15 +226,15 @@ export class DiscordManager extends EventEmitter {
     this.currentTrackId = trackId;
     this.currentFilePath = filePath;
 
-    // Spawn ffmpeg to decode the audio file and re-encode as OGG Opus.
-    // This bypasses prism-media's Node.js Opus encoder entirely, avoiding
-    // compatibility issues with opusscript/node-opus in packaged Electron apps.
+    // Spawn ffmpeg to decode the audio file and re-encode as WebM/Opus.
+    // WebM is streamable from a pipe and uses a different demuxer in
+    // @discordjs/voice compared to OGG, which rules out OGG-demuxer issues.
     // Volume is baked in here; setVolume() will restart the stream if needed.
     const args = [
       '-i', filePath,
       '-vn',                              // skip any video/image streams (e.g. embedded album art)
       '-af', `volume=${this.volume / 100}`,
-      '-f', 'ogg',
+      '-f', 'webm',
       '-c:a', 'libopus',
       '-b:a', '96k',
       '-ar', '48000',
@@ -255,12 +268,22 @@ export class DiscordManager extends EventEmitter {
 
     this.currentFfmpeg = ffmpeg;
 
-    const resource = createAudioResource(ffmpeg.stdout!, {
-      inputType: StreamType.OggOpus,
+    const resource: AudioResource = createAudioResource(ffmpeg.stdout!, {
+      inputType: StreamType.WebmOpus,
     });
 
     log.info('[discord] audio resource created, calling player.play()');
     this.player.play(resource);
+
+    // Log playbackDuration every 5s to verify Opus packets are actually being
+    // dispatched. 0ms after several seconds = demuxer not producing frames.
+    const durationTimer = setInterval(() => {
+      if (this.playbackStatus !== 'playing') {
+        clearInterval(durationTimer);
+        return;
+      }
+      log.info(`[discord] playbackDuration=${resource.playbackDuration}ms`);
+    }, 5000);
     this.playbackStatus = 'playing';
     this.emit('playbackChange', this.getState());
   }
