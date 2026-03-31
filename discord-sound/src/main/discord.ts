@@ -105,14 +105,20 @@ export class DiscordManager extends EventEmitter {
     log.info('[discord] audio player created and subscribed');
 
     // Diagnostic: report which encryption library @discordjs/voice will use.
-    for (const lib of ['sodium-native', 'libsodium-wrappers', '@noble/ciphers']) {
+    // Also check the subpath that @discordjs/voice actually imports.
+    for (const lib of [
+      'sodium-native',
+      'libsodium-wrappers',
+      '@noble/ciphers',
+      '@noble/ciphers/chacha',
+    ]) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         require(lib);
         log.info(`[discord] encryption library loaded: ${lib}`);
-        break;
-      } catch {
-        log.debug(`[discord] encryption library not available: ${lib}`);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        log.warn(`[discord] encryption library not available: ${lib} — ${msg}`);
       }
     }
 
