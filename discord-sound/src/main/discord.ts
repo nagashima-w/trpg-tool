@@ -1,14 +1,18 @@
 import ffmpegPath from 'ffmpeg-static';
-import { sep } from 'path';
+import { dirname } from 'path';
 import { spawn, type ChildProcess } from 'child_process';
+import log from 'electron-log/main';
 
 // Resolve ffmpeg binary path. In a packaged Electron app the binary is unpacked
 // from the asar archive, so replace app.asar with app.asar.unpacked.
 let ffmpegBin = 'ffmpeg';
 if (ffmpegPath) {
   ffmpegBin = ffmpegPath.replace(/app\.asar([/\\])/, 'app.asar.unpacked$1');
-  const dir = ffmpegBin.substring(0, ffmpegBin.lastIndexOf(sep));
+  const dir = dirname(ffmpegBin);
   process.env.PATH = dir + (process.platform === 'win32' ? ';' : ':') + (process.env.PATH ?? '');
+  log.info(`[discord] ffmpeg resolved: ${ffmpegBin}`);
+} else {
+  log.warn('[discord] ffmpeg-static returned null, falling back to system ffmpeg');
 }
 
 import { EventEmitter } from 'events';
@@ -39,6 +43,7 @@ export class DiscordManager extends EventEmitter {
   private isDestroyingIntentionally = false;
 
   async login(token: string): Promise<void> {
+    log.info('[discord] login called');
     if (this.client) {
       this.client.destroy();
       this.client = null;
@@ -48,6 +53,7 @@ export class DiscordManager extends EventEmitter {
     });
     await client.login(token);
     this.client = client;
+    log.info('[discord] login succeeded');
   }
 
   getGuilds(): Guild[] {
@@ -66,6 +72,7 @@ export class DiscordManager extends EventEmitter {
 
   // quiet=true suppresses the intermediate 'connecting' event (used for startup auto-connect)
   async connect(guildId: string, channelId: string, quiet = false): Promise<void> {
+    log.info(`[discord] connect guildId=${guildId} channelId=${channelId} quiet=${quiet}`);
     if (!this.client) throw new Error('Not logged in');
     const guild = this.client.guilds.cache.get(guildId);
     if (!guild) throw new Error('Guild not found');
@@ -80,7 +87,9 @@ export class DiscordManager extends EventEmitter {
 
     try {
       await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
+      log.info('[discord] voice connection ready');
     } catch (err) {
+      log.error('[discord] voice connection failed:', err);
       // Prevent the Destroyed event from triggering _handleForcedDisconnect
       // (which would wrongly show the "kicked from channel" alert on a failed connect).
       this.isDestroyingIntentionally = true;
@@ -92,8 +101,10 @@ export class DiscordManager extends EventEmitter {
     this.connection = connection;
     this.player = createAudioPlayer();
     connection.subscribe(this.player);
+    log.info('[discord] audio player created and subscribed');
 
     this.player.on(AudioPlayerStatus.Idle, () => {
+      log.info(`[discord] player Idle (looping=${this.looping}, track=${this.currentTrackId})`);
       if (this.looping && this.currentTrackId && this.currentFilePath) {
         this.play(this.currentTrackId, this.currentFilePath);
       } else {
@@ -104,18 +115,38 @@ export class DiscordManager extends EventEmitter {
       }
     });
 
+    this.player.on(AudioPlayerStatus.Playing, () => {
+      log.info('[discord] player Playing');
+    });
+
+    this.player.on(AudioPlayerStatus.Buffering, () => {
+      log.info('[discord] player Buffering');
+    });
+
+    this.player.on(AudioPlayerStatus.AutoPaused, () => {
+      log.warn('[discord] player AutoPaused (no subscribers in voice channel?)');
+    });
+
+    this.player.on('error', (err) => {
+      log.error('[discord] player error:', err);
+    });
+
     connection.on(VoiceConnectionStatus.Disconnected, async () => {
+      log.warn('[discord] connection Disconnected, attempting reconnect...');
       try {
         await Promise.race([
           entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
           entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
         ]);
+        log.info('[discord] reconnect signalling/connecting started');
       } catch {
+        log.warn('[discord] reconnect timed out, destroying connection');
         connection.destroy();
       }
     });
 
     connection.on(VoiceConnectionStatus.Destroyed, () => {
+      log.info(`[discord] connection Destroyed (intentional=${this.isDestroyingIntentionally})`);
       if (this.isDestroyingIntentionally) {
         this.isDestroyingIntentionally = false;
         return;
@@ -127,6 +158,7 @@ export class DiscordManager extends EventEmitter {
   }
 
   disconnect(): void {
+    log.info('[discord] disconnect called');
     this._resetState();
     if (this.connection) {
       this.isDestroyingIntentionally = true;
@@ -139,6 +171,7 @@ export class DiscordManager extends EventEmitter {
 
   private _killFfmpeg(): void {
     if (this.currentFfmpeg) {
+      log.info('[discord] killing previous ffmpeg process');
       try { this.currentFfmpeg.kill(); } catch { /* already exited */ }
       this.currentFfmpeg = null;
     }
@@ -156,6 +189,7 @@ export class DiscordManager extends EventEmitter {
   }
 
   private _handleForcedDisconnect(): void {
+    log.warn('[discord] forced disconnect detected');
     this._resetState();
     this.connection = null;
     this.emit('statusChange', 'disconnected');
@@ -164,7 +198,12 @@ export class DiscordManager extends EventEmitter {
   }
 
   play(trackId: string, filePath: string): void {
-    if (!this.player || !this.connection) return;
+    if (!this.player || !this.connection) {
+      log.warn(`[discord] play() called but player=${!!this.player} connection=${!!this.connection}`);
+      return;
+    }
+
+    log.info(`[discord] play trackId=${trackId} file=${filePath}`);
 
     // Kill any previously running ffmpeg process before starting a new one.
     this._killFfmpeg();
@@ -176,7 +215,7 @@ export class DiscordManager extends EventEmitter {
     // This bypasses prism-media's Node.js Opus encoder entirely, avoiding
     // compatibility issues with opusscript/node-opus in packaged Electron apps.
     // Volume is baked in here; setVolume() will restart the stream if needed.
-    const ffmpeg = spawn(ffmpegBin, [
+    const args = [
       '-i', filePath,
       '-af', `volume=${this.volume / 100}`,
       '-f', 'ogg',
@@ -185,7 +224,31 @@ export class DiscordManager extends EventEmitter {
       '-ar', '48000',
       '-ac', '2',
       'pipe:1',
-    ], { stdio: ['ignore', 'pipe', 'ignore'] });
+    ];
+    log.info(`[discord] spawning ffmpeg: ${ffmpegBin} ${args.join(' ')}`);
+
+    const ffmpeg = spawn(ffmpegBin, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+
+    ffmpeg.on('error', (err) => {
+      log.error('[discord] ffmpeg spawn error:', err);
+    });
+
+    ffmpeg.stderr!.on('data', (data: Buffer) => {
+      // ffmpeg writes progress/info to stderr; log at debug level to avoid noise
+      log.debug(`[ffmpeg stderr] ${data.toString().trimEnd()}`);
+    });
+
+    ffmpeg.on('close', (code, signal) => {
+      log.info(`[discord] ffmpeg exited code=${code} signal=${signal}`);
+    });
+
+    let firstData = true;
+    ffmpeg.stdout!.on('data', () => {
+      if (firstData) {
+        log.info('[discord] ffmpeg stdout: first data chunk received');
+        firstData = false;
+      }
+    });
 
     this.currentFfmpeg = ffmpeg;
 
@@ -193,12 +256,14 @@ export class DiscordManager extends EventEmitter {
       inputType: StreamType.OggOpus,
     });
 
+    log.info('[discord] audio resource created, calling player.play()');
     this.player.play(resource);
     this.playbackStatus = 'playing';
     this.emit('playbackChange', this.getState());
   }
 
   pause(): void {
+    log.info('[discord] pause');
     if (this.player && this.playbackStatus === 'playing') {
       this.player.pause();
       this.playbackStatus = 'paused';
@@ -207,6 +272,7 @@ export class DiscordManager extends EventEmitter {
   }
 
   resume(): void {
+    log.info('[discord] resume');
     if (this.player && this.playbackStatus === 'paused') {
       this.player.unpause();
       this.playbackStatus = 'playing';
@@ -215,6 +281,7 @@ export class DiscordManager extends EventEmitter {
   }
 
   stop(): void {
+    log.info('[discord] stop');
     this._killFfmpeg();
     this.currentTrackId = null;
     this.currentFilePath = null;
@@ -226,6 +293,7 @@ export class DiscordManager extends EventEmitter {
   }
 
   setVolume(volume: number): void {
+    log.info(`[discord] setVolume ${volume}`);
     this.volume = volume;
     // Restart stream with the new volume baked into ffmpeg.
     // This causes a brief restart but applies the change immediately.
@@ -244,6 +312,7 @@ export class DiscordManager extends EventEmitter {
   }
 
   destroy(): void {
+    log.info('[discord] destroy');
     this.disconnect();
     if (this.client) {
       this.client.destroy();
