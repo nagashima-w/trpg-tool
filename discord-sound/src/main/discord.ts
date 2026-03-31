@@ -1,15 +1,17 @@
 import ffmpegPath from 'ffmpeg-static';
 import { sep } from 'path';
+import { spawn, type ChildProcess } from 'child_process';
+
+// Resolve ffmpeg binary path. In a packaged Electron app the binary is unpacked
+// from the asar archive, so replace app.asar with app.asar.unpacked.
+let ffmpegBin = 'ffmpeg';
 if (ffmpegPath) {
-  // In a packaged Electron app, ffmpeg-static is unpacked from the asar archive.
-  // Replace app.asar with app.asar.unpacked so the binary can actually be executed.
-  const resolvedPath = ffmpegPath.replace(/app\.asar([/\\])/, 'app.asar.unpacked$1');
-  const dir = resolvedPath.substring(0, resolvedPath.lastIndexOf(sep));
+  ffmpegBin = ffmpegPath.replace(/app\.asar([/\\])/, 'app.asar.unpacked$1');
+  const dir = ffmpegBin.substring(0, ffmpegBin.lastIndexOf(sep));
   process.env.PATH = dir + (process.platform === 'win32' ? ';' : ':') + (process.env.PATH ?? '');
 }
 
 import { EventEmitter } from 'events';
-import { createReadStream } from 'fs';
 import { Client, GatewayIntentBits } from 'discord.js';
 import {
   joinVoiceChannel,
@@ -21,7 +23,6 @@ import {
   entersState,
   type VoiceConnection,
   type AudioPlayer,
-  type AudioResource,
 } from '@discordjs/voice';
 import type { Guild, VoiceChannel, PlaybackState } from '../shared/types';
 
@@ -29,9 +30,9 @@ export class DiscordManager extends EventEmitter {
   private client: Client | null = null;
   private connection: VoiceConnection | null = null;
   private player: AudioPlayer | null = null;
-  private currentResource: AudioResource | null = null;
   private currentTrackId: string | null = null;
   private currentFilePath: string | null = null;
+  private currentFfmpeg: ChildProcess | null = null;
   private volume: number = 80;
   private looping: boolean = true;
   private playbackStatus: 'idle' | 'playing' | 'paused' = 'idle';
@@ -136,12 +137,19 @@ export class DiscordManager extends EventEmitter {
     this.emit('playbackChange', this.getState());
   }
 
+  private _killFfmpeg(): void {
+    if (this.currentFfmpeg) {
+      try { this.currentFfmpeg.kill(); } catch { /* already exited */ }
+      this.currentFfmpeg = null;
+    }
+  }
+
   private _resetState(): void {
+    this._killFfmpeg();
     if (this.player) {
       this.player.stop(true);
       this.player = null;
     }
-    this.currentResource = null;
     this.currentTrackId = null;
     this.currentFilePath = null;
     this.playbackStatus = 'idle';
@@ -158,18 +166,32 @@ export class DiscordManager extends EventEmitter {
   play(trackId: string, filePath: string): void {
     if (!this.player || !this.connection) return;
 
+    // Kill any previously running ffmpeg process before starting a new one.
+    this._killFfmpeg();
+
     this.currentTrackId = trackId;
     this.currentFilePath = filePath;
 
-    // Use createReadStream so the file content is piped to ffmpeg via stdin.
-    // Passing a file path directly to ffmpeg as a CLI argument can silently fail
-    // on Windows when the path contains non-ASCII characters (e.g. Japanese).
-    const resource = createAudioResource(createReadStream(filePath), {
-      inputType: StreamType.Arbitrary,
-      inlineVolume: true,
+    // Spawn ffmpeg to decode the audio file and re-encode as OGG Opus.
+    // This bypasses prism-media's Node.js Opus encoder entirely, avoiding
+    // compatibility issues with opusscript/node-opus in packaged Electron apps.
+    // Volume is baked in here; setVolume() will restart the stream if needed.
+    const ffmpeg = spawn(ffmpegBin, [
+      '-i', filePath,
+      '-af', `volume=${this.volume / 100}`,
+      '-f', 'ogg',
+      '-c:a', 'libopus',
+      '-b:a', '96k',
+      '-ar', '48000',
+      '-ac', '2',
+      'pipe:1',
+    ], { stdio: ['ignore', 'pipe', 'ignore'] });
+
+    this.currentFfmpeg = ffmpeg;
+
+    const resource = createAudioResource(ffmpeg.stdout!, {
+      inputType: StreamType.OggOpus,
     });
-    resource.volume?.setVolume(this.volume / 100);
-    this.currentResource = resource;
 
     this.player.play(resource);
     this.playbackStatus = 'playing';
@@ -193,20 +215,22 @@ export class DiscordManager extends EventEmitter {
   }
 
   stop(): void {
+    this._killFfmpeg();
     this.currentTrackId = null;
     this.currentFilePath = null;
     if (this.player) {
       this.player.stop(true);
     }
-    this.currentResource = null;
     this.playbackStatus = 'idle';
     this.emit('playbackChange', this.getState());
   }
 
   setVolume(volume: number): void {
     this.volume = volume;
-    if (this.currentResource?.volume) {
-      this.currentResource.volume.setVolume(volume / 100);
+    // Restart stream with the new volume baked into ffmpeg.
+    // This causes a brief restart but applies the change immediately.
+    if (this.playbackStatus === 'playing' && this.currentTrackId && this.currentFilePath) {
+      this.play(this.currentTrackId, this.currentFilePath);
     }
     this.emit('playbackChange', this.getState());
   }
