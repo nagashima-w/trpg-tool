@@ -1,3 +1,9 @@
+import log from 'electron-log/main';
+log.initialize();
+log.transports.file.level = 'debug';
+log.transports.console.level = 'debug';
+log.info('[app] starting up');
+
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { join } from 'path';
 import { SettingsManager } from './settings';
