@@ -178,14 +178,16 @@ export class DiscordManager extends EventEmitter {
   }
 
   private _resetState(): void {
+    // Clear track info before stopping the player so that the Idle event
+    // handler does not trigger a looping restart mid-teardown.
+    this.currentTrackId = null;
+    this.currentFilePath = null;
+    this.playbackStatus = 'idle';
     this._killFfmpeg();
     if (this.player) {
       this.player.stop(true);
       this.player = null;
     }
-    this.currentTrackId = null;
-    this.currentFilePath = null;
-    this.playbackStatus = 'idle';
   }
 
   private _handleForcedDisconnect(): void {
@@ -217,6 +219,7 @@ export class DiscordManager extends EventEmitter {
     // Volume is baked in here; setVolume() will restart the stream if needed.
     const args = [
       '-i', filePath,
+      '-vn',                              // skip any video/image streams (e.g. embedded album art)
       '-af', `volume=${this.volume / 100}`,
       '-f', 'ogg',
       '-c:a', 'libopus',
