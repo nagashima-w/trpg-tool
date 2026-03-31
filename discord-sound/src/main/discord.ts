@@ -136,6 +136,13 @@ export class DiscordManager extends EventEmitter {
 
     this.player.on(AudioPlayerStatus.Playing, () => {
       log.info('[discord] player Playing');
+      // Log UDP/WS ping every 5s to verify UDP packets are reaching Discord.
+      // udp=undefined means Discord's voice server never responded to our pings.
+      const pingTimer = setInterval(() => {
+        if (!this.connection) { clearInterval(pingTimer); return; }
+        const { udp, ws } = this.connection.ping;
+        log.info(`[discord] ping: udp=${udp ?? 'N/A'}ms ws=${ws ?? 'N/A'}ms`);
+      }, 5000);
     });
 
     this.player.on(AudioPlayerStatus.Buffering, () => {
