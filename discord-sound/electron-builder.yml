@@ -9,6 +9,9 @@ asarUnpack:
 directories:
   buildResources: build
   output: dist
+nsis:
+  perMachine: true
+  include: build/installer.nsh
 win:
   target: nsis
 mac:

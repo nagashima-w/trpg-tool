@@ -31,6 +31,7 @@ export interface ElectronAPI {
   onStatusChange: (cb: (status: ConnectionStatus) => void) => void;
   onPlaybackChange: (cb: (state: PlaybackState) => void) => void;
   onForcedDisconnect: (cb: () => void) => void;
+  onUdpBlocked: (cb: () => void) => void;
 }
 
 declare global {

@@ -138,10 +138,18 @@ export class DiscordManager extends EventEmitter {
       log.info('[discord] player Playing');
       // Log UDP/WS ping every 5s to verify UDP packets are reaching Discord.
       // udp=undefined means Discord's voice server never responded to our pings.
+      let pingCount = 0;
       const pingTimer = setInterval(() => {
         if (!this.connection) { clearInterval(pingTimer); return; }
         const { udp, ws } = this.connection.ping;
         log.info(`[discord] ping: udp=${udp ?? 'N/A'}ms ws=${ws ?? 'N/A'}ms`);
+        pingCount++;
+        // After 20 s (4 intervals): if WS works but UDP is still N/A,
+        // Windows Firewall is very likely blocking inbound UDP responses.
+        if (pingCount === 4 && udp === undefined && ws !== undefined) {
+          log.warn('[discord] UDP ping N/A after 20 s — Windows Firewall may be blocking voice UDP');
+          this.emit('udpBlocked');
+        }
       }, 5000);
     });
 

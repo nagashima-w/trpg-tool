@@ -359,6 +359,16 @@ api.onForcedDisconnect(() => {
   alert('Discord ボイスチャンネルから切断されました。')
 })
 
+api.onUdpBlocked(() => {
+  alert(
+    '音声 UDP が接続できません。\n\n' +
+    'Windows Defender ファイアウォールがこのアプリの通信をブロックしている可能性があります。\n\n' +
+    '解決方法:\n' +
+    '1. アプリを一度アンインストールして再インストールしてください（インストール時にファイアウォール例外が自動登録されます）。\n' +
+    '2. または「Windowsセキュリティ」→「ファイアウォールとネットワーク保護」→「アプリをファイアウォール経由で許可する」から「Discord Sound Player」を許可してください。'
+  )
+})
+
 // Close modal on overlay click
 settingsModal.addEventListener('click', (e) => {
   if (e.target === settingsModal) {
