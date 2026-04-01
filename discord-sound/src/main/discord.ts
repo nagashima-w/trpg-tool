@@ -43,6 +43,8 @@ export class DiscordManager extends EventEmitter {
   private looping: boolean = true;
   private playbackStatus: 'idle' | 'playing' | 'paused' = 'idle';
   private isDestroyingIntentionally = false;
+  private seekOffset = 0;        // absolute file position where current resource started (ms)
+  private _isRestarting = false; // suppresses Idle-loop during intentional player restarts
 
   async login(token: string): Promise<void> {
     log.info('[discord] login called');
@@ -130,6 +132,10 @@ export class DiscordManager extends EventEmitter {
     }
 
     this.player.on(AudioPlayerStatus.Idle, () => {
+      // Suppress spurious Idle events that occur during intentional player
+      // restarts (volume change / seek). _isRestarting is set true just before
+      // player.stop(true) and cleared immediately after.
+      if (this._isRestarting) return;
       log.info(`[discord] player Idle (looping=${this.looping}, track=${this.currentTrackId})`);
       if (this.looping && this.currentTrackId && this.currentFilePath) {
         this.play(this.currentTrackId, this.currentFilePath);
@@ -287,6 +293,7 @@ export class DiscordManager extends EventEmitter {
     });
 
     this.currentFfmpeg = ffmpeg;
+    this.seekOffset = seekMs;
 
     const resource: AudioResource = createAudioResource(ffmpeg.stdout!, {
       inputType: StreamType.WebmOpus,
@@ -294,6 +301,14 @@ export class DiscordManager extends EventEmitter {
     this.currentResource = resource;
 
     log.info('[discord] audio resource created, calling player.play()');
+    // Stop the player first so it enters proper Buffering state for the new
+    // resource. Calling player.play() while in Playing state keeps it in
+    // Playing state, which causes missed-frame Idle transitions before the new
+    // ffmpeg has produced any output. The _isRestarting flag suppresses the
+    // Idle loop-restart handler during this intentional stop.
+    this._isRestarting = true;
+    this.player.stop(true);
+    this._isRestarting = false;
     this.player.play(resource);
 
     // Log playbackDuration every 5s to verify Opus packets are actually being
@@ -345,8 +360,10 @@ export class DiscordManager extends EventEmitter {
     // Restart ffmpeg with the new volume, seeking to the current position
     // so the track does not reset to the beginning.
     if (this.playbackStatus === 'playing' && this.currentTrackId && this.currentFilePath) {
-      const seekMs = this.currentResource?.playbackDuration ?? 0;
-      log.info(`[discord] setVolume seeking to ${seekMs}ms (resource=${!!this.currentResource})`);
+      // Use absolute file position = seekOffset (where current resource started)
+      // + playbackDuration (how far into the current resource we are).
+      const seekMs = this.seekOffset + (this.currentResource?.playbackDuration ?? 0);
+      log.info(`[discord] setVolume seeking to ${seekMs}ms (offset=${this.seekOffset} resource=${!!this.currentResource})`);
       this.play(this.currentTrackId, this.currentFilePath, seekMs);
     }
     this.emit('playbackChange', this.getState());
