@@ -41,6 +41,10 @@ const electronAPI = {
     ipcRenderer.removeAllListeners('discord:playbackChange');
     ipcRenderer.on('discord:playbackChange', (_event, state) => cb(state));
   },
+  onLoggedIn: (cb: () => void): void => {
+    ipcRenderer.removeAllListeners('discord:loggedIn');
+    ipcRenderer.on('discord:loggedIn', () => cb());
+  },
   onForcedDisconnect: (cb: () => void): void => {
     ipcRenderer.removeAllListeners('discord:forcedDisconnect');
     ipcRenderer.on('discord:forcedDisconnect', () => cb());

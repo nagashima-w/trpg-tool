@@ -330,6 +330,19 @@ saveSettingsBtn.addEventListener('click', async () => {
 })
 
 // IPC event listeners
+// Reload guild list as soon as the bot finishes logging in (guilds are cached).
+// This covers the non-auto-connect case where no 'connected' event fires.
+api.onLoggedIn(async () => {
+  await loadGuilds()
+  if (savedLastGuildId) {
+    guildSelect.value = savedLastGuildId
+    await loadChannels(savedLastGuildId)
+    if (savedLastChannelId) {
+      channelSelect.value = savedLastChannelId
+    }
+  }
+})
+
 api.onStatusChange(async (status: ConnectionStatus) => {
   const previous = currentStatus
   currentStatus = status

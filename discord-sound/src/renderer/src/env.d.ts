@@ -28,6 +28,7 @@ export interface ElectronAPI {
   tracksRename: (id: string, name: string) => Promise<void>;
 
   // Events
+  onLoggedIn: (cb: () => void) => void;
   onStatusChange: (cb: (status: ConnectionStatus) => void) => void;
   onPlaybackChange: (cb: (state: PlaybackState) => void) => void;
   onForcedDisconnect: (cb: () => void) => void;

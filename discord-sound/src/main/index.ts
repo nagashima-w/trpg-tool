@@ -45,6 +45,9 @@ function setupDiscordEvents(): void {
   discordManager.on('playbackChange', (state) => {
     mainWindow?.webContents.send('discord:playbackChange', state);
   });
+  discordManager.on('loggedIn', () => {
+    mainWindow?.webContents.send('discord:loggedIn');
+  });
   discordManager.on('forcedDisconnect', () => {
     mainWindow?.webContents.send('discord:forcedDisconnect');
   });
