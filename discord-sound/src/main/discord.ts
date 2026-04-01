@@ -104,6 +104,12 @@ export class DiscordManager extends EventEmitter {
     connection.subscribe(this.player);
     log.info('[discord] audio player created and subscribed');
 
+    // Capture @discordjs/voice internal debug logs (IP discovery, encryption,
+    // UDP socket state, etc.) to help diagnose UDP connectivity issues.
+    connection.on('debug', (message: string) => {
+      log.debug(`[voice-debug] ${message}`);
+    });
+
     // Diagnostic: report which encryption library @discordjs/voice will use.
     // Also check the subpath that @discordjs/voice actually imports.
     for (const lib of [
@@ -138,20 +144,25 @@ export class DiscordManager extends EventEmitter {
       log.info('[discord] player Playing');
       // Log UDP/WS ping every 5s to verify UDP packets are reaching Discord.
       // udp=undefined means Discord's voice server never responded to our pings.
-      let pingCount = 0;
       const pingTimer = setInterval(() => {
         if (!this.connection) { clearInterval(pingTimer); return; }
         const { udp, ws } = this.connection.ping;
         log.info(`[discord] ping: udp=${udp ?? 'N/A'}ms ws=${ws ?? 'N/A'}ms`);
-        pingCount++;
-        // After 20 s (4 intervals): if WS works but UDP is still N/A,
-        // Windows Firewall is very likely blocking inbound UDP responses.
-        if (pingCount === 4 && udp === undefined && ws !== undefined) {
-          log.warn('[discord] UDP ping N/A after 20 s — Windows Firewall may be blocking voice UDP');
-          this.emit('udpBlocked');
-        }
       }, 5000);
     });
+
+    // Check UDP connectivity 30 s after the connection is established
+    // (independent of playback state). WS working + UDP N/A = very likely
+    // a firewall issue.
+    setTimeout(() => {
+      if (!this.connection) return;
+      const { udp, ws } = this.connection.ping;
+      log.info(`[discord] 30 s UDP check: udp=${udp ?? 'N/A'}ms ws=${ws ?? 'N/A'}ms`);
+      if (udp === undefined && ws !== undefined) {
+        log.warn('[discord] UDP ping N/A at 30 s — possible firewall block');
+        this.emit('udpBlocked');
+      }
+    }, 30_000);
 
     this.player.on(AudioPlayerStatus.Buffering, () => {
       log.info('[discord] player Buffering');
