@@ -104,11 +104,6 @@ export class DiscordManager extends EventEmitter {
     connection.subscribe(this.player);
     log.info('[discord] audio player created and subscribed');
 
-    // Capture @discordjs/voice internal debug logs (IP discovery, encryption,
-    // UDP socket state, etc.) to help diagnose UDP connectivity issues.
-    connection.on('debug', (message: string) => {
-      log.debug(`[voice-debug] ${message}`);
-    });
 
     // Diagnostic: report which encryption library @discordjs/voice will use.
     // Also check the subpath that @discordjs/voice actually imports.
