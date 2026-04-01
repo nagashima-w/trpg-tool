@@ -38,6 +38,7 @@ export class DiscordManager extends EventEmitter {
   private currentTrackId: string | null = null;
   private currentFilePath: string | null = null;
   private currentFfmpeg: ChildProcess | null = null;
+  private currentResource: AudioResource | null = null;
   private volume: number = 80;
   private looping: boolean = true;
   private playbackStatus: 'idle' | 'playing' | 'paused' = 'idle';
@@ -52,7 +53,11 @@ export class DiscordManager extends EventEmitter {
     const client = new Client({
       intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
     });
+    // Wait for the ready event so that all GUILD_CREATE events have been
+    // processed and client.guilds.cache is fully populated before we return.
+    const readyPromise = new Promise<void>(resolve => client.once('ready', () => resolve()));
     await client.login(token);
+    await readyPromise;
     this.client = client;
     log.info('[discord] login succeeded');
   }
@@ -208,6 +213,7 @@ export class DiscordManager extends EventEmitter {
     // handler does not trigger a looping restart mid-teardown.
     this.currentTrackId = null;
     this.currentFilePath = null;
+    this.currentResource = null;
     this.playbackStatus = 'idle';
     this._killFfmpeg();
     if (this.player) {
@@ -225,25 +231,25 @@ export class DiscordManager extends EventEmitter {
     this.emit('forcedDisconnect');
   }
 
-  play(trackId: string, filePath: string): void {
+  play(trackId: string, filePath: string, seekMs = 0): void {
     if (!this.player || !this.connection) {
       log.warn(`[discord] play() called but player=${!!this.player} connection=${!!this.connection}`);
       return;
     }
 
-    log.info(`[discord] play trackId=${trackId} file=${filePath}`);
+    log.info(`[discord] play trackId=${trackId} file=${filePath} seekMs=${seekMs}`);
 
     // Kill any previously running ffmpeg process before starting a new one.
     this._killFfmpeg();
 
     this.currentTrackId = trackId;
     this.currentFilePath = filePath;
+    this.currentResource = null;
 
     // Spawn ffmpeg to decode the audio file and re-encode as WebM/Opus.
-    // WebM is streamable from a pipe and uses a different demuxer in
-    // @discordjs/voice compared to OGG, which rules out OGG-demuxer issues.
-    // Volume is baked in here; setVolume() will restart the stream if needed.
+    // -ss before -i: fast keyframe seek when resuming after a volume change.
     const args = [
+      ...(seekMs > 0 ? ['-ss', String(seekMs / 1000)] : []),
       '-i', filePath,
       '-vn',                              // skip any video/image streams (e.g. embedded album art)
       '-af', `volume=${this.volume / 100}`,
@@ -284,6 +290,7 @@ export class DiscordManager extends EventEmitter {
     const resource: AudioResource = createAudioResource(ffmpeg.stdout!, {
       inputType: StreamType.WebmOpus,
     });
+    this.currentResource = resource;
 
     log.info('[discord] audio resource created, calling player.play()');
     this.player.play(resource);
@@ -334,10 +341,11 @@ export class DiscordManager extends EventEmitter {
   setVolume(volume: number): void {
     log.info(`[discord] setVolume ${volume}`);
     this.volume = volume;
-    // Restart stream with the new volume baked into ffmpeg.
-    // This causes a brief restart but applies the change immediately.
+    // Restart ffmpeg with the new volume, seeking to the current position
+    // so the track does not reset to the beginning.
     if (this.playbackStatus === 'playing' && this.currentTrackId && this.currentFilePath) {
-      this.play(this.currentTrackId, this.currentFilePath);
+      const seekMs = this.currentResource?.playbackDuration ?? 0;
+      this.play(this.currentTrackId, this.currentFilePath, seekMs);
     }
     this.emit('playbackChange', this.getState());
   }
