@@ -60,6 +60,7 @@ export class DiscordManager extends EventEmitter {
     await readyPromise;
     this.client = client;
     log.info('[discord] login succeeded');
+    this.emit('loggedIn');
   }
 
   getGuilds(): Guild[] {
@@ -345,6 +346,7 @@ export class DiscordManager extends EventEmitter {
     // so the track does not reset to the beginning.
     if (this.playbackStatus === 'playing' && this.currentTrackId && this.currentFilePath) {
       const seekMs = this.currentResource?.playbackDuration ?? 0;
+      log.info(`[discord] setVolume seeking to ${seekMs}ms (resource=${!!this.currentResource})`);
       this.play(this.currentTrackId, this.currentFilePath, seekMs);
     }
     this.emit('playbackChange', this.getState());
