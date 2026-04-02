@@ -226,7 +226,7 @@ async function routeCommand(
       const result = await handleSession(env.DB, userId, guildId, args)
       return messageResponse(result.message, result.ephemeral)
     }
-    case 'help': {
+    case 'dicehelp': {
       const result = handleHelp()
       return messageResponse(result.message, result.ephemeral)
     }

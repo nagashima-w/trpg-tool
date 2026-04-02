@@ -65,7 +65,7 @@ const commands = [
     ],
   },
   {
-    name: 'help',
+    name: 'dicehelp',
     description: 'コマンドの使い方を表示する',
   },
   {
