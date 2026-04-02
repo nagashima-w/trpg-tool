@@ -198,6 +198,19 @@ select:focus {
   background-color: var(--track-hover);
 }
 
+.track-item[draggable="true"] {
+  cursor: grab;
+}
+
+.track-item.dragging {
+  opacity: 0.4;
+}
+
+.track-item.drag-over {
+  border-top: 2px solid var(--accent);
+  margin-top: -1px;
+}
+
 .track-item.selected {
   background-color: var(--track-selected);
 }
@@ -273,10 +286,41 @@ select:focus {
   white-space: nowrap;
 }
 
-.loop-indicator {
+.loop-mode-control {
+  margin-top: 6px;
+}
+
+.loop-mode-control select {
+  width: 100%;
   font-size: 12px;
+  padding: 3px 5px;
+  max-width: none;
+  background-color: var(--bg-primary);
   color: var(--accent);
-  margin-top: 4px;
+  border-color: var(--bg-tertiary);
+}
+
+/* ---- Seek bar ---- */
+.seek-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-display {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+  white-space: nowrap;
+}
+
+.time-display:last-child {
+  text-align: right;
+}
+
+.seek-control input[type="range"] {
+  flex: 1;
 }
 
 .playback-buttons {

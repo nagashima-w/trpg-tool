@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS: Settings = {
   lastGuildId: '',
   lastChannelId: '',
   restoreLastConnection: false,
+  loopMode: 'single',
 };
 
 export class SettingsManager {

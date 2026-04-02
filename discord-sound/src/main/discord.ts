@@ -5,7 +5,7 @@ import log from 'electron-log/main';
 
 // Resolve ffmpeg binary path. In a packaged Electron app the binary is unpacked
 // from the asar archive, so replace app.asar with app.asar.unpacked.
-let ffmpegBin = 'ffmpeg';
+export let ffmpegBin = 'ffmpeg';
 if (ffmpegPath) {
   ffmpegBin = ffmpegPath.replace(/app\.asar([/\\])/, 'app.asar.unpacked$1');
   const dir = dirname(ffmpegBin);
@@ -29,7 +29,7 @@ import {
   type AudioPlayer,
   type AudioResource,
 } from '@discordjs/voice';
-import type { Guild, VoiceChannel, PlaybackState } from '../shared/types';
+import type { Guild, VoiceChannel, PlaybackState, LoopMode } from '../shared/types';
 
 export class DiscordManager extends EventEmitter {
   private client: Client | null = null;
@@ -40,7 +40,9 @@ export class DiscordManager extends EventEmitter {
   private currentFfmpeg: ChildProcess | null = null;
   private currentResource: AudioResource | null = null;
   private volume: number = 80;
-  private looping: boolean = true;
+  private loopMode: LoopMode = 'single';
+  private durationMs = 0;
+  private positionTimer: NodeJS.Timeout | null = null;
   private playbackStatus: 'idle' | 'playing' | 'paused' = 'idle';
   private isDestroyingIntentionally = false;
   private seekOffset = 0;        // absolute file position where current resource started (ms)
@@ -136,13 +138,20 @@ export class DiscordManager extends EventEmitter {
       // restarts (volume change / seek). _isRestarting is set true just before
       // player.stop(true) and cleared immediately after.
       if (this._isRestarting) return;
-      log.info(`[discord] player Idle (looping=${this.looping}, track=${this.currentTrackId})`);
-      if (this.looping && this.currentTrackId && this.currentFilePath) {
-        this.play(this.currentTrackId, this.currentFilePath);
+      log.info(`[discord] player Idle (loopMode=${this.loopMode}, track=${this.currentTrackId})`);
+      if (this.loopMode === 'single' && this.currentTrackId && this.currentFilePath) {
+        this.play(this.currentTrackId, this.currentFilePath, 0, this.durationMs);
+      } else if (this.loopMode === 'playlist' && this.currentTrackId) {
+        const endedId = this.currentTrackId;
+        this.currentTrackId = null;
+        this.currentFilePath = null;
+        this.stopPositionTimer();
+        this.emit('trackEnded', endedId);
       } else {
         this.playbackStatus = 'idle';
         this.currentTrackId = null;
         this.currentFilePath = null;
+        this.stopPositionTimer();
         this.emit('playbackChange', this.getState());
       }
     });
@@ -222,6 +231,7 @@ export class DiscordManager extends EventEmitter {
     this.currentFilePath = null;
     this.currentResource = null;
     this.playbackStatus = 'idle';
+    this.stopPositionTimer();
     this._killFfmpeg();
     if (this.player) {
       this.player.stop(true);
@@ -238,13 +248,34 @@ export class DiscordManager extends EventEmitter {
     this.emit('forcedDisconnect');
   }
 
-  play(trackId: string, filePath: string, seekMs = 0): void {
+  private startPositionTimer(): void {
+    this.stopPositionTimer();
+    this.positionTimer = setInterval(() => {
+      this.emit('positionUpdate', this.getPosition());
+    }, 500);
+  }
+
+  private stopPositionTimer(): void {
+    if (this.positionTimer) {
+      clearInterval(this.positionTimer);
+      this.positionTimer = null;
+    }
+  }
+
+  getPosition(): { positionMs: number; durationMs: number } {
+    return {
+      positionMs: this.seekOffset + (this.currentResource?.playbackDuration ?? 0),
+      durationMs: this.durationMs,
+    };
+  }
+
+  play(trackId: string, filePath: string, seekMs = 0, durationMs = 0): void {
     if (!this.player || !this.connection) {
       log.warn(`[discord] play() called but player=${!!this.player} connection=${!!this.connection}`);
       return;
     }
 
-    log.info(`[discord] play trackId=${trackId} file=${filePath} seekMs=${seekMs}`);
+    log.info(`[discord] play trackId=${trackId} file=${filePath} seekMs=${seekMs} durationMs=${durationMs}`);
 
     // Kill any previously running ffmpeg process before starting a new one.
     this._killFfmpeg();
@@ -252,6 +283,7 @@ export class DiscordManager extends EventEmitter {
     this.currentTrackId = trackId;
     this.currentFilePath = filePath;
     this.currentResource = null;
+    this.durationMs = durationMs;
 
     // Spawn ffmpeg to decode the audio file and re-encode as WebM/Opus.
     // -ss before -i: fast keyframe seek when resuming after a volume change.
@@ -310,6 +342,7 @@ export class DiscordManager extends EventEmitter {
     this.player.stop(true);
     this._isRestarting = false;
     this.player.play(resource);
+    this.startPositionTimer();
 
     // Log playbackDuration every 5s to verify Opus packets are actually being
     // dispatched. 0ms after several seconds = demuxer not producing frames.
@@ -324,11 +357,18 @@ export class DiscordManager extends EventEmitter {
     this.emit('playbackChange', this.getState());
   }
 
+  seekTo(ms: number): void {
+    if (this.currentTrackId && this.currentFilePath) {
+      this.play(this.currentTrackId, this.currentFilePath, ms, this.durationMs);
+    }
+  }
+
   pause(): void {
     log.info('[discord] pause');
     if (this.player && this.playbackStatus === 'playing') {
       this.player.pause();
       this.playbackStatus = 'paused';
+      this.stopPositionTimer();
       this.emit('playbackChange', this.getState());
     }
   }
@@ -338,12 +378,14 @@ export class DiscordManager extends EventEmitter {
     if (this.player && this.playbackStatus === 'paused') {
       this.player.unpause();
       this.playbackStatus = 'playing';
+      this.startPositionTimer();
       this.emit('playbackChange', this.getState());
     }
   }
 
   stop(): void {
     log.info('[discord] stop');
+    this.stopPositionTimer();
     this._killFfmpeg();
     this.currentTrackId = null;
     this.currentFilePath = null;
@@ -364,9 +406,14 @@ export class DiscordManager extends EventEmitter {
       // + playbackDuration (how far into the current resource we are).
       const seekMs = this.seekOffset + (this.currentResource?.playbackDuration ?? 0);
       log.info(`[discord] setVolume seeking to ${seekMs}ms (offset=${this.seekOffset} resource=${!!this.currentResource})`);
-      this.play(this.currentTrackId, this.currentFilePath, seekMs);
+      this.play(this.currentTrackId, this.currentFilePath, seekMs, this.durationMs);
     }
     this.emit('playbackChange', this.getState());
+  }
+
+  setLoopMode(mode: LoopMode): void {
+    log.info(`[discord] setLoopMode ${mode}`);
+    this.loopMode = mode;
   }
 
   getState(): PlaybackState {
@@ -374,6 +421,8 @@ export class DiscordManager extends EventEmitter {
       status: this.playbackStatus,
       currentTrackId: this.currentTrackId,
       volume: this.volume,
+      positionMs: this.seekOffset + (this.currentResource?.playbackDuration ?? 0),
+      durationMs: this.durationMs,
     };
   }
 

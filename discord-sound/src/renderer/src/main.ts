@@ -1,13 +1,15 @@
-import type { Track, ConnectionStatus, PlaybackState } from '../../shared/types'
+import type { Track, ConnectionStatus, PlaybackState, LoopMode } from '../../shared/types'
 
 const api = window.electronAPI
 
 // State
 let tracks: Track[] = []
 let currentStatus: ConnectionStatus = 'disconnected'
-let currentPlayback: PlaybackState = { status: 'idle', currentTrackId: null, volume: 80 }
+let currentPlayback: PlaybackState = { status: 'idle', currentTrackId: null, volume: 80, positionMs: 0, durationMs: 0 }
 let savedLastGuildId = ''
 let savedLastChannelId = ''
+let isSeeking = false
+let draggedTrackId: string | null = null
 
 // DOM references
 const guildSelect = document.getElementById('guild-select') as HTMLSelectElement
@@ -24,6 +26,10 @@ const pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement
 const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement
 const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement
 const volumeDisplay = document.getElementById('volume-display') as HTMLSpanElement
+const seekSlider = document.getElementById('seek-slider') as HTMLInputElement
+const positionDisplay = document.getElementById('position-display') as HTMLSpanElement
+const durationDisplay = document.getElementById('duration-display') as HTMLSpanElement
+const loopModeSelect = document.getElementById('loop-mode-select') as HTMLSelectElement
 const refreshGuildsBtn = document.getElementById('refresh-guilds-btn') as HTMLButtonElement
 const settingsBtn = document.getElementById('settings-btn') as HTMLButtonElement
 const footerStatusText = document.getElementById('footer-status-text') as HTMLSpanElement
@@ -37,6 +43,13 @@ const cancelSettingsBtn = document.getElementById('cancel-settings-btn') as HTML
 
 // Selected track for playback
 let selectedTrackId: string | null = null
+
+function formatTime(ms: number): string {
+  const totalSec = Math.floor(ms / 1000)
+  const m = Math.floor(totalSec / 60)
+  const s = totalSec % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
 
 function statusLabel(status: ConnectionStatus): string {
   if (status === 'connected') return '接続済み'
@@ -53,6 +66,22 @@ function updateStatusBadge(status: ConnectionStatus): void {
   disconnectBtn.disabled = status !== 'connected'
 }
 
+function updateSeekBar(positionMs: number, durationMs: number): void {
+  if (isSeeking) return
+  positionDisplay.textContent = formatTime(positionMs)
+  if (durationMs > 0) {
+    seekSlider.max = String(durationMs)
+    seekSlider.value = String(positionMs)
+    seekSlider.disabled = false
+    durationDisplay.textContent = formatTime(durationMs)
+  } else {
+    seekSlider.max = '100'
+    seekSlider.value = '0'
+    seekSlider.disabled = true
+    durationDisplay.textContent = '0:00'
+  }
+}
+
 function updatePlaybackUI(state: PlaybackState): void {
   currentPlayback = state
 
@@ -65,6 +94,15 @@ function updatePlaybackUI(state: PlaybackState): void {
 
   volumeSlider.value = String(state.volume)
   volumeDisplay.textContent = `${state.volume}%`
+
+  updateSeekBar(state.positionMs, state.durationMs)
+
+  if (state.status === 'idle') {
+    seekSlider.value = '0'
+    seekSlider.disabled = true
+    positionDisplay.textContent = '0:00'
+    durationDisplay.textContent = '0:00'
+  }
 
   // Highlight current track in list
   document.querySelectorAll('.track-item').forEach(el => {
@@ -89,12 +127,58 @@ function renderTracks(): void {
     const item = document.createElement('div')
     item.className = 'track-item'
     item.dataset.trackId = track.id
+    item.draggable = true
     if (currentPlayback.currentTrackId === track.id) {
       item.classList.add('playing')
     }
     if (selectedTrackId === track.id) {
       item.classList.add('selected')
     }
+
+    // Drag-and-drop handlers
+    item.addEventListener('dragstart', (e) => {
+      draggedTrackId = track.id
+      item.classList.add('dragging')
+      e.dataTransfer!.effectAllowed = 'move'
+    })
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging')
+      draggedTrackId = null
+      document.querySelectorAll('.track-item').forEach(el => el.classList.remove('drag-over'))
+    })
+
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault()
+      e.dataTransfer!.dropEffect = 'move'
+      if (draggedTrackId && draggedTrackId !== track.id) {
+        document.querySelectorAll('.track-item').forEach(el => el.classList.remove('drag-over'))
+        item.classList.add('drag-over')
+      }
+    })
+
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over')
+    })
+
+    item.addEventListener('drop', async (e) => {
+      e.preventDefault()
+      item.classList.remove('drag-over')
+      if (!draggedTrackId || draggedTrackId === track.id) return
+
+      const fromIdx = tracks.findIndex(t => t.id === draggedTrackId)
+      const toIdx = tracks.findIndex(t => t.id === track.id)
+      if (fromIdx === -1 || toIdx === -1) return
+
+      const reordered = [...tracks]
+      const [moved] = reordered.splice(fromIdx, 1)
+      reordered.splice(toIdx, 0, moved)
+      tracks = reordered
+
+      renderTracks()
+      updatePlaybackUI(currentPlayback)
+      await api.tracksReorder(tracks.map(t => t.id))
+    })
 
     const nameSpan = document.createElement('span')
     nameSpan.className = 'track-name'
@@ -291,6 +375,25 @@ volumeSlider.addEventListener('change', async () => {
   await api.playbackSetVolume(Number(volumeSlider.value))
 })
 
+// Seek bar
+seekSlider.addEventListener('mousedown', () => {
+  isSeeking = true
+})
+
+seekSlider.addEventListener('mouseup', async () => {
+  isSeeking = false
+  await api.playbackSeek(Number(seekSlider.value))
+})
+
+seekSlider.addEventListener('input', () => {
+  positionDisplay.textContent = formatTime(Number(seekSlider.value))
+})
+
+// Loop mode
+loopModeSelect.addEventListener('change', async () => {
+  await api.playbackSetLoopMode(loopModeSelect.value as LoopMode)
+})
+
 settingsBtn.addEventListener('click', () => {
   showSettingsModal()
 })
@@ -330,8 +433,6 @@ saveSettingsBtn.addEventListener('click', async () => {
 })
 
 // IPC event listeners
-// Reload guild list as soon as the bot finishes logging in (guilds are cached).
-// This covers the non-auto-connect case where no 'connected' event fires.
 api.onLoggedIn(async () => {
   await loadGuilds()
   if (savedLastGuildId) {
@@ -347,9 +448,6 @@ api.onStatusChange(async (status: ConnectionStatus) => {
   const previous = currentStatus
   currentStatus = status
   updateStatusBadge(status)
-  // When connection is established (e.g. after startup auto-connect), reload the
-  // guild list so the selects reflect the actual state even if init() ran before
-  // the bot had finished logging in.
   if (status === 'connected' && previous !== 'connected') {
     await loadGuilds()
     if (savedLastGuildId) {
@@ -366,12 +464,15 @@ api.onPlaybackChange((state: PlaybackState) => {
   updatePlaybackUI(state)
 })
 
+api.onPositionUpdate(({ positionMs, durationMs }) => {
+  updateSeekBar(positionMs, durationMs)
+})
+
 api.onForcedDisconnect(() => {
   currentStatus = 'disconnected'
   updateStatusBadge('disconnected')
   alert('Discord ボイスチャンネルから切断されました。')
 })
-
 
 // Close modal on overlay click
 settingsModal.addEventListener('click', (e) => {
@@ -387,6 +488,9 @@ async function init(): Promise<void> {
   // Set volume from settings
   volumeSlider.value = String(settings.defaultVolume)
   volumeDisplay.textContent = `${settings.defaultVolume}%`
+
+  // Set loop mode from settings
+  loopModeSelect.value = settings.loopMode ?? 'single'
 
   // Populate settings modal
   tokenInput.value = settings.token
@@ -421,9 +525,6 @@ async function init(): Promise<void> {
   if (!settings.token) {
     showSettingsModal()
   }
-
-  // Get current status
-  // (status change events will update UI when main connects)
 }
 
 document.addEventListener('DOMContentLoaded', init)
