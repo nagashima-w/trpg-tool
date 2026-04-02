@@ -93,4 +93,27 @@ export class TrackManager {
       this.save();
     }
   }
+
+  reorder(ids: string[]): void {
+    const map = new Map(this.tracks.map((t) => [t.id, t]));
+    const reordered: Track[] = [];
+    for (const id of ids) {
+      const t = map.get(id);
+      if (t) reordered.push(t);
+    }
+    // Append any tracks not in the ids list (safety net)
+    for (const t of this.tracks) {
+      if (!ids.includes(t.id)) reordered.push(t);
+    }
+    this.tracks = reordered;
+    this.save();
+  }
+
+  updateDuration(id: string, durationMs: number): void {
+    const track = this.tracks.find((t) => t.id === id);
+    if (track) {
+      track.durationMs = durationMs;
+      this.save();
+    }
+  }
 }

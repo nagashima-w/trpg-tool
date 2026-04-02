@@ -6,9 +6,11 @@ log.info('[app] starting up');
 
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { join } from 'path';
+import { spawn } from 'child_process';
 import { SettingsManager } from './settings';
 import { TrackManager } from './tracks';
-import { DiscordManager } from './discord';
+import { DiscordManager, ffmpegBin } from './discord';
+import type { LoopMode } from '../shared/types';
 
 let mainWindow: BrowserWindow | null = null;
 let settingsManager: SettingsManager;
@@ -38,6 +40,20 @@ function createWindow(): void {
   });
 }
 
+function detectAndStoreDuration(trackId: string, filePath: string): void {
+  const ffmpeg = spawn(ffmpegBin, ['-i', filePath], { stdio: ['ignore', 'ignore', 'pipe'] });
+  let stderr = '';
+  ffmpeg.stderr!.on('data', (d: Buffer) => { stderr += d.toString(); });
+  ffmpeg.on('close', () => {
+    const m = /Duration: (\d+):(\d+):(\d+\.\d+)/.exec(stderr);
+    if (m) {
+      const ms = Math.round((parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseFloat(m[3])) * 1000);
+      trackManager.updateDuration(trackId, ms);
+      log.info(`[app] duration detected for ${trackId}: ${ms}ms`);
+    }
+  });
+}
+
 function setupDiscordEvents(): void {
   discordManager.on('statusChange', (status) => {
     mainWindow?.webContents.send('discord:statusChange', status);
@@ -51,7 +67,17 @@ function setupDiscordEvents(): void {
   discordManager.on('forcedDisconnect', () => {
     mainWindow?.webContents.send('discord:forcedDisconnect');
   });
-
+  discordManager.on('positionUpdate', (pos) => {
+    mainWindow?.webContents.send('discord:positionUpdate', pos);
+  });
+  discordManager.on('trackEnded', (endedId: string) => {
+    const tracks = trackManager.getAll();
+    const idx = tracks.findIndex(t => t.id === endedId);
+    const next = tracks[(idx + 1) % tracks.length];
+    if (next) {
+      discordManager.play(next.id, next.filePath, 0, next.durationMs ?? 0);
+    }
+  });
 }
 
 function setupIpcHandlers(): void {
@@ -88,7 +114,16 @@ function setupIpcHandlers(): void {
   ipcMain.handle('playback-play', (_event, trackId: string) => {
     const track = trackManager.getById(trackId);
     if (!track) throw new Error('Track not found');
-    discordManager.play(track.id, track.filePath);
+    discordManager.play(track.id, track.filePath, 0, track.durationMs ?? 0);
+  });
+
+  ipcMain.handle('playback-seek', (_event, ms: number) => {
+    discordManager.seekTo(ms);
+  });
+
+  ipcMain.handle('playback-set-loop-mode', (_event, mode: LoopMode) => {
+    discordManager.setLoopMode(mode);
+    settingsManager.update({ loopMode: mode });
   });
 
   ipcMain.handle('playback-pause', () => {
@@ -122,7 +157,13 @@ function setupIpcHandlers(): void {
       filters: [{ name: 'Audio Files', extensions: ['mp3', 'ogg', 'wav', 'flac'] }],
     });
     if (result.canceled) return [];
-    return trackManager.addFiles(result.filePaths);
+    const added = trackManager.addFiles(result.filePaths);
+    for (const track of added) {
+      if (!track.durationMs) {
+        detectAndStoreDuration(track.id, track.filePath);
+      }
+    }
+    return added;
   });
 
   ipcMain.handle('tracks-add-folder', async () => {
@@ -131,7 +172,17 @@ function setupIpcHandlers(): void {
       properties: ['openDirectory'],
     });
     if (result.canceled) return [];
-    return trackManager.addFolder(result.filePaths[0]);
+    const added = trackManager.addFolder(result.filePaths[0]);
+    for (const track of added) {
+      if (!track.durationMs) {
+        detectAndStoreDuration(track.id, track.filePath);
+      }
+    }
+    return added;
+  });
+
+  ipcMain.handle('tracks-reorder', (_event, ids: string[]) => {
+    trackManager.reorder(ids);
   });
 
   ipcMain.handle('tracks-remove', (_event, id: string) => {
@@ -152,6 +203,19 @@ app.whenReady().then(async () => {
   setupDiscordEvents();
   setupIpcHandlers();
   createWindow();
+
+  // Detect durations for existing tracks that don't have one yet
+  for (const track of trackManager.getAll()) {
+    if (!track.durationMs) {
+      detectAndStoreDuration(track.id, track.filePath);
+    }
+  }
+
+  // Restore loopMode from settings
+  const savedSettings = settingsManager.get();
+  if (savedSettings.loopMode) {
+    discordManager.setLoopMode(savedSettings.loopMode);
+  }
 
   const settings = settingsManager.get();
   if (settings.token) {

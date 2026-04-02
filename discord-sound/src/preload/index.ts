@@ -32,6 +32,15 @@ const electronAPI = {
   tracksRename: (id: string, name: string): Promise<void> =>
     ipcRenderer.invoke('tracks-rename', id, name),
 
+  // New v1 features
+  playbackSeek: (ms: number): Promise<void> => ipcRenderer.invoke('playback-seek', ms),
+  tracksReorder: (ids: string[]): Promise<void> => ipcRenderer.invoke('tracks-reorder', ids),
+  playbackSetLoopMode: (mode: string): Promise<void> => ipcRenderer.invoke('playback-set-loop-mode', mode),
+  onPositionUpdate: (cb: (pos: { positionMs: number; durationMs: number }) => void): void => {
+    ipcRenderer.removeAllListeners('discord:positionUpdate');
+    ipcRenderer.on('discord:positionUpdate', (_event, pos) => cb(pos));
+  },
+
   // Events
   onStatusChange: (cb: (status: ConnectionStatus) => void): void => {
     ipcRenderer.removeAllListeners('discord:statusChange');

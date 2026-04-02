@@ -1,7 +1,10 @@
+export type LoopMode = 'single' | 'playlist' | 'none';
+
 export interface Track {
   id: string;
   name: string;
   filePath: string;
+  durationMs?: number;
 }
 
 export interface Settings {
@@ -10,6 +13,7 @@ export interface Settings {
   lastGuildId: string;
   lastChannelId: string;
   restoreLastConnection: boolean;
+  loopMode: LoopMode;
 }
 
 export interface Guild {
@@ -30,4 +34,6 @@ export interface PlaybackState {
   status: PlaybackStatus;
   currentTrackId: string | null;
   volume: number;
+  positionMs: number;
+  durationMs: number;
 }

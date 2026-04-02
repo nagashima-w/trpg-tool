@@ -49,7 +49,18 @@
           <div class="now-playing">
             <div class="now-playing-label">再生中:</div>
             <div id="now-playing-name" class="now-playing-name">--</div>
-            <div class="loop-indicator">&#x1F501; ループ再生</div>
+            <div class="loop-mode-control">
+              <select id="loop-mode-select">
+                <option value="single">&#x1F501; 1曲ループ</option>
+                <option value="playlist">&#x1F500; プレイリスト</option>
+                <option value="none">&#x23F9; 停止</option>
+              </select>
+            </div>
+          </div>
+          <div class="seek-control">
+            <span id="position-display" class="time-display">0:00</span>
+            <input type="range" id="seek-slider" min="0" max="100" value="0" disabled />
+            <span id="duration-display" class="time-display">0:00</span>
           </div>
           <div class="playback-buttons">
             <button id="play-btn" class="btn btn-icon" title="再生" disabled>&#9654;</button>
