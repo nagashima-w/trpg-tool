@@ -140,6 +140,7 @@ function setupIpcHandlers(): void {
 
   ipcMain.handle('playback-set-volume', (_event, volume: number) => {
     discordManager.setVolume(volume);
+    settingsManager.update({ defaultVolume: volume });
   });
 
   ipcMain.handle('playback-get-state', () => {
@@ -211,8 +212,9 @@ app.whenReady().then(async () => {
     }
   }
 
-  // Restore loopMode from settings
+  // Restore volume and loopMode from settings
   const savedSettings = settingsManager.get();
+  discordManager.setVolume(savedSettings.defaultVolume);
   if (savedSettings.loopMode) {
     discordManager.setLoopMode(savedSettings.loopMode);
   }
