@@ -1,9 +1,11 @@
-import type { Track, ConnectionStatus, PlaybackState, LoopMode } from '../../shared/types'
+import type { Bot, Track, ConnectionStatus, PlaybackState, LoopMode } from '../../shared/types'
 
 const api = window.electronAPI
 
 // State
 let tracks: Track[] = []
+let bots: Bot[] = []
+let activeBotId = ''
 let currentStatus: ConnectionStatus = 'disconnected'
 let currentPlayback: PlaybackState = { status: 'idle', currentTrackId: null, volume: 80, positionMs: 0, durationMs: 0 }
 let savedLastGuildId = ''
@@ -35,13 +37,15 @@ const settingsBtn = document.getElementById('settings-btn') as HTMLButtonElement
 const footerStatusText = document.getElementById('footer-status-text') as HTMLSpanElement
 const settingsModal = document.getElementById('settings-modal') as HTMLDivElement
 const modalCloseBtn = document.getElementById('modal-close-btn') as HTMLButtonElement
-const tokenInput = document.getElementById('token-input') as HTMLInputElement
+const botList = document.getElementById('bot-list') as HTMLDivElement
+const botNameInput = document.getElementById('bot-name-input') as HTMLInputElement
+const botTokenInput = document.getElementById('bot-token-input') as HTMLInputElement
+const botAddBtn = document.getElementById('bot-add-btn') as HTMLButtonElement
 const defaultVolumeInput = document.getElementById('default-volume-input') as HTMLInputElement
 const restoreConnectionInput = document.getElementById('restore-connection-input') as HTMLInputElement
 const saveSettingsBtn = document.getElementById('save-settings-btn') as HTMLButtonElement
 const cancelSettingsBtn = document.getElementById('cancel-settings-btn') as HTMLButtonElement
 
-// Selected track for playback
 let selectedTrackId: string | null = null
 
 function formatTime(ms: number): string {
@@ -104,13 +108,71 @@ function updatePlaybackUI(state: PlaybackState): void {
     durationDisplay.textContent = '0:00'
   }
 
-  // Highlight current track in list
   document.querySelectorAll('.track-item').forEach(el => {
     el.classList.remove('playing')
   })
   if (state.currentTrackId) {
     const item = document.querySelector(`[data-track-id="${state.currentTrackId}"]`)
     item?.classList.add('playing')
+  }
+}
+
+function renderBotList(): void {
+  botList.innerHTML = ''
+  if (bots.length === 0) {
+    const empty = document.createElement('div')
+    empty.className = 'bot-empty'
+    empty.textContent = 'Botが登録されていません'
+    botList.appendChild(empty)
+    return
+  }
+  for (const bot of bots) {
+    const row = document.createElement('div')
+    row.className = 'bot-row' + (bot.id === activeBotId ? ' active' : '')
+
+    const radio = document.createElement('input')
+    radio.type = 'radio'
+    radio.name = 'active-bot'
+    radio.checked = bot.id === activeBotId
+    radio.addEventListener('change', async () => {
+      try {
+        await api.botsSetActive(bot.id)
+        activeBotId = bot.id
+        bots = await api.botsGetAll()
+        renderBotList()
+        await loadGuilds()
+      } catch (e) {
+        alert(`Bot切り替えエラー: ${e}`)
+        radio.checked = bot.id === activeBotId
+      }
+    })
+
+    const nameSpan = document.createElement('span')
+    nameSpan.className = 'bot-name'
+    nameSpan.textContent = bot.name
+
+    const tokenSpan = document.createElement('span')
+    tokenSpan.className = 'bot-token-masked'
+    tokenSpan.textContent = `****${bot.token.slice(-4)}`
+
+    const removeBtn = document.createElement('button')
+    removeBtn.className = 'btn btn-icon-small btn-danger-small'
+    removeBtn.title = '削除'
+    removeBtn.textContent = '×'
+    removeBtn.addEventListener('click', async () => {
+      if (!confirm(`「${bot.name}」を削除しますか？`)) return
+      await api.botsRemove(bot.id)
+      bots = await api.botsGetAll()
+      const settings = await api.getSettings()
+      activeBotId = settings.activeBotId
+      renderBotList()
+    })
+
+    row.appendChild(radio)
+    row.appendChild(nameSpan)
+    row.appendChild(tokenSpan)
+    row.appendChild(removeBtn)
+    botList.appendChild(row)
   }
 }
 
@@ -135,19 +197,16 @@ function renderTracks(): void {
       item.classList.add('selected')
     }
 
-    // Drag-and-drop handlers
     item.addEventListener('dragstart', (e) => {
       draggedTrackId = track.id
       item.classList.add('dragging')
       e.dataTransfer!.effectAllowed = 'move'
     })
-
     item.addEventListener('dragend', () => {
       item.classList.remove('dragging')
       draggedTrackId = null
       document.querySelectorAll('.track-item').forEach(el => el.classList.remove('drag-over'))
     })
-
     item.addEventListener('dragover', (e) => {
       e.preventDefault()
       e.dataTransfer!.dropEffect = 'move'
@@ -156,25 +215,18 @@ function renderTracks(): void {
         item.classList.add('drag-over')
       }
     })
-
-    item.addEventListener('dragleave', () => {
-      item.classList.remove('drag-over')
-    })
-
+    item.addEventListener('dragleave', () => { item.classList.remove('drag-over') })
     item.addEventListener('drop', async (e) => {
       e.preventDefault()
       item.classList.remove('drag-over')
       if (!draggedTrackId || draggedTrackId === track.id) return
-
       const fromIdx = tracks.findIndex(t => t.id === draggedTrackId)
       const toIdx = tracks.findIndex(t => t.id === track.id)
       if (fromIdx === -1 || toIdx === -1) return
-
       const reordered = [...tracks]
       const [moved] = reordered.splice(fromIdx, 1)
       reordered.splice(toIdx, 0, moved)
       tracks = reordered
-
       renderTracks()
       updatePlaybackUI(currentPlayback)
       await api.tracksReorder(tracks.map(t => t.id))
@@ -184,23 +236,14 @@ function renderTracks(): void {
     nameSpan.className = 'track-name'
     nameSpan.textContent = track.name
     nameSpan.title = track.filePath
-
-    // Double-click to rename
-    nameSpan.addEventListener('dblclick', () => {
-      startRename(track.id, nameSpan)
-    })
+    nameSpan.addEventListener('dblclick', () => { startRename(track.id, nameSpan) })
 
     const playTrackBtn = document.createElement('button')
     playTrackBtn.className = 'btn btn-icon-small'
     playTrackBtn.title = '再生'
     playTrackBtn.textContent = '▶'
     playTrackBtn.addEventListener('click', async () => {
-      try {
-        await api.playbackPlay(track.id)
-      } catch (e) {
-        console.error(e)
-        alert(`再生エラー: ${e}`)
-      }
+      try { await api.playbackPlay(track.id) } catch (e) { alert(`再生エラー: ${e}`) }
     })
 
     const removeBtn = document.createElement('button')
@@ -219,7 +262,6 @@ function renderTracks(): void {
       selectedTrackId = track.id
       document.querySelectorAll('.track-item').forEach(el => el.classList.remove('selected'))
       item.classList.add('selected')
-      // Enable play button if not already playing
       playBtn.disabled = currentPlayback.status === 'playing'
     })
 
@@ -248,18 +290,13 @@ function startRename(trackId: string, nameSpan: HTMLSpanElement): void {
       if (track) track.name = newName
     }
     renderTracks()
-    if (currentPlayback.currentTrackId) {
-      updatePlaybackUI(currentPlayback)
-    }
+    if (currentPlayback.currentTrackId) updatePlaybackUI(currentPlayback)
   }
 
   input.addEventListener('blur', commit)
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      input.blur()
-    } else if (e.key === 'Escape') {
-      renderTracks()
-    }
+    if (e.key === 'Enter') input.blur()
+    else if (e.key === 'Escape') renderTracks()
   })
 }
 
@@ -293,13 +330,8 @@ async function loadChannels(guildId: string): Promise<void> {
   }
 }
 
-function showSettingsModal(): void {
-  settingsModal.classList.remove('hidden')
-}
-
-function hideSettingsModal(): void {
-  settingsModal.classList.add('hidden')
-}
+function showSettingsModal(): void { settingsModal.classList.remove('hidden') }
+function hideSettingsModal(): void { settingsModal.classList.add('hidden') }
 
 // Event listeners
 refreshGuildsBtn.addEventListener('click', async () => {
@@ -310,29 +342,17 @@ refreshGuildsBtn.addEventListener('click', async () => {
 guildSelect.addEventListener('change', async () => {
   const guildId = guildSelect.value
   channelSelect.innerHTML = '<option value="">-- チャンネルを選択 --</option>'
-  if (guildId) {
-    await loadChannels(guildId)
-  }
+  if (guildId) await loadChannels(guildId)
 })
 
 connectBtn.addEventListener('click', async () => {
   const guildId = guildSelect.value
   const channelId = channelSelect.value
-  if (!guildId || !channelId) {
-    alert('サーバーとチャンネルを選択してください')
-    return
-  }
-  try {
-    await api.discordConnect(guildId, channelId)
-  } catch (e) {
-    console.error(e)
-    alert(`接続エラー: ${e}`)
-  }
+  if (!guildId || !channelId) { alert('サーバーとチャンネルを選択してください'); return }
+  try { await api.discordConnect(guildId, channelId) } catch (e) { alert(`接続エラー: ${e}`) }
 })
 
-disconnectBtn.addEventListener('click', async () => {
-  await api.discordDisconnect()
-})
+disconnectBtn.addEventListener('click', async () => { await api.discordDisconnect() })
 
 addFilesBtn.addEventListener('click', async () => {
   const added = await api.tracksAdd()
@@ -350,135 +370,80 @@ playBtn.addEventListener('click', async () => {
   if (currentPlayback.status === 'paused') {
     await api.playbackResume()
   } else if (selectedTrackId) {
-    try {
-      await api.playbackPlay(selectedTrackId)
-    } catch (e) {
-      console.error(e)
-      alert(`再生エラー: ${e}`)
-    }
+    try { await api.playbackPlay(selectedTrackId) } catch (e) { alert(`再生エラー: ${e}`) }
   }
 })
 
-pauseBtn.addEventListener('click', async () => {
-  await api.playbackPause()
-})
-
-stopBtn.addEventListener('click', async () => {
-  await api.playbackStop()
-})
+pauseBtn.addEventListener('click', async () => { await api.playbackPause() })
+stopBtn.addEventListener('click', async () => { await api.playbackStop() })
 
 volumeSlider.addEventListener('input', () => {
   volumeDisplay.textContent = `${volumeSlider.value}%`
 })
-
 volumeSlider.addEventListener('change', async () => {
   await api.playbackSetVolume(Number(volumeSlider.value))
 })
 
-// Seek bar
-seekSlider.addEventListener('mousedown', () => {
-  isSeeking = true
-})
-
+seekSlider.addEventListener('mousedown', () => { isSeeking = true })
 seekSlider.addEventListener('mouseup', async () => {
   isSeeking = false
   await api.playbackSeek(Number(seekSlider.value))
 })
-
 seekSlider.addEventListener('input', () => {
   positionDisplay.textContent = formatTime(Number(seekSlider.value))
 })
 
-// Loop mode
 loopModeSelect.addEventListener('change', async () => {
   await api.playbackSetLoopMode(loopModeSelect.value as LoopMode)
 })
 
-settingsBtn.addEventListener('click', () => {
+settingsBtn.addEventListener('click', async () => {
+  bots = await api.botsGetAll()
+  const settings = await api.getSettings()
+  activeBotId = settings.activeBotId
+  defaultVolumeInput.value = String(settings.defaultVolume)
+  restoreConnectionInput.checked = settings.restoreLastConnection
+  renderBotList()
   showSettingsModal()
 })
 
-modalCloseBtn.addEventListener('click', () => {
-  hideSettingsModal()
-})
+modalCloseBtn.addEventListener('click', () => { hideSettingsModal() })
+cancelSettingsBtn.addEventListener('click', () => { hideSettingsModal() })
 
-cancelSettingsBtn.addEventListener('click', () => {
-  hideSettingsModal()
+botAddBtn.addEventListener('click', async () => {
+  const name = botNameInput.value.trim()
+  const token = botTokenInput.value.trim()
+  if (!name || !token) { alert('名前とトークンを入力してください'); return }
+  try {
+    const bot = await api.botsAdd(name, token)
+    bots.push(bot)
+    botNameInput.value = ''
+    botTokenInput.value = ''
+    // If this is the first bot, set as active and login
+    const settings = await api.getSettings()
+    activeBotId = settings.activeBotId
+    if (activeBotId === bot.id) {
+      await loadGuilds()
+    }
+    renderBotList()
+  } catch (e) {
+    alert(`Bot追加エラー: ${e}`)
+  }
 })
 
 saveSettingsBtn.addEventListener('click', async () => {
-  const token = tokenInput.value.trim()
-  const defaultVolume = Number(defaultVolumeInput.value)
-  const restoreLastConnection = restoreConnectionInput.checked
-
-  const current = await api.getSettings()
+  const settings = await api.getSettings()
   await api.saveSettings({
-    ...current,
-    token: token || current.token,
-    defaultVolume,
-    restoreLastConnection,
+    ...settings,
+    defaultVolume: Number(defaultVolumeInput.value),
+    restoreLastConnection: restoreConnectionInput.checked,
   })
-
-  if (token) {
-    try {
-      await api.discordLogin(token)
-      await loadGuilds()
-      hideSettingsModal()
-    } catch (e) {
-      alert(`Botログインエラー: ${e}`)
-    }
-  } else {
-    hideSettingsModal()
-  }
-})
-
-// IPC event listeners
-api.onLoggedIn(async () => {
-  await loadGuilds()
-  if (savedLastGuildId) {
-    guildSelect.value = savedLastGuildId
-    await loadChannels(savedLastGuildId)
-    if (savedLastChannelId) {
-      channelSelect.value = savedLastChannelId
-    }
-  }
-})
-
-api.onStatusChange(async (status: ConnectionStatus) => {
-  const previous = currentStatus
-  currentStatus = status
-  updateStatusBadge(status)
-  if (status === 'connected' && previous !== 'connected') {
-    await loadGuilds()
-    if (savedLastGuildId) {
-      guildSelect.value = savedLastGuildId
-      await loadChannels(savedLastGuildId)
-      if (savedLastChannelId) {
-        channelSelect.value = savedLastChannelId
-      }
-    }
-  }
-})
-
-api.onPlaybackChange((state: PlaybackState) => {
-  updatePlaybackUI(state)
-})
-
-api.onPositionUpdate(({ positionMs, durationMs }) => {
-  updateSeekBar(positionMs, durationMs)
-})
-
-api.onForcedDisconnect(() => {
-  currentStatus = 'disconnected'
-  updateStatusBadge('disconnected')
-  alert('Discord ボイスチャンネルから切断されました。')
+  hideSettingsModal()
 })
 
 // Keyboard shortcuts
 document.addEventListener('keydown', async (e) => {
-  // Ignore when typing in an input field
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return
-
   if (e.key === 'ArrowUp') {
     e.preventDefault()
     const newVol = Math.min(100, Number(volumeSlider.value) + 5)
@@ -493,64 +458,82 @@ document.addEventListener('keydown', async (e) => {
     await api.playbackSetVolume(newVol)
   } else if (e.key === 'ArrowRight' && currentPlayback.status !== 'idle') {
     e.preventDefault()
-    const newPos = Number(seekSlider.value) + 5000
-    await api.playbackSeek(newPos)
+    await api.playbackSeek(Number(seekSlider.value) + 5000)
   } else if (e.key === 'ArrowLeft' && currentPlayback.status !== 'idle') {
     e.preventDefault()
-    const newPos = Math.max(0, Number(seekSlider.value) - 5000)
-    await api.playbackSeek(newPos)
+    await api.playbackSeek(Math.max(0, Number(seekSlider.value) - 5000))
   }
 })
 
-// Close modal on overlay click
-settingsModal.addEventListener('click', (e) => {
-  if (e.target === settingsModal) {
-    hideSettingsModal()
+// IPC event listeners
+api.onLoggedIn(async () => {
+  await loadGuilds()
+  if (savedLastGuildId) {
+    guildSelect.value = savedLastGuildId
+    await loadChannels(savedLastGuildId)
+    if (savedLastChannelId) channelSelect.value = savedLastChannelId
   }
+})
+
+api.onStatusChange(async (status: ConnectionStatus) => {
+  const previous = currentStatus
+  currentStatus = status
+  updateStatusBadge(status)
+  if (status === 'connected' && previous !== 'connected') {
+    await loadGuilds()
+    if (savedLastGuildId) {
+      guildSelect.value = savedLastGuildId
+      await loadChannels(savedLastGuildId)
+      if (savedLastChannelId) channelSelect.value = savedLastChannelId
+    }
+  }
+})
+
+api.onPlaybackChange((state: PlaybackState) => { updatePlaybackUI(state) })
+
+api.onPositionUpdate(({ positionMs, durationMs }) => { updateSeekBar(positionMs, durationMs) })
+
+api.onForcedDisconnect(() => {
+  currentStatus = 'disconnected'
+  updateStatusBadge('disconnected')
+  alert('Discord ボイスチャンネルから切断されました。')
+})
+
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) hideSettingsModal()
 })
 
 // Initialize
 async function init(): Promise<void> {
   const settings = await api.getSettings()
 
-  // Set volume from settings
   volumeSlider.value = String(settings.defaultVolume)
   volumeDisplay.textContent = `${settings.defaultVolume}%`
-
-  // Set loop mode from settings
   loopModeSelect.value = settings.loopMode ?? 'single'
 
-  // Populate settings modal
-  tokenInput.value = settings.token
   defaultVolumeInput.value = String(settings.defaultVolume)
   restoreConnectionInput.checked = settings.restoreLastConnection
 
-  // Load tracks
   tracks = await api.tracksGetAll()
   renderTracks()
 
-  // Load playback state
   const state = await api.playbackGetState()
   updatePlaybackUI(state)
 
-  // Remember last connection for use when 'connected' event fires after auto-connect
-  savedLastGuildId = settings.lastGuildId
-  savedLastChannelId = settings.lastChannelId
+  // Remember last connection of active bot
+  const activeBot = settings.bots.find(b => b.id === settings.activeBotId)
+  savedLastGuildId = activeBot?.lastGuildId ?? ''
+  savedLastChannelId = activeBot?.lastChannelId ?? ''
 
-  // Load guilds if already logged in (non-auto-connect case or manual login)
-  if (settings.token) {
+  if (settings.bots.length > 0 && settings.activeBotId) {
     await loadGuilds()
-    if (settings.lastGuildId) {
-      guildSelect.value = settings.lastGuildId
-      await loadChannels(settings.lastGuildId)
-      if (settings.lastChannelId) {
-        channelSelect.value = settings.lastChannelId
-      }
+    if (savedLastGuildId) {
+      guildSelect.value = savedLastGuildId
+      await loadChannels(savedLastGuildId)
+      if (savedLastChannelId) channelSelect.value = savedLastChannelId
     }
-  }
-
-  // Show settings if no token
-  if (!settings.token) {
+  } else {
+    // No bots yet — open settings
     showSettingsModal()
   }
 }

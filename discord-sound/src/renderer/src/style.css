@@ -596,3 +596,66 @@ input[type="range"]::-webkit-slider-thumb:hover {
   padding: 16px 20px;
   border-top: 1px solid var(--border);
 }
+
+/* ---- Bot list ---- */
+.bot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 32px;
+}
+
+.bot-empty {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.bot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border);
+}
+
+.bot-row.active {
+  border-color: var(--accent);
+  background-color: rgba(88, 101, 242, 0.1);
+}
+
+.bot-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bot-token-masked {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+.bot-add-form .bot-add-row {
+  display: flex;
+  gap: 6px;
+}
+
+.bot-add-form input[type="text"],
+.bot-add-form input[type="password"] {
+  flex: 1;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  outline: none;
+  min-width: 0;
+}
+
+.bot-add-form input:focus {
+  border-color: var(--accent);
+}

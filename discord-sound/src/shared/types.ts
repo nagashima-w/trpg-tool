@@ -1,5 +1,13 @@
 export type LoopMode = 'single' | 'playlist' | 'none';
 
+export interface Bot {
+  id: string;
+  name: string;
+  token: string;
+  lastGuildId: string;
+  lastChannelId: string;
+}
+
 export interface Track {
   id: string;
   name: string;
@@ -8,10 +16,9 @@ export interface Track {
 }
 
 export interface Settings {
-  token: string;
+  bots: Bot[];
+  activeBotId: string;
   defaultVolume: number;
-  lastGuildId: string;
-  lastChannelId: string;
   restoreLastConnection: boolean;
   loopMode: LoopMode;
 }

@@ -1,13 +1,18 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Settings, Track, Guild, VoiceChannel, PlaybackState, ConnectionStatus } from '../shared/types';
+import type { Settings, Bot, Track, Guild, VoiceChannel, PlaybackState, ConnectionStatus } from '../shared/types';
 
 const electronAPI = {
   // Settings
   getSettings: (): Promise<Settings> => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Settings): Promise<void> => ipcRenderer.invoke('save-settings', settings),
 
+  // Bot management
+  botsGetAll: (): Promise<Bot[]> => ipcRenderer.invoke('bots-get-all'),
+  botsAdd: (name: string, token: string): Promise<Bot> => ipcRenderer.invoke('bots-add', name, token),
+  botsRemove: (id: string): Promise<void> => ipcRenderer.invoke('bots-remove', id),
+  botsSetActive: (id: string): Promise<void> => ipcRenderer.invoke('bots-set-active', id),
+
   // Discord
-  discordLogin: (token: string): Promise<void> => ipcRenderer.invoke('discord-login', token),
   discordGetGuilds: (): Promise<Guild[]> => ipcRenderer.invoke('discord-get-guilds'),
   discordGetVoiceChannels: (guildId: string): Promise<VoiceChannel[]> =>
     ipcRenderer.invoke('discord-get-voice-channels', guildId),
@@ -23,6 +28,8 @@ const electronAPI = {
   playbackSetVolume: (volume: number): Promise<void> =>
     ipcRenderer.invoke('playback-set-volume', volume),
   playbackGetState: (): Promise<PlaybackState> => ipcRenderer.invoke('playback-get-state'),
+  playbackSeek: (ms: number): Promise<void> => ipcRenderer.invoke('playback-seek', ms),
+  playbackSetLoopMode: (mode: string): Promise<void> => ipcRenderer.invoke('playback-set-loop-mode', mode),
 
   // Tracks
   tracksGetAll: (): Promise<Track[]> => ipcRenderer.invoke('tracks-get-all'),
@@ -31,15 +38,7 @@ const electronAPI = {
   tracksRemove: (id: string): Promise<void> => ipcRenderer.invoke('tracks-remove', id),
   tracksRename: (id: string, name: string): Promise<void> =>
     ipcRenderer.invoke('tracks-rename', id, name),
-
-  // New v1 features
-  playbackSeek: (ms: number): Promise<void> => ipcRenderer.invoke('playback-seek', ms),
   tracksReorder: (ids: string[]): Promise<void> => ipcRenderer.invoke('tracks-reorder', ids),
-  playbackSetLoopMode: (mode: string): Promise<void> => ipcRenderer.invoke('playback-set-loop-mode', mode),
-  onPositionUpdate: (cb: (pos: { positionMs: number; durationMs: number }) => void): void => {
-    ipcRenderer.removeAllListeners('discord:positionUpdate');
-    ipcRenderer.on('discord:positionUpdate', (_event, pos) => cb(pos));
-  },
 
   // Events
   onStatusChange: (cb: (status: ConnectionStatus) => void): void => {
@@ -57,6 +56,10 @@ const electronAPI = {
   onForcedDisconnect: (cb: () => void): void => {
     ipcRenderer.removeAllListeners('discord:forcedDisconnect');
     ipcRenderer.on('discord:forcedDisconnect', () => cb());
+  },
+  onPositionUpdate: (cb: (pos: { positionMs: number; durationMs: number }) => void): void => {
+    ipcRenderer.removeAllListeners('discord:positionUpdate');
+    ipcRenderer.on('discord:positionUpdate', (_event, pos) => cb(pos));
   },
 };
 
