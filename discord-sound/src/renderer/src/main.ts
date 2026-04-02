@@ -119,7 +119,7 @@ function renderTracks(): void {
   if (tracks.length === 0) {
     const empty = document.createElement('div')
     empty.className = 'empty-message'
-    empty.textContent = 'トラックがありません。追加してください。'
+    empty.textContent = '再生リストにトラックがありません。追加してください。'
     trackList.appendChild(empty)
     return
   }
