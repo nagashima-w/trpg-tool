@@ -92,9 +92,19 @@
           <button id="modal-close-btn" class="btn btn-ghost modal-close">&times;</button>
         </div>
         <div class="modal-body">
+          <!-- Bot list -->
           <div class="form-group">
-            <label for="token-input">Bot トークン</label>
-            <input type="password" id="token-input" placeholder="Discord Bot Token" />
+            <label>Bot 一覧</label>
+            <div id="bot-list" class="bot-list"></div>
+          </div>
+          <!-- Add bot form -->
+          <div class="form-group bot-add-form">
+            <label>Bot を追加</label>
+            <div class="bot-add-row">
+              <input type="text" id="bot-name-input" placeholder="名前（例: メインBot）" />
+              <input type="password" id="bot-token-input" placeholder="Discord Bot Token" />
+              <button id="bot-add-btn" class="btn btn-secondary">追加</button>
+            </div>
           </div>
           <div class="form-group">
             <label for="default-volume-input">デフォルト音量</label>
@@ -106,7 +116,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button id="save-settings-btn" class="btn btn-primary">保存して接続</button>
+          <button id="save-settings-btn" class="btn btn-primary">保存</button>
           <button id="cancel-settings-btn" class="btn btn-ghost">キャンセル</button>
         </div>
       </div>

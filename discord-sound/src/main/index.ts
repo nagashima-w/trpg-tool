@@ -7,10 +7,11 @@ log.info('[app] starting up');
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { join } from 'path';
 import { spawn } from 'child_process';
+import { randomUUID } from 'crypto';
 import { SettingsManager } from './settings';
 import { TrackManager } from './tracks';
 import { DiscordManager, ffmpegBin } from './discord';
-import type { LoopMode } from '../shared/types';
+import type { Bot, LoopMode } from '../shared/types';
 
 let mainWindow: BrowserWindow | null = null;
 let settingsManager: SettingsManager;
@@ -89,9 +90,37 @@ function setupIpcHandlers(): void {
     settingsManager.save(settings);
   });
 
-  ipcMain.handle('discord-login', async (_event, token: string) => {
-    await discordManager.login(token);
-    settingsManager.update({ token });
+  // Bot management
+  ipcMain.handle('bots-get-all', () => {
+    return settingsManager.get().bots;
+  });
+
+  ipcMain.handle('bots-add', async (_event, name: string, token: string) => {
+    const settings = settingsManager.get();
+    const bot: Bot = { id: randomUUID(), name, token, lastGuildId: '', lastChannelId: '' };
+    settings.bots.push(bot);
+    if (!settings.activeBotId) settings.activeBotId = bot.id;
+    settingsManager.save(settings);
+    return bot;
+  });
+
+  ipcMain.handle('bots-remove', (_event, id: string) => {
+    const settings = settingsManager.get();
+    settings.bots = settings.bots.filter(b => b.id !== id);
+    if (settings.activeBotId === id) {
+      settings.activeBotId = settings.bots[0]?.id ?? '';
+    }
+    settingsManager.save(settings);
+  });
+
+  ipcMain.handle('bots-set-active', async (_event, id: string) => {
+    const settings = settingsManager.get();
+    const bot = settings.bots.find(b => b.id === id);
+    if (!bot) throw new Error('Bot not found');
+    settings.activeBotId = id;
+    settingsManager.save(settings);
+    discordManager.disconnect();
+    await discordManager.login(bot.token);
   });
 
   ipcMain.handle('discord-get-guilds', () => {
@@ -104,7 +133,14 @@ function setupIpcHandlers(): void {
 
   ipcMain.handle('discord-connect', async (_event, guildId: string, channelId: string) => {
     await discordManager.connect(guildId, channelId);
-    settingsManager.update({ lastGuildId: guildId, lastChannelId: channelId });
+    // Save last connection per active bot
+    const settings = settingsManager.get();
+    const bot = settings.bots.find(b => b.id === settings.activeBotId);
+    if (bot) {
+      bot.lastGuildId = guildId;
+      bot.lastChannelId = channelId;
+      settingsManager.save(settings);
+    }
   });
 
   ipcMain.handle('discord-disconnect', () => {
@@ -212,25 +248,23 @@ app.whenReady().then(async () => {
     }
   }
 
-  // Restore volume and loopMode from settings
-  const savedSettings = settingsManager.get();
-  discordManager.setVolume(savedSettings.defaultVolume);
-  if (savedSettings.loopMode) {
-    discordManager.setLoopMode(savedSettings.loopMode);
+  const settings = settingsManager.get();
+  discordManager.setVolume(settings.defaultVolume);
+  if (settings.loopMode) {
+    discordManager.setLoopMode(settings.loopMode);
   }
 
-  const settings = settingsManager.get();
-  if (settings.token) {
+  const activeBot = settingsManager.getActiveBot();
+  if (activeBot) {
     try {
-      await discordManager.login(settings.token);
+      await discordManager.login(activeBot.token);
       if (
         settings.restoreLastConnection &&
-        settings.lastGuildId &&
-        settings.lastChannelId
+        activeBot.lastGuildId &&
+        activeBot.lastChannelId
       ) {
         try {
-          // quiet=true: don't emit 'connecting' during startup auto-connect
-        await discordManager.connect(settings.lastGuildId, settings.lastChannelId, true);
+          await discordManager.connect(activeBot.lastGuildId, activeBot.lastChannelId, true);
         } catch (err) {
           console.error('Failed to auto-connect:', err);
         }

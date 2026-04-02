@@ -1,12 +1,17 @@
-import type { Settings, Track, Guild, VoiceChannel, PlaybackState, ConnectionStatus, LoopMode } from '../../shared/types';
+import type { Settings, Bot, Track, Guild, VoiceChannel, PlaybackState, ConnectionStatus, LoopMode } from '../../shared/types';
 
 export interface ElectronAPI {
   // Settings
   getSettings: () => Promise<Settings>;
   saveSettings: (settings: Settings) => Promise<void>;
 
+  // Bot management
+  botsGetAll: () => Promise<Bot[]>;
+  botsAdd: (name: string, token: string) => Promise<Bot>;
+  botsRemove: (id: string) => Promise<void>;
+  botsSetActive: (id: string) => Promise<void>;
+
   // Discord
-  discordLogin: (token: string) => Promise<void>;
   discordGetGuilds: () => Promise<Guild[]>;
   discordGetVoiceChannels: (guildId: string) => Promise<VoiceChannel[]>;
   discordConnect: (guildId: string, channelId: string) => Promise<void>;
