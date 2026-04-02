@@ -1,9 +1,9 @@
 // ============================================================
-// /sc コマンド - 正気度チェック（第7版）
+// /sc コマンド - 正気度チェック（第6版 / 第7版）
 // ============================================================
 
-import { rollD100, judgeResult, evalRollExpression } from '../dice.ts'
-import { getActiveCharacter, updateCharacterStat } from '../db.ts'
+import { rollD100, judgeResult, judgeResult6, evalRollExpression } from '../dice.ts'
+import { getActiveCharacter, getActiveSession, updateCharacterStat } from '../db.ts'
 import { extractSecret, resultLabel, type CommandResult } from './shared.ts'
 import type { D1Database } from '../db.ts'
 
@@ -30,6 +30,7 @@ function evalSanValue(expr: string): number | null {
 export async function handleSc(
   db: D1Database,
   userId: string,
+  guildId: string,
   rawArgs: string,
 ): Promise<CommandResult> {
   const { args, isSecret } = extractSecret(rawArgs)
@@ -50,10 +51,23 @@ export async function handleSc(
     }
   }
 
+  // アクティブセッションからシステムを取得
+  const session = await getActiveSession(db, guildId)
+  const system = session?.system ?? 'coc7'
+
   const currentSan = char.san
   const base = rollD100(true)
-  const level = judgeResult(base.total, currentSan)
-  const isSuccessRoll = ['critical', 'extreme', 'hard', 'regular'].includes(level)
+
+  let isSuccessRoll: boolean
+  let level: ReturnType<typeof judgeResult>
+
+  if (system === 'coc6') {
+    level = judgeResult6(base.total, currentSan)
+    isSuccessRoll = ['critical', 'special', 'success'].includes(level)
+  } else {
+    level = judgeResult(base.total, currentSan)
+    isSuccessRoll = ['critical', 'extreme', 'hard', 'regular'].includes(level)
+  }
 
   const lossExpr = isSuccessRoll ? parsed.success : parsed.failure
   const loss = evalSanValue(lossExpr)

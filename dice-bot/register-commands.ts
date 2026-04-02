@@ -18,7 +18,7 @@ if (!APPLICATION_ID || !BOT_TOKEN) {
 const commands = [
   {
     name: 'cc',
-    description: '技能・能力値ロール（新クトゥルフ神話TRPG 第7版）',
+    description: '技能・能力値ロール（CoC第6版/第7版 セッションのシステムに応じた判定）',
     options: [
       {
         name: 'args',
@@ -82,6 +82,16 @@ const commands = [
             description: 'セッション名 例: 呪われた村',
             type: 3, // STRING
             required: true,
+          },
+          {
+            name: 'system',
+            description: 'TRPGシステム（省略時: 第7版）',
+            type: 3, // STRING
+            required: false,
+            choices: [
+              { name: '新クトゥルフ神話TRPG（第7版）', value: 'coc7' },
+              { name: 'クトゥルフ神話TRPG（第6版）', value: 'coc6' },
+            ],
           },
         ],
       },

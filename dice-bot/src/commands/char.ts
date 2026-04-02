@@ -53,7 +53,7 @@ async function handleCharSet(
   const char = mapToCharacter(data, userId)
   if (!char) {
     return {
-      message: 'このシートは新クトゥルフ神話TRPG（第7版）のキャラクターではありません。',
+      message: 'このシートはクトゥルフ神話TRPG（第6版・第7版）のキャラクターではありません。',
       ephemeral: true,
     }
   }
