@@ -474,6 +474,34 @@ api.onForcedDisconnect(() => {
   alert('Discord ボイスチャンネルから切断されました。')
 })
 
+// Keyboard shortcuts
+document.addEventListener('keydown', async (e) => {
+  // Ignore when typing in an input field
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return
+
+  if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    const newVol = Math.min(100, Number(volumeSlider.value) + 5)
+    volumeSlider.value = String(newVol)
+    volumeDisplay.textContent = `${newVol}%`
+    await api.playbackSetVolume(newVol)
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    const newVol = Math.max(0, Number(volumeSlider.value) - 5)
+    volumeSlider.value = String(newVol)
+    volumeDisplay.textContent = `${newVol}%`
+    await api.playbackSetVolume(newVol)
+  } else if (e.key === 'ArrowRight' && currentPlayback.status !== 'idle') {
+    e.preventDefault()
+    const newPos = Number(seekSlider.value) + 5000
+    await api.playbackSeek(newPos)
+  } else if (e.key === 'ArrowLeft' && currentPlayback.status !== 'idle') {
+    e.preventDefault()
+    const newPos = Math.max(0, Number(seekSlider.value) - 5000)
+    await api.playbackSeek(newPos)
+  }
+})
+
 // Close modal on overlay click
 settingsModal.addEventListener('click', (e) => {
   if (e.target === settingsModal) {
