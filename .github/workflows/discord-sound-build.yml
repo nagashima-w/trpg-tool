@@ -9,6 +9,7 @@ on:
       - 'discord-sound/electron*.ts'
       - 'discord-sound/tsconfig*.json'
       - 'discord-sound/electron-builder.yml'
+      - 'discord-sound/build/**'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +18,7 @@ on:
       - 'discord-sound/electron*.ts'
       - 'discord-sound/tsconfig*.json'
       - 'discord-sound/electron-builder.yml'
+      - 'discord-sound/build/**'
   workflow_dispatch:
 
 defaults:
@@ -71,18 +73,35 @@ jobs:
       contents: write
 
     steps:
+      - uses: actions/checkout@v5
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download all artifacts
         uses: actions/download-artifact@v6
         with:
           path: artifacts
           merge-multiple: true
 
-      - name: Create or update latest release
+      - name: Create or update versioned release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: discord-sound-v${{ steps.version.outputs.version }}
+          name: Discord Sound Player v${{ steps.version.outputs.version }}
+          body: |
+            Discord Sound Player v${{ steps.version.outputs.version }}
+          files: artifacts/**
+          make_latest: true
+
+      - name: Update latest release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: discord-sound-latest
           name: Discord Sound Player (latest)
           body: |
-            mainブランチの最新ビルドです。
+            mainブランチの最新ビルドです。現在のバージョン: v${{ steps.version.outputs.version }}
           files: artifacts/**
-          make_latest: true
