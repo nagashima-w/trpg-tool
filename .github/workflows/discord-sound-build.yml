@@ -52,6 +52,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create icon.ico from icon.png (Windows)
+        if: matrix.os == 'windows-latest'
+        run: magick "build/icon.png" -define icon:auto-resize=256,48,32,16 "build/icon.ico"
+
       - name: Build and package
         run: npm run ${{ matrix.script }}
         env:
