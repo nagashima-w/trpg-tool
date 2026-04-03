@@ -231,7 +231,7 @@ function setupIpcHandlers(): void {
   });
 
   ipcMain.handle('open-user-guide', () => {
-    shell.openExternal('https://github.com/nagashima-w/trpg-tool/blob/main/discord-sound/USER-GUIDE.md');
+    return shell.openExternal('https://github.com/nagashima-w/trpg-tool/blob/main/discord-sound/USER-GUIDE.md');
   });
 }
 

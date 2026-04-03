@@ -398,9 +398,7 @@ loopModeSelect.addEventListener('change', async () => {
   await api.playbackSetLoopMode(loopModeSelect.value as LoopMode)
 })
 
-userGuideBtn.addEventListener('click', () => {
-  api.openUserGuide()
-})
+userGuideBtn.addEventListener('click', async () => { await api.openUserGuide() })
 
 settingsBtn.addEventListener('click', async () => {
   bots = await api.botsGetAll()
