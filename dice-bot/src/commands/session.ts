@@ -42,10 +42,6 @@ async function handleSessionStart(
   guildId: string,
   rawName: string,
 ): Promise<SessionCommandResult> {
-  if (!rawName) {
-    return { message: 'セッション名を指定してください。例: `/session start 呪われた村`', ephemeral: true }
-  }
-
   // 末尾に "coc6" または "coc7" があればシステムとして解釈
   const tokens = rawName.trim().split(/\s+/)
   let system: 'coc7' | 'coc6' = 'coc7'

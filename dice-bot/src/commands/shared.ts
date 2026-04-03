@@ -55,3 +55,8 @@ const RESULT_LABEL: Record<ResultLevel, string> = {
 export function resultLabel(level: ResultLevel): string {
   return RESULT_LABEL[level]
 }
+
+/** 成功判定（failure・fumble 以外はすべて成功）。第6版・第7版共通。 */
+export function isSuccess(level: ResultLevel): boolean {
+  return level !== 'failure' && level !== 'fumble'
+}

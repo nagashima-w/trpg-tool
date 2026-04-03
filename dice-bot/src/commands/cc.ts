@@ -30,11 +30,12 @@ export async function handleCc(
   // modifier抽出
   const { args: skillName, modifier } = extractModifier(argsNoSecret)
 
-  // アクティブセッションからシステムを取得
-  const session = await getActiveSession(db, guildId)
+  const [session, char] = await Promise.all([
+    getActiveSession(db, guildId),
+    getActiveCharacter(db, userId),
+  ])
   const system = session?.system ?? 'coc7'
 
-  // 第6版ではボーナス/ペナルティダイスを使用しない
   if (system === 'coc6' && modifier !== 0) {
     return {
       message: 'ボーナス/ペナルティダイスはクトゥルフ神話TRPG第6版では使用しません。',
@@ -42,8 +43,6 @@ export async function handleCc(
     }
   }
 
-  // キャラクター取得
-  const char = await getActiveCharacter(db, userId)
   if (!char) {
     return {
       message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。',
@@ -84,7 +83,6 @@ export async function handleCc(
   const lines: string[] = []
 
   if (system === 'coc6') {
-    // 第6版: シンプルロール（ボーナス/ペナルティなし）
     const level = judgeResult6(base.total, targetValue)
     lines.push(`🎲 **${resolvedName}** (目標値: ${targetValue})`)
     lines.push(`出目：**${base.total}** ＞ ${resultLabel(level)}`)
@@ -96,7 +94,6 @@ export async function handleCc(
       isSecret,
     }}
   } else {
-    // 第7版: ボーナス/ペナルティダイスあり
     const { final, extraRolls } = applyBonusPenalty(base, modifier)
     const level = judgeResult(final, targetValue)
 
