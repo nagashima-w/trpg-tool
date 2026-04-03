@@ -45,88 +45,102 @@ const noCharDb = makeDb(null)
 
 describe('handleCc', () => {
   it('技能名を渡すと判定結果を含む文字列を返す', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星')
     expect(result.message).toContain('目星')
   })
 
   it('結果に目標値が含まれる', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星')
     expect(result.message).toContain('75')
   })
 
-  it('判定レベルが含まれる（6種のいずれか）', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星')
+  it('判定レベルが含まれる（7版の6種のいずれか）', async () => {
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星')
     const levels = ['クリティカル', 'イクストリーム', 'ハード', 'レギュラー', '失敗', 'ファンブル']
     expect(levels.some(l => result.message.includes(l))).toBe(true)
   })
 
   it('能力値名（INT）でも判定できる', async () => {
-    const result = await handleCc(makeDb(), 'user-A', 'INT')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', 'INT')
     expect(result.message).toContain('INT')
     expect(result.message).toContain('85')
   })
 
   it('ボーナス指定（+1）でボーナスが表示に含まれる', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星 +1')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星 +1')
     expect(result.message).toContain('ボーナス')
   })
 
   it('ペナルティ指定（-1）でペナルティが表示に含まれる', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星 -1')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星 -1')
     expect(result.message).toContain('ペナルティ')
   })
 
   it('secret指定はephemeral=trueを返す', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星 secret')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星 secret')
     expect(result.ephemeral).toBe(true)
   })
 
   it('secret未指定はephemeral=falseを返す', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星')
     expect(result.ephemeral).toBe(false)
   })
 
   it('幸運で判定できる（char.luckを使用）', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '幸運')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '幸運')
     expect(result.message).toContain('65') // MOCK_CHAR_ROW.luck = 65
     expect(result.diceLog?.targetValue).toBe(65)
   })
 
   it('LUCK（英語）で判定できる', async () => {
-    const result = await handleCc(makeDb(), 'user-A', 'LUCK')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', 'LUCK')
     expect(result.diceLog?.targetValue).toBe(65)
   })
 
   it('HPで判定できる（char.hpを使用）', async () => {
-    const result = await handleCc(makeDb(), 'user-A', 'HP')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', 'HP')
     expect(result.diceLog?.targetValue).toBe(12) // MOCK_CHAR_ROW.hp = 12
   })
 
   it('SANで判定できる（char.sanを使用）', async () => {
-    const result = await handleCc(makeDb(), 'user-A', 'SAN')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', 'SAN')
     expect(result.diceLog?.targetValue).toBe(42) // MOCK_CHAR_ROW.san = 42
   })
 
   it('存在しない技能はエラーメッセージを返す', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '存在しない技能')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '存在しない技能')
     expect(result.message).toContain('見つかりません')
   })
 
   it('アクティブキャラなしはエラーメッセージを返す', async () => {
-    const result = await handleCc(noCharDb, 'user-A', '目星')
+    const result = await handleCc(noCharDb, 'user-A', 'guild-1', '目星')
     expect(result.message).toContain('キャラクター')
   })
 
   it('diceLogを返す', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星')
     expect(result.diceLog).toBeDefined()
     expect(result.diceLog?.skillName).toBe('目星')
     expect(result.diceLog?.targetValue).toBe(75)
   })
 
   it('secret指定時diceLog.isSecret=true', async () => {
-    const result = await handleCc(makeDb(), 'user-A', '目星 secret')
+    const result = await handleCc(makeDb(), 'user-A', 'guild-1', '目星 secret')
     expect(result.diceLog?.isSecret).toBe(true)
+  })
+
+  it('第6版セッションでは判定レベルが6版種のいずれか', async () => {
+    const db = makeSessionDb({ session: { ...MOCK_SESSION_ROW, system: 'coc6' } })
+    const result = await handleCc(db, 'user-A', 'guild-1', '目星')
+    const levels = ['クリティカル', 'スペシャル', '成功', '失敗', 'ファンブル']
+    expect(levels.some(l => result.message.includes(l))).toBe(true)
+  })
+
+  it('第6版セッションでボーナスダイス指定はエラーを返す', async () => {
+    const db = makeSessionDb({ session: { ...MOCK_SESSION_ROW, system: 'coc6' } })
+    const result = await handleCc(db, 'user-A', 'guild-1', '目星 +1')
+    expect(result.message).toContain('第6版')
+    expect(result.ephemeral).toBe(true)
   })
 })
 
@@ -134,34 +148,41 @@ describe('handleCc', () => {
 
 describe('handleSc', () => {
   it('SAN値で判定し結果を返す', async () => {
-    const result = await handleSc(makeDb(), 'user-A', '0/1d3')
+    const result = await handleSc(makeDb(), 'user-A', 'guild-1', '0/1d3')
     expect(result.message).toContain('SAN')
   })
 
   it('現在のSAN値が結果に含まれる', async () => {
-    const result = await handleSc(makeDb(), 'user-A', '1/1d6')
+    const result = await handleSc(makeDb(), 'user-A', 'guild-1', '1/1d6')
     expect(result.message).toContain('42')
   })
 
   it('secret指定はephemeral=trueを返す', async () => {
-    const result = await handleSc(makeDb(), 'user-A', '0/1d3 secret')
+    const result = await handleSc(makeDb(), 'user-A', 'guild-1', '0/1d3 secret')
     expect(result.ephemeral).toBe(true)
   })
 
   it('不正な書式はエラーメッセージを返す', async () => {
-    const result = await handleSc(makeDb(), 'user-A', '不正な書式')
+    const result = await handleSc(makeDb(), 'user-A', 'guild-1', '不正な書式')
     expect(result.message).toContain('書式')
   })
 
   it('アクティブキャラなしはエラーメッセージを返す', async () => {
-    const result = await handleSc(noCharDb, 'user-A', '0/1d3')
+    const result = await handleSc(noCharDb, 'user-A', 'guild-1', '0/1d3')
     expect(result.message).toContain('キャラクター')
   })
 
   it('diceLogを返す', async () => {
-    const result = await handleSc(makeDb(), 'user-A', '0/1d3')
+    const result = await handleSc(makeDb(), 'user-A', 'guild-1', '0/1d3')
     expect(result.diceLog).toBeDefined()
     expect(result.diceLog?.skillName).toBe('SANチェック')
+    expect(result.diceLog?.targetValue).toBe(42)
+  })
+
+  it('第6版セッションでもSANチェックが動作する', async () => {
+    const db = makeSessionDb({ session: { ...MOCK_SESSION_ROW, system: 'coc6' } })
+    const result = await handleSc(db, 'user-A', 'guild-1', '0/1d3')
+    expect(result.message).toContain('SANチェック')
     expect(result.diceLog?.targetValue).toBe(42)
   })
 })
@@ -263,6 +284,23 @@ describe('handleSession start', () => {
     const result = await handleSession(makeSessionDb({ session: null }), 'kp', 'guild-1', 'start 呪われた村')
     expect(result.message).toContain('呪われた村')
     expect(result.ephemeral).toBe(false)
+  })
+
+  it('システム未指定は第7版として開始する', async () => {
+    const result = await handleSession(makeSessionDb({ session: null }), 'kp', 'guild-1', 'start 呪われた村')
+    expect(result.message).toContain('第7版')
+  })
+
+  it('coc6指定で第6版として開始する', async () => {
+    const result = await handleSession(makeSessionDb({ session: null }), 'kp', 'guild-1', 'start 怪異の夜 coc6')
+    expect(result.message).toContain('怪異の夜')
+    expect(result.message).toContain('第6版')
+  })
+
+  it('coc7指定で第7版として開始する', async () => {
+    const result = await handleSession(makeSessionDb({ session: null }), 'kp', 'guild-1', 'start 呪われた村 coc7')
+    expect(result.message).toContain('呪われた村')
+    expect(result.message).toContain('第7版')
   })
 
   it('セッション名未指定はエラーを返す', async () => {

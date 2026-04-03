@@ -166,7 +166,7 @@ async function routeCommand(
 ): Promise<Response> {
   switch (commandName) {
     case 'cc': {
-      const result = await handleCc(env.DB, userId, args)
+      const result = await handleCc(env.DB, userId, guildId, args)
       if (result.diceLog) {
         await tryRecordDiceLog(
           env.DB, guildId, userId,
@@ -180,7 +180,7 @@ async function routeCommand(
       return messageResponse(result.message, result.ephemeral)
     }
     case 'sc': {
-      const result = await handleSc(env.DB, userId, args)
+      const result = await handleSc(env.DB, userId, guildId, args)
       if (result.diceLog) {
         await tryRecordDiceLog(
           env.DB, guildId, userId,
@@ -226,7 +226,7 @@ async function routeCommand(
       const result = await handleSession(env.DB, userId, guildId, args)
       return messageResponse(result.message, result.ephemeral)
     }
-    case 'help': {
+    case 'dicehelp': {
       const result = handleHelp()
       return messageResponse(result.message, result.ephemeral)
     }
@@ -279,8 +279,15 @@ export default {
       if (commandName === 'session') {
         const subCmd      = dataOptions?.[0]?.name as string ?? ''
         const subCmdOpts  = dataOptions?.[0]?.options as Array<Record<string, unknown>> | undefined
-        const sessionName = subCmdOpts?.[0]?.value as string ?? ''
-        args = sessionName ? `${subCmd} ${sessionName}` : subCmd
+        const sessionName   = subCmdOpts?.find(o => o.name === 'name')?.value as string ?? ''
+        const sessionSystem = subCmdOpts?.find(o => o.name === 'system')?.value as string ?? ''
+        if (sessionName && sessionSystem) {
+          args = `${subCmd} ${sessionName} ${sessionSystem}`
+        } else if (sessionName) {
+          args = `${subCmd} ${sessionName}`
+        } else {
+          args = subCmd
+        }
       } else {
         args = dataOptions?.[0]?.value as string ?? ''
       }

@@ -57,7 +57,12 @@ const VALID_COC7_DATA: CharasheetData = {
   SKAP: ['15',   '59',     '75',   '25',   '70'],
 }
 
-const NON_COC7_DATA: CharasheetData = {
+const VALID_COC6_DATA: CharasheetData = {
+  ...VALID_COC7_DATA,
+  game: 'coc6',
+}
+
+const NON_COC_DATA: CharasheetData = {
   ...VALID_COC7_DATA,
   game: 'sw2.5', // 違うゲームシステム
 }
@@ -66,10 +71,17 @@ describe('mapToCharacter', () => {
   it('coc7のデータを正しくマッピングする', () => {
     const char = mapToCharacter(VALID_COC7_DATA, 'user-discord-123')
     expect(char).not.toBeNull()
+    expect(char?.game).toBe('coc7')
   })
 
-  it('coc7以外のgameフィールドはnullを返す', () => {
-    expect(mapToCharacter(NON_COC7_DATA, 'user-discord-123')).toBeNull()
+  it('coc6のデータも受け入れる', () => {
+    const char = mapToCharacter(VALID_COC6_DATA, 'user-discord-123')
+    expect(char).not.toBeNull()
+    expect(char?.game).toBe('coc6')
+  })
+
+  it('coc6・coc7以外のgameフィールドはnullを返す', () => {
+    expect(mapToCharacter(NON_COC_DATA, 'user-discord-123')).toBeNull()
   })
 
   it('キャラクター名を正しく取得する', () => {

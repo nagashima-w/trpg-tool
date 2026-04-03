@@ -82,7 +82,7 @@ describe('upsertCharacter', () => {
   it('INSERT OR REPLACEを実行する', async () => {
     const db = makeDb()
     await upsertCharacter(db, {
-      id: '4634372', user_id: 'user-123', name: '遠山 陽子',
+      id: '4634372', user_id: 'user-123', game: 'coc7', name: '遠山 陽子',
       hp: 12, mp: 10, san: 42, luck: 65,
       stats: { STR: 85, CON: 50, DEX: 50, APP: 65, POW: 50, SIZ: 75, INT: 85, EDU: 60, MOV: 8 },
       skills: { '目星': 75 },
@@ -93,17 +93,17 @@ describe('upsertCharacter', () => {
   it('stats・skillsをJSON文字列にシリアライズしてbindする', async () => {
     const db = makeDb()
     await upsertCharacter(db, {
-      id: '111', user_id: 'u1', name: 'テスト',
+      id: '111', user_id: 'u1', game: 'coc7', name: 'テスト',
       hp: 1, mp: 1, san: 1, luck: 1,
       stats: { STR: 10, CON: 10, DEX: 10, APP: 10, POW: 10, SIZ: 10, INT: 10, EDU: 10, MOV: 7 },
       skills: { '目星': 50 },
     })
     const calls = db._stmt.bind.mock.calls[0]
-    // stats と skills が JSON 文字列で渡されている (id, user_id, name, hp, mp, san, luck, stats, skills)
-    expect(typeof calls[7]).toBe('string') // stats
-    expect(typeof calls[8]).toBe('string') // skills
-    expect(JSON.parse(calls[7])).toHaveProperty('STR')
-    expect(JSON.parse(calls[8])).toHaveProperty('目星')
+    // stats と skills が JSON 文字列で渡されている (id, user_id, game, name, hp, mp, san, luck, stats, skills)
+    expect(typeof calls[8]).toBe('string') // stats
+    expect(typeof calls[9]).toBe('string') // skills
+    expect(JSON.parse(calls[8])).toHaveProperty('STR')
+    expect(JSON.parse(calls[9])).toHaveProperty('目星')
   })
 })
 

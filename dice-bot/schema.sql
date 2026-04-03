@@ -1,8 +1,9 @@
--- Cloudflare D1 Schema for CoC 7th Edition Discord Bot
+-- Cloudflare D1 Schema for CoC Discord Bot (6th & 7th Edition)
 
 CREATE TABLE IF NOT EXISTS Characters (
   id         TEXT     PRIMARY KEY,
   user_id    TEXT     NOT NULL,
+  game       TEXT     NOT NULL DEFAULT 'coc7', -- 'coc7' | 'coc6'
   name       TEXT     NOT NULL,
   hp         INTEGER  NOT NULL DEFAULT 0,
   mp         INTEGER  NOT NULL DEFAULT 0,
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS Sessions (
   name        TEXT     NOT NULL,
   kp_user_id  TEXT     NOT NULL,
   status      TEXT     NOT NULL DEFAULT 'active', -- 'active' | 'completed'
+  system      TEXT     NOT NULL DEFAULT 'coc7',   -- 'coc7' | 'coc6'
   started_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ended_at    DATETIME
 );

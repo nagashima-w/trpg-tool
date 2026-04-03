@@ -40,14 +40,23 @@ export function extractModifier(args: string): { args: string; modifier: number 
 }
 
 const RESULT_LABEL: Record<ResultLevel, string> = {
+  // 第7版
   critical: 'クリティカル！',
   extreme:  'イクストリーム成功！',
   hard:     'ハード成功！',
   regular:  'レギュラー成功',
   failure:  '失敗',
   fumble:   'ファンブル…',
+  // 第6版
+  special:  'スペシャル成功！',
+  success:  '成功',
 }
 
 export function resultLabel(level: ResultLevel): string {
   return RESULT_LABEL[level]
+}
+
+/** 成功判定（failure・fumble 以外はすべて成功）。第6版・第7版共通。 */
+export function isSuccess(level: ResultLevel): boolean {
+  return level !== 'failure' && level !== 'fumble'
 }

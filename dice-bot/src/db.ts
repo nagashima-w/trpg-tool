@@ -16,6 +16,7 @@ export type { D1Database }
 interface CharacterRow {
   id: string
   user_id: string
+  game: string    // 'coc7' | 'coc6'
   name: string
   hp: number
   mp: number
@@ -34,6 +35,7 @@ export interface SessionRow {
   name: string
   kp_user_id: string
   status: SessionStatus
+  system: 'coc7' | 'coc6'
   started_at: string
   ended_at: string | null
 }
@@ -76,6 +78,7 @@ function parseCharacterRow(row: CharacterRow): CharacterRecord {
   return {
     id:      row.id,
     user_id: row.user_id,
+    game:    (row.game as 'coc7' | 'coc6') ?? 'coc7',
     name:    row.name,
     hp:      row.hp,
     mp:      row.mp,
@@ -123,12 +126,13 @@ export async function upsertCharacter(
   await db
     .prepare(`
       INSERT OR REPLACE INTO Characters
-        (id, user_id, name, hp, mp, san, luck, stats, skills, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        (id, user_id, game, name, hp, mp, san, luck, stats, skills, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `)
     .bind(
       char.id,
       char.user_id,
+      char.game,
       char.name,
       char.hp,
       char.mp,
@@ -205,14 +209,15 @@ export async function startSession(
   guildId: string,
   name: string,
   kpUserId: string,
+  system: 'coc7' | 'coc6' = 'coc7',
 ): Promise<string> {
   const id = generateId()
   await db
     .prepare(`
-      INSERT INTO Sessions (id, guild_id, name, kp_user_id, status, started_at)
-      VALUES (?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
+      INSERT INTO Sessions (id, guild_id, name, kp_user_id, status, system, started_at)
+      VALUES (?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP)
     `)
-    .bind(id, guildId, name, kpUserId)
+    .bind(id, guildId, name, kpUserId, system)
     .run()
   return id
 }

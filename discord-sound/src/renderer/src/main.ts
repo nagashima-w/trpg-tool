@@ -34,6 +34,7 @@ const durationDisplay = document.getElementById('duration-display') as HTMLSpanE
 const loopModeSelect = document.getElementById('loop-mode-select') as HTMLSelectElement
 const refreshGuildsBtn = document.getElementById('refresh-guilds-btn') as HTMLButtonElement
 const settingsBtn = document.getElementById('settings-btn') as HTMLButtonElement
+const userGuideBtn = document.getElementById('user-guide-btn') as HTMLButtonElement
 const footerStatusText = document.getElementById('footer-status-text') as HTMLSpanElement
 const settingsModal = document.getElementById('settings-modal') as HTMLDivElement
 const modalCloseBtn = document.getElementById('modal-close-btn') as HTMLButtonElement
@@ -396,6 +397,8 @@ seekSlider.addEventListener('input', () => {
 loopModeSelect.addEventListener('change', async () => {
   await api.playbackSetLoopMode(loopModeSelect.value as LoopMode)
 })
+
+userGuideBtn.addEventListener('click', async () => { await api.openUserGuide() })
 
 settingsBtn.addEventListener('click', async () => {
   bots = await api.botsGetAll()

@@ -2,7 +2,9 @@
 // CoC 第7版 ダイスロジック
 // ============================================================
 
-export type ResultLevel = 'critical' | 'extreme' | 'hard' | 'regular' | 'failure' | 'fumble'
+// 第7版: critical / extreme / hard / regular / failure / fumble
+// 第6版: critical / special / success / failure / fumble
+export type ResultLevel = 'critical' | 'extreme' | 'hard' | 'regular' | 'failure' | 'fumble' | 'special' | 'success'
 export type JudgeResult = ResultLevel // alias for readability in tests
 
 /** rollD100(false) → number、rollD100(true) → D100Detail */
@@ -88,6 +90,26 @@ export function judgeResult(dice: number, target: number): ResultLevel {
   if (dice <= target) return 'regular'
 
   // 失敗
+  return 'failure'
+}
+
+/**
+ * 第6版の判定レベルを返す。
+ * @param dice  出目（1〜100）
+ * @param target 目標値
+ *
+ * 判定順:
+ *   ファンブル: 96以上（目標値によらず）
+ *   クリティカル: 出目1
+ *   スペシャル: 目標値の1/5以下（端数切り捨て）
+ *   成功: 目標値以下
+ *   失敗: それ以外
+ */
+export function judgeResult6(dice: number, target: number): ResultLevel {
+  if (dice >= 96) return 'fumble'
+  if (dice === 1) return 'critical'
+  if (dice <= Math.floor(target / 5)) return 'special'
+  if (dice <= target) return 'success'
   return 'failure'
 }
 

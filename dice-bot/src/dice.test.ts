@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import {
   rollD100,
   judgeResult,
+  judgeResult6,
   applyBonusPenalty,
   parseRollExpression,
   evalRollExpression,
-  type RollResult,
   type JudgeResult,
 } from './dice'
 
@@ -101,6 +101,50 @@ describe('judgeResult - 失敗', () => {
   it('出目が目標値より大きいは失敗', () => {
     expect(judgeResult(51, 50)).toBe('failure')
     expect(judgeResult(99, 50)).toBe('failure')
+  })
+})
+
+// ── judgeResult6 ─────────────────────────────────────────────────────────────
+
+describe('judgeResult6 - ファンブル', () => {
+  it('出目96〜100は目標値によらずファンブル', () => {
+    expect(judgeResult6(96, 10)).toBe('fumble')
+    expect(judgeResult6(96, 99)).toBe('fumble')
+    expect(judgeResult6(100, 50)).toBe('fumble')
+  })
+})
+
+describe('judgeResult6 - クリティカル', () => {
+  it('出目1は常にクリティカル', () => {
+    expect(judgeResult6(1, 50)).toBe('critical')
+    expect(judgeResult6(1, 1)).toBe('critical')
+    expect(judgeResult6(1, 99)).toBe('critical')
+  })
+})
+
+describe('judgeResult6 - スペシャル', () => {
+  it('出目が目標値の1/5以下（端数切り捨て）はスペシャル', () => {
+    expect(judgeResult6(10, 50)).toBe('special')  // 50/5=10
+    expect(judgeResult6(2,  10)).toBe('special')  // 10/5=2
+    expect(judgeResult6(11, 50)).not.toBe('special')
+  })
+
+  it('出目1はクリティカル優先（スペシャル範囲内でも）', () => {
+    expect(judgeResult6(1, 50)).toBe('critical')
+  })
+})
+
+describe('judgeResult6 - 成功', () => {
+  it('出目が目標値以下は成功', () => {
+    expect(judgeResult6(50, 50)).toBe('success')
+    expect(judgeResult6(11, 50)).toBe('success')
+  })
+})
+
+describe('judgeResult6 - 失敗', () => {
+  it('出目が目標値より大きいは失敗', () => {
+    expect(judgeResult6(51, 50)).toBe('failure')
+    expect(judgeResult6(95, 50)).toBe('failure')
   })
 })
 

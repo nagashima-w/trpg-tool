@@ -1,10 +1,10 @@
 // ============================================================
-// /sc コマンド - 正気度チェック（第7版）
+// /sc コマンド - 正気度チェック（第6版 / 第7版）
 // ============================================================
 
-import { rollD100, judgeResult, evalRollExpression } from '../dice.ts'
-import { getActiveCharacter, updateCharacterStat } from '../db.ts'
-import { extractSecret, resultLabel, type CommandResult } from './shared.ts'
+import { rollD100, judgeResult, judgeResult6, evalRollExpression } from '../dice.ts'
+import { getActiveCharacter, getActiveSession, updateCharacterStat } from '../db.ts'
+import { extractSecret, resultLabel, isSuccess, type CommandResult } from './shared.ts'
 import type { D1Database } from '../db.ts'
 
 /**
@@ -30,17 +30,10 @@ function evalSanValue(expr: string): number | null {
 export async function handleSc(
   db: D1Database,
   userId: string,
+  guildId: string,
   rawArgs: string,
 ): Promise<CommandResult> {
   const { args, isSecret } = extractSecret(rawArgs)
-
-  const char = await getActiveCharacter(db, userId)
-  if (!char) {
-    return {
-      message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。',
-      ephemeral: true,
-    }
-  }
 
   const parsed = parseSanArgs(args)
   if (!parsed) {
@@ -50,10 +43,25 @@ export async function handleSc(
     }
   }
 
+  const [char, session] = await Promise.all([
+    getActiveCharacter(db, userId),
+    getActiveSession(db, guildId),
+  ])
+
+  if (!char) {
+    return {
+      message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。',
+      ephemeral: true,
+    }
+  }
+
+  const system = session?.system ?? 'coc7'
   const currentSan = char.san
   const base = rollD100(true)
-  const level = judgeResult(base.total, currentSan)
-  const isSuccessRoll = ['critical', 'extreme', 'hard', 'regular'].includes(level)
+  const level = system === 'coc6'
+    ? judgeResult6(base.total, currentSan)
+    : judgeResult(base.total, currentSan)
+  const isSuccessRoll = isSuccess(level)
 
   const lossExpr = isSuccessRoll ? parsed.success : parsed.failure
   const loss = evalSanValue(lossExpr)

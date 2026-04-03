@@ -38,6 +38,7 @@ export interface CharasheetData {
 export interface CharacterRecord {
   id: string
   user_id: string
+  game: 'coc7' | 'coc6'
   name: string
   hp: number
   mp: number
@@ -107,10 +108,10 @@ export async function fetchCharasheet(id: string): Promise<CharasheetData> {
 
 /**
  * CharasheetDataをCharacterRecordに変換する。
- * game が 'coc7' でない場合はnullを返す。
+ * game が 'coc7' または 'coc6' でない場合はnullを返す。
  */
 export function mapToCharacter(data: CharasheetData, userId: string): CharacterRecord | null {
-  if (data.game !== 'coc7') return null
+  if (data.game !== 'coc7' && data.game !== 'coc6') return null
 
   // 技能マッピング: 値が空文字・NaNのものはスキップ
   const skills: Record<string, number> = {}
@@ -131,6 +132,7 @@ export function mapToCharacter(data: CharasheetData, userId: string): CharacterR
   return {
     id:      String(data.data_id),
     user_id: userId,
+    game:    data.game as 'coc7' | 'coc6',
     name:    data.pc_name,
     hp:      safeInt(data.NP10),
     mp:      safeInt(data.NP11),

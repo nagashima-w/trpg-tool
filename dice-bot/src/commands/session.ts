@@ -40,8 +40,18 @@ async function handleSessionStart(
   db: D1Database,
   kpUserId: string,
   guildId: string,
-  name: string,
+  rawName: string,
 ): Promise<SessionCommandResult> {
+  // 末尾に "coc6" または "coc7" があればシステムとして解釈
+  const tokens = rawName.trim().split(/\s+/)
+  let system: 'coc7' | 'coc6' = 'coc7'
+  let name = rawName.trim()
+  const lastToken = tokens[tokens.length - 1]?.toLowerCase()
+  if (lastToken === 'coc6' || lastToken === 'coc7') {
+    system = lastToken as 'coc7' | 'coc6'
+    name = tokens.slice(0, -1).join(' ')
+  }
+
   if (!name) {
     return { message: 'セッション名を指定してください。例: `/session start 呪われた村`', ephemeral: true }
   }
@@ -54,10 +64,14 @@ async function handleSessionStart(
     }
   }
 
-  await startSession(db, guildId, name, kpUserId)
+  await startSession(db, guildId, name, kpUserId, system)
+
+  const systemLabel = system === 'coc6'
+    ? 'クトゥルフ神話TRPG（第6版）'
+    : '新クトゥルフ神話TRPG（第7版）'
 
   return {
-    message: `🎮 セッション「**${name}**」を開始しました！\nこれ以降のダイスロールはログに記録されます。`,
+    message: `🎮 セッション「**${name}**」を開始しました！（システム: ${systemLabel}）\nこれ以降のダイスロールはログに記録されます。`,
     ephemeral: false,
   }
 }
