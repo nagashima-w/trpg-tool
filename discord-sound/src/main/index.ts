@@ -4,7 +4,7 @@ log.transports.file.level = 'debug';
 log.transports.console.level = 'debug';
 log.info('[app] starting up');
 
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, Menu, shell } from 'electron';
 import { join } from 'path';
 import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
@@ -17,6 +17,27 @@ let mainWindow: BrowserWindow | null = null;
 let settingsManager: SettingsManager;
 let trackManager: TrackManager;
 let discordManager: DiscordManager;
+
+const USER_GUIDE_URL = 'https://github.com/nagashima-w/trpg-tool/blob/main/discord-sound/USER-GUIDE.md';
+
+function setupMenu(): void {
+  const template = Menu.buildFromTemplate([
+    { role: 'fileMenu' },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'ユーザーガイド(web)',
+          click: () => { shell.openExternal(USER_GUIDE_URL); },
+        },
+      ],
+    },
+  ]);
+  Menu.setApplicationMenu(template);
+}
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -241,6 +262,7 @@ app.whenReady().then(async () => {
   trackManager = new TrackManager(userDataPath);
   discordManager = new DiscordManager();
 
+  setupMenu();
   setupDiscordEvents();
   setupIpcHandlers();
   createWindow();
