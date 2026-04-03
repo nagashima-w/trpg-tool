@@ -35,6 +35,9 @@ export interface ElectronAPI {
   tracksRename: (id: string, name: string) => Promise<void>;
   tracksReorder: (ids: string[]) => Promise<void>;
 
+  // Help
+  openUserGuide: () => Promise<void>;
+
   // Events
   onLoggedIn: (cb: () => void) => void;
   onStatusChange: (cb: (status: ConnectionStatus) => void) => void;

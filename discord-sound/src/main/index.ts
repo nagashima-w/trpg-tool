@@ -4,7 +4,7 @@ log.transports.file.level = 'debug';
 log.transports.console.level = 'debug';
 log.info('[app] starting up');
 
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import { join } from 'path';
 import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
@@ -228,6 +228,10 @@ function setupIpcHandlers(): void {
 
   ipcMain.handle('tracks-rename', (_event, id: string, name: string) => {
     trackManager.rename(id, name);
+  });
+
+  ipcMain.handle('open-user-guide', () => {
+    shell.openExternal('https://github.com/nagashima-w/trpg-tool/blob/main/discord-sound/USER-GUIDE.md');
   });
 }
 

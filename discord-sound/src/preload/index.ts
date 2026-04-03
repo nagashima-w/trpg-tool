@@ -61,6 +61,8 @@ const electronAPI = {
     ipcRenderer.removeAllListeners('discord:positionUpdate');
     ipcRenderer.on('discord:positionUpdate', (_event, pos) => cb(pos));
   },
+
+  openUserGuide: (): Promise<void> => ipcRenderer.invoke('open-user-guide'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
