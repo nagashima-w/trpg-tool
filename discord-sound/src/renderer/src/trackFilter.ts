@@ -1,9 +1,12 @@
 import type { Track } from '../../shared/types'
 
+export type TagFilterMode = 'OR' | 'AND'
+
 export function filterTracks(
   tracks: Track[],
   searchQuery: string,
-  activeTagFilters: string[]
+  activeTagFilters: string[],
+  tagFilterMode: TagFilterMode = 'OR'
 ): Track[] {
   let result = tracks
 
@@ -13,9 +16,15 @@ export function filterTracks(
   }
 
   if (activeTagFilters.length > 0) {
-    result = result.filter((t) =>
-      activeTagFilters.some((tag) => t.tags?.includes(tag))
-    )
+    if (tagFilterMode === 'AND') {
+      result = result.filter((t) =>
+        activeTagFilters.every((tag) => t.tags?.includes(tag))
+      )
+    } else {
+      result = result.filter((t) =>
+        activeTagFilters.some((tag) => t.tags?.includes(tag))
+      )
+    }
   }
 
   return result

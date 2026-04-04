@@ -1,5 +1,5 @@
 import type { Bot, Track, ConnectionStatus, PlaybackState, LoopMode } from '../../shared/types'
-import { filterTracks } from './trackFilter'
+import { filterTracks, type TagFilterMode } from './trackFilter'
 
 const api = window.electronAPI
 
@@ -17,6 +17,7 @@ let draggedTrackId: string | null = null
 // Filter state
 let searchQuery = ''
 let activeTagFilters: string[] = []
+let tagFilterMode: TagFilterMode = 'AND'
 let openTagEditorId: string | null = null
 
 // DOM references
@@ -195,6 +196,18 @@ function renderTagFilterBar(): void {
   tagFilterBar.classList.remove('hidden')
   tagFilterBar.innerHTML = ''
 
+  // AND/OR トグル
+  const modeToggle = document.createElement('button')
+  modeToggle.className = 'btn tag-mode-toggle ' + (tagFilterMode === 'AND' ? 'tag-mode-and' : 'tag-mode-or')
+  modeToggle.textContent = tagFilterMode
+  modeToggle.title = tagFilterMode === 'AND' ? '全タグに一致（クリックでORに切替）' : 'いずれかのタグに一致（クリックでANDに切替）'
+  modeToggle.addEventListener('click', () => {
+    tagFilterMode = tagFilterMode === 'AND' ? 'OR' : 'AND'
+    renderTagFilterBar()
+    renderTracks()
+  })
+  tagFilterBar.appendChild(modeToggle)
+
   for (const tag of allTags) {
     const chip = document.createElement('span')
     chip.className = 'tag-chip tag-chip-filter' + (activeTagFilters.includes(tag) ? ' active' : '')
@@ -341,7 +354,7 @@ function renderTracks(): void {
     return
   }
 
-  const filtered = filterTracks(tracks, searchQuery, activeTagFilters)
+  const filtered = filterTracks(tracks, searchQuery, activeTagFilters, tagFilterMode)
 
   if (filtered.length === 0) {
     const empty = document.createElement('div')

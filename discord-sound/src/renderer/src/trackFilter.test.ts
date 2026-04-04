@@ -38,44 +38,84 @@ describe('filterTracks - search', () => {
   })
 })
 
-describe('filterTracks - tag filter', () => {
+describe('filterTracks - tag filter (OR)', () => {
   it('returns all tracks for empty tag filter', () => {
-    expect(filterTracks(tracks, '', [])).toHaveLength(5)
+    expect(filterTracks(tracks, '', [], 'OR')).toHaveLength(5)
   })
 
-  it('filters by single tag (OR logic)', () => {
-    const result = filterTracks(tracks, '', ['戦闘'])
+  it('filters by single tag', () => {
+    const result = filterTracks(tracks, '', ['戦闘'], 'OR')
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('1')
   })
 
-  it('filters by multiple tags (OR logic - any match)', () => {
-    const result = filterTracks(tracks, '', ['戦闘', '環境音'])
+  it('multiple tags: shows tracks with ANY selected tag', () => {
+    const result = filterTracks(tracks, '', ['戦闘', '環境音'], 'OR')
     expect(result).toHaveLength(3)
     expect(result.map(t => t.id)).toEqual(expect.arrayContaining(['1', '2', '3']))
   })
 
   it('excludes tracks with no tags when filter is active', () => {
-    const result = filterTracks(tracks, '', ['戦闘'])
+    const result = filterTracks(tracks, '', ['戦闘'], 'OR')
     expect(result.find(t => t.id === '4')).toBeUndefined()
     expect(result.find(t => t.id === '5')).toBeUndefined()
   })
 
   it('handles tracks with undefined tags', () => {
-    const result = filterTracks(tracks, '', ['環境音'])
+    const result = filterTracks(tracks, '', ['環境音'], 'OR')
+    expect(result.find(t => t.id === '5')).toBeUndefined()
+  })
+})
+
+describe('filterTracks - tag filter (AND)', () => {
+  it('returns all tracks for empty tag filter', () => {
+    expect(filterTracks(tracks, '', [], 'AND')).toHaveLength(5)
+  })
+
+  it('filters by single tag', () => {
+    const result = filterTracks(tracks, '', ['戦闘'], 'AND')
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
+  it('multiple tags: shows only tracks with ALL selected tags', () => {
+    const result = filterTracks(tracks, '', ['戦闘', 'ボス'], 'AND')
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
+  it('returns empty when no track has all selected tags', () => {
+    const result = filterTracks(tracks, '', ['戦闘', '環境音'], 'AND')
+    expect(result).toHaveLength(0)
+  })
+
+  it('excludes tracks with no tags when filter is active', () => {
+    const result = filterTracks(tracks, '', ['戦闘'], 'AND')
+    expect(result.find(t => t.id === '4')).toBeUndefined()
     expect(result.find(t => t.id === '5')).toBeUndefined()
   })
 })
 
 describe('filterTracks - combined', () => {
-  it('applies both search and tag filter', () => {
-    const result = filterTracks(tracks, 'dungeon', ['環境音'])
+  it('applies both search and OR tag filter', () => {
+    const result = filterTracks(tracks, 'dungeon', ['環境音'], 'OR')
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('3')
   })
 
+  it('applies both search and AND tag filter', () => {
+    const result = filterTracks(tracks, 'battle', ['戦闘', 'ボス'], 'AND')
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
   it('returns empty when search matches but tag does not', () => {
-    const result = filterTracks(tracks, 'battle', ['環境音'])
+    const result = filterTracks(tracks, 'battle', ['環境音'], 'OR')
     expect(result).toHaveLength(0)
+  })
+
+  it('defaults to OR when mode is not specified', () => {
+    const result = filterTracks(tracks, '', ['戦闘', '環境音'])
+    expect(result).toHaveLength(3)
   })
 })
