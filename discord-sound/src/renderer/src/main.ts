@@ -227,40 +227,81 @@ function renderTagFilterBar(): void {
 function renderTagEditor(track: Track, container: HTMLElement): void {
   container.innerHTML = ''
 
-  const tags = track.tags ?? []
-  for (const tag of tags) {
-    const chip = document.createElement('span')
-    chip.className = 'tag-chip'
-    chip.textContent = tag
+  const currentTags = track.tags ?? []
 
-    const removeX = document.createElement('span')
-    removeX.className = 'tag-chip-remove'
-    removeX.textContent = '×'
-    removeX.addEventListener('click', async (e) => {
-      e.stopPropagation()
-      const newTags = (track.tags ?? []).filter(t => t !== tag)
-      track.tags = newTags
-      await api.tracksUpdateTags(track.id, newTags)
-      renderTagEditor(track, container)
-      renderTagFilterBar()
-      renderTracks()
-    })
-    chip.appendChild(removeX)
-    container.appendChild(chip)
+  // --- 現在のタグ（削除可能チップ） ---
+  if (currentTags.length > 0) {
+    const currentSection = document.createElement('div')
+    currentSection.className = 'tag-editor-section'
+    for (const tag of currentTags) {
+      const chip = document.createElement('span')
+      chip.className = 'tag-chip tag-chip-current'
+      chip.textContent = tag
+
+      const removeX = document.createElement('span')
+      removeX.className = 'tag-chip-remove'
+      removeX.textContent = '×'
+      removeX.addEventListener('click', async (e) => {
+        e.stopPropagation()
+        const newTags = currentTags.filter(t => t !== tag)
+        track.tags = newTags
+        await api.tracksUpdateTags(track.id, newTags)
+        renderTagEditor(track, container)
+        renderTagFilterBar()
+        renderTracks()
+      })
+      chip.appendChild(removeX)
+      currentSection.appendChild(chip)
+    }
+    container.appendChild(currentSection)
   }
+
+  // --- 既存タグのサジェスト ---
+  const allTags = Array.from(new Set(tracks.flatMap(t => t.tags ?? []))).sort()
+  const suggestions = allTags.filter(tag => !currentTags.includes(tag))
+  if (suggestions.length > 0) {
+    const suggestSection = document.createElement('div')
+    suggestSection.className = 'tag-editor-section tag-editor-suggestions'
+
+    const label = document.createElement('span')
+    label.className = 'tag-editor-section-label'
+    label.textContent = '既存:'
+    suggestSection.appendChild(label)
+
+    for (const tag of suggestions) {
+      const chip = document.createElement('span')
+      chip.className = 'tag-chip tag-chip-suggest'
+      chip.textContent = tag
+      chip.title = 'クリックで追加'
+      chip.addEventListener('click', async (e) => {
+        e.stopPropagation()
+        const newTags = [...currentTags, tag]
+        track.tags = newTags
+        await api.tracksUpdateTags(track.id, newTags)
+        renderTagEditor(track, container)
+        renderTagFilterBar()
+        renderTracks()
+      })
+      suggestSection.appendChild(chip)
+    }
+    container.appendChild(suggestSection)
+  }
+
+  // --- 新規タグ入力 ---
+  const inputSection = document.createElement('div')
+  inputSection.className = 'tag-editor-section'
 
   const input = document.createElement('input')
   input.type = 'text'
   input.className = 'tag-add-input'
-  input.placeholder = 'タグを追加...'
+  input.placeholder = '新規タグを入力...'
 
   const addTag = async (): Promise<void> => {
     const newTag = input.value.trim()
-    if (newTag && !(track.tags ?? []).includes(newTag)) {
-      const newTags = [...(track.tags ?? []), newTag]
+    if (newTag && !currentTags.includes(newTag)) {
+      const newTags = [...currentTags, newTag]
       track.tags = newTags
       await api.tracksUpdateTags(track.id, newTags)
-      input.value = ''
       renderTagEditor(track, container)
       renderTagFilterBar()
       renderTracks()
@@ -277,7 +318,6 @@ function renderTagEditor(track: Track, container: HTMLElement): void {
     }
   })
   input.addEventListener('blur', () => {
-    // blur後も少し待ってから閉じる（chip×クリックの場合は再描画で対応）
     void addTag()
   })
 
@@ -285,8 +325,9 @@ function renderTagEditor(track: Track, container: HTMLElement): void {
   hint.className = 'tag-editor-hint'
   hint.textContent = 'Enterで追加 / Escで閉じる'
 
-  container.appendChild(input)
-  container.appendChild(hint)
+  inputSection.appendChild(input)
+  inputSection.appendChild(hint)
+  container.appendChild(inputSection)
   input.focus()
 }
 
