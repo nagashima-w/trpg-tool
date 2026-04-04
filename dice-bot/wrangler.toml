@@ -5,9 +5,10 @@ compatibility_flags = ["nodejs_compat"]
 account_id = "8bf739e7189a37dbd719ed763e956fc8"
 
 [[d1_databases]]
-binding     = "DB"
-database_name = "coc-dice-bot-db"
-database_id   = "76bc0e45-e495-4ad2-9438-e15f3cb8a4a4"
+binding        = "DB"
+database_name  = "coc-dice-bot-db"
+database_id    = "76bc0e45-e495-4ad2-9438-e15f3cb8a4a4"
+migrations_dir = "migrations"
 
 [vars]
 DISCORD_PUBLIC_KEY = "86507feb63fd64eda0fe40f89da677a5733c228661f26fa48c5e877b90d410bc"

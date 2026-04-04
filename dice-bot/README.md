@@ -48,13 +48,42 @@ npm test
 
 ## デプロイ
 
-GitHub Actions (`dice-bot-deploy.yml`) が `main` ブランチへの push 時に自動デプロイする。
+GitHub Actions (`dice-bot-deploy.yml`) が `main` ブランチへの push 時に自動デプロイする。  
+デプロイ前に `wrangler d1 migrations apply` が自動実行され、未適用のマイグレーションが適用される。
 
 手動でデプロイする場合:
 
 ```bash
 npm run deploy
 ```
+
+---
+
+## DBマイグレーション
+
+スキーマ変更は `migrations/` ディレクトリの番号付き SQL ファイルで管理する。  
+`wrangler d1 migrations apply` は適用済みのファイルをスキップするため、何度実行しても安全。
+
+### 新しいマイグレーションを追加する手順
+
+1. `migrations/NNNN_description.sql` を作成（例: `0002_add_foo_column.sql`）
+2. `main` にマージすると GitHub Actions が自動適用する
+
+### 手動適用（ローカル確認）
+
+```bash
+# 未適用のマイグレーションを確認
+npx wrangler d1 migrations list coc-dice-bot-db
+
+# 本番 D1 に適用
+npx wrangler d1 migrations apply coc-dice-bot-db
+```
+
+### マイグレーション履歴
+
+| ファイル | 内容 |
+|:---|:---|
+| `0001_add_game_system_columns.sql` | `Characters.game`・`Sessions.system` カラムを追加（第6版対応） |
 
 ---
 
