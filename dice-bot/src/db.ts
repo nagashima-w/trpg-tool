@@ -32,12 +32,20 @@ export type SessionStatus = 'active' | 'completed'
 export interface SessionRow {
   id: string
   guild_id: string
+  channel_id: string
   name: string
   kp_user_id: string
   status: SessionStatus
   system: 'coc7' | 'coc6'
   started_at: string
   ended_at: string | null
+}
+
+export interface SessionParticipantWithChar {
+  user_id: string
+  character_id: string
+  joined_at: string
+  character: import('./charasheet.ts').CharacterRecord
 }
 
 export interface DiceLogRow {
@@ -189,15 +197,16 @@ export async function updateCharacterStat(
 // ── セッション操作 ────────────────────────────────────────────
 
 /**
- * guildのactiveなセッションを返す。なければnull。
+ * チャンネルのactiveなセッションを返す。なければnull。
  */
 export async function getActiveSession(
   db: D1Database,
   guildId: string,
+  channelId: string,
 ): Promise<SessionRow | null> {
   return db
-    .prepare(`SELECT * FROM Sessions WHERE guild_id = ? AND status = 'active' LIMIT 1`)
-    .bind(guildId)
+    .prepare(`SELECT * FROM Sessions WHERE guild_id = ? AND channel_id = ? AND status = 'active' LIMIT 1`)
+    .bind(guildId, channelId)
     .first<SessionRow>()
 }
 
@@ -207,6 +216,7 @@ export async function getActiveSession(
 export async function startSession(
   db: D1Database,
   guildId: string,
+  channelId: string,
   name: string,
   kpUserId: string,
   system: 'coc7' | 'coc6' = 'coc7',
@@ -214,12 +224,83 @@ export async function startSession(
   const id = generateId()
   await db
     .prepare(`
-      INSERT INTO Sessions (id, guild_id, name, kp_user_id, status, system, started_at)
-      VALUES (?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP)
+      INSERT INTO Sessions (id, guild_id, channel_id, name, kp_user_id, status, system, started_at)
+      VALUES (?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP)
     `)
-    .bind(id, guildId, name, kpUserId, system)
+    .bind(id, guildId, channelId, name, kpUserId, system)
     .run()
   return id
+}
+
+/**
+ * セッション参加者をupsertする（/char set 実行時に呼び出す）。
+ */
+export async function upsertSessionParticipant(
+  db: D1Database,
+  sessionId: string,
+  userId: string,
+  characterId: string,
+): Promise<void> {
+  await db
+    .prepare(`
+      INSERT INTO Session_Participants (session_id, user_id, character_id, joined_at)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(session_id, user_id) DO UPDATE SET character_id = excluded.character_id
+    `)
+    .bind(sessionId, userId, characterId)
+    .run()
+}
+
+/**
+ * セッション参加者をキャラクターデータ付きで返す（joined_at 昇順）。
+ */
+export async function getSessionParticipants(
+  db: D1Database,
+  sessionId: string,
+): Promise<SessionParticipantWithChar[]> {
+  const { results } = await db
+    .prepare(`
+      SELECT sp.user_id, sp.character_id, sp.joined_at,
+             c.id, c.user_id AS c_user_id, c.game, c.name, c.hp, c.mp, c.san, c.luck, c.stats, c.skills
+      FROM Session_Participants sp
+      INNER JOIN Characters c ON c.id = sp.character_id
+      WHERE sp.session_id = ?
+      ORDER BY sp.joined_at ASC
+    `)
+    .bind(sessionId)
+    .all<{
+      user_id: string
+      character_id: string
+      joined_at: string
+      id: string
+      c_user_id: string
+      game: string
+      name: string
+      hp: number
+      mp: number
+      san: number
+      luck: number
+      stats: string
+      skills: string
+    }>()
+
+  return results.map(r => ({
+    user_id: r.user_id,
+    character_id: r.character_id,
+    joined_at: r.joined_at,
+    character: {
+      id: r.id,
+      user_id: r.c_user_id,
+      game: (r.game as 'coc7' | 'coc6') ?? 'coc7',
+      name: r.name,
+      hp: r.hp,
+      mp: r.mp,
+      san: r.san,
+      luck: r.luck,
+      stats: JSON.parse(r.stats),
+      skills: JSON.parse(r.skills),
+    },
+  }))
 }
 
 /**

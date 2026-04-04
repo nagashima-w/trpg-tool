@@ -3,20 +3,25 @@
 // ============================================================
 
 import { parseCharasheetUrl, fetchCharasheet, mapToCharacter } from '../charasheet.ts'
-import { getActiveCharacter, upsertCharacter, setActiveCharacter, updateCharacterStat } from '../db.ts'
+import {
+  getActiveCharacter, upsertCharacter, setActiveCharacter, updateCharacterStat,
+  getActiveSession, upsertSessionParticipant,
+} from '../db.ts'
 import type { D1Database } from '../db.ts'
 import type { CommandResult } from './shared.ts'
 
 export async function handleChar(
   db: D1Database,
   userId: string,
+  guildId: string,
+  channelId: string,
   rawArgs: string,
 ): Promise<CommandResult> {
   const parts = rawArgs.trim().split(/\s+/)
   const subcommand = parts[0]?.toLowerCase()
 
   switch (subcommand) {
-    case 'set':    return handleCharSet(db, userId, parts[1] ?? '')
+    case 'set':    return handleCharSet(db, userId, guildId, channelId, parts[1] ?? '')
     case 'status': return handleCharStatus(db, userId)
     case 'update': return handleCharUpdate(db, userId, parts[1], parts[2])
     default:
@@ -32,6 +37,8 @@ export async function handleChar(
 async function handleCharSet(
   db: D1Database,
   userId: string,
+  guildId: string,
+  channelId: string,
   url: string,
 ): Promise<CommandResult> {
   if (!url) {
@@ -61,6 +68,12 @@ async function handleCharSet(
   await upsertCharacter(db, char)
   await setActiveCharacter(db, userId, char.id)
 
+  // アクティブセッションがあれば参加者として登録
+  const session = await getActiveSession(db, guildId, channelId)
+  if (session) {
+    await upsertSessionParticipant(db, session.id, userId, char.id)
+  }
+
   return {
     message: `✅ **${char.name}** を登録しました！\nHP: ${char.hp} / MP: ${char.mp} / SAN: ${char.san} / 幸運: ${char.luck}`,
     ephemeral: true,
@@ -83,7 +96,7 @@ async function handleCharStatus(
     `HP: ${char.hp} | MP: ${char.mp} | SAN: ${char.san} | 幸運: ${char.luck}`,
   ]
 
-  return { message: lines.join('\n'), ephemeral: true }
+  return { message: lines.join('\n'), ephemeral: false }
 }
 
 // ── /char update ─────────────────────────────────────────────

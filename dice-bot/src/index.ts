@@ -86,6 +86,7 @@ function messageResponse(content: string, ephemeral: boolean): Response {
 async function tryRecordDiceLog(
   db: D1Database,
   guildId: string,
+  channelId: string,
   userId: string,
   skillName: string,
   targetValue: number,
@@ -94,7 +95,7 @@ async function tryRecordDiceLog(
   isSecret: boolean,
 ): Promise<void> {
   try {
-    const session = await getActiveSession(db, guildId)
+    const session = await getActiveSession(db, guildId, channelId)
     if (!session) return
 
     const char = await getActiveCharacter(db, userId)
@@ -161,6 +162,7 @@ async function routeCommand(
   commandName: string,
   userId: string,
   guildId: string,
+  channelId: string,
   args: string,
   interactionToken: string,
 ): Promise<Response> {
@@ -169,7 +171,7 @@ async function routeCommand(
       const result = await handleCc(env.DB, userId, guildId, args)
       if (result.diceLog) {
         await tryRecordDiceLog(
-          env.DB, guildId, userId,
+          env.DB, guildId, channelId, userId,
           result.diceLog.skillName,
           result.diceLog.targetValue,
           result.diceLog.finalDice,
@@ -183,7 +185,7 @@ async function routeCommand(
       const result = await handleSc(env.DB, userId, guildId, args)
       if (result.diceLog) {
         await tryRecordDiceLog(
-          env.DB, guildId, userId,
+          env.DB, guildId, channelId, userId,
           result.diceLog.skillName,
           result.diceLog.targetValue,
           result.diceLog.finalDice,
@@ -198,16 +200,16 @@ async function routeCommand(
       return messageResponse(result.message, result.ephemeral)
     }
     case 'char': {
-      const result = await handleChar(env.DB, userId, args)
+      const result = await handleChar(env.DB, userId, guildId, channelId, args)
       return messageResponse(result.message, result.ephemeral)
     }
     case 'session': {
-      if (args === 'end') {
+      if (args.split(/\s+/)[0] === 'end') {
         // レポート生成・ファイル送信はDiscordの3秒制限を超える可能性があるため
         // deferred応答（type:5）で即時ACKし、waitUntilでバックグラウンド処理する
         ctx.waitUntil((async () => {
           try {
-            const result = await handleSession(env.DB, userId, guildId, 'end')
+            const result = await handleSession(env.DB, userId, guildId, channelId, 'end')
             await editOriginalResponse(env.DISCORD_APPLICATION_ID, interactionToken, result.message)
             if (result.file) {
               await sendFollowupFile(env.DISCORD_APPLICATION_ID, interactionToken, result.file)
@@ -223,7 +225,7 @@ async function routeCommand(
         return jsonResponse({ type: DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })
       }
 
-      const result = await handleSession(env.DB, userId, guildId, args)
+      const result = await handleSession(env.DB, userId, guildId, channelId, args)
       return messageResponse(result.message, result.ephemeral)
     }
     case 'dicehelp': {
@@ -270,6 +272,7 @@ export default {
         return new Response('Bad Request', { status: 400 })
       }
       const guildId          = (interaction.guild_id as string) ?? ''
+      const channelId        = (interaction.channel_id as string) ?? ''
       const interactionToken = interaction.token as string
 
       // session はサブコマンド構造（options[0] が SUB_COMMAND）のため個別にパース
@@ -281,7 +284,10 @@ export default {
         const subCmdOpts  = dataOptions?.[0]?.options as Array<Record<string, unknown>> | undefined
         const sessionName   = subCmdOpts?.find(o => o.name === 'name')?.value as string ?? ''
         const sessionSystem = subCmdOpts?.find(o => o.name === 'system')?.value as string ?? ''
-        if (sessionName && sessionSystem) {
+        const pcParam       = subCmdOpts?.find(o => o.name === 'param')?.value as string ?? ''
+        if (subCmd === 'pc') {
+          args = `pc ${pcParam}`
+        } else if (sessionName && sessionSystem) {
           args = `${subCmd} ${sessionName} ${sessionSystem}`
         } else if (sessionName) {
           args = `${subCmd} ${sessionName}`
@@ -292,7 +298,7 @@ export default {
         args = dataOptions?.[0]?.value as string ?? ''
       }
 
-      return routeCommand(env, ctx, commandName, userId, guildId, args, interactionToken)
+      return routeCommand(env, ctx, commandName, userId, guildId, channelId, args, interactionToken)
     }
 
     return new Response('Bad Request', { status: 400 })

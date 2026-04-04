@@ -100,6 +100,19 @@ const commands = [
         description: 'セッションを終了してレポートを出力する',
         type: 1, // SUB_COMMAND
       },
+      {
+        name: 'pc',
+        description: '参加キャラクターの能力値一覧を表示する',
+        type: 1, // SUB_COMMAND
+        options: [
+          {
+            name: 'param',
+            description: 'list / STR / CON / DEX / APP / POW / SIZ / INT / EDU / HP / MP / SAN / 幸運 など',
+            type: 3, // STRING
+            required: true,
+          },
+        ],
+      },
     ],
   },
 ]
