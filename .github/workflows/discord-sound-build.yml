@@ -25,6 +25,9 @@ defaults:
   run:
     working-directory: discord-sound
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build (${{ matrix.os }})
