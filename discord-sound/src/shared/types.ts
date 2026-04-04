@@ -13,6 +13,7 @@ export interface Track {
   name: string;
   filePath: string;
   durationMs?: number;
+  tags?: string[];
 }
 
 export interface Settings {

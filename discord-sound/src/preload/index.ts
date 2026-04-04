@@ -39,6 +39,9 @@ const electronAPI = {
   tracksRename: (id: string, name: string): Promise<void> =>
     ipcRenderer.invoke('tracks-rename', id, name),
   tracksReorder: (ids: string[]): Promise<void> => ipcRenderer.invoke('tracks-reorder', ids),
+  tracksUpdateTags: (id: string, tags: string[]): Promise<void> =>
+    ipcRenderer.invoke('tracks-update-tags', id, tags),
+  tracksGetAllTags: (): Promise<string[]> => ipcRenderer.invoke('tracks-get-all-tags'),
 
   // Events
   onStatusChange: (cb: (status: ConnectionStatus) => void): void => {

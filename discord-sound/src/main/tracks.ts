@@ -116,4 +116,22 @@ export class TrackManager {
       this.save();
     }
   }
+
+  updateTags(id: string, tags: string[]): void {
+    const track = this.tracks.find((t) => t.id === id);
+    if (track) {
+      track.tags = tags;
+      this.save();
+    }
+  }
+
+  getAllTags(): string[] {
+    const tagSet = new Set<string>();
+    for (const track of this.tracks) {
+      for (const tag of (track.tags ?? [])) {
+        tagSet.add(tag);
+      }
+    }
+    return [...tagSet].sort();
+  }
 }

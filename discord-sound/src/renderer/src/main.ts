@@ -1,4 +1,5 @@
 import type { Bot, Track, ConnectionStatus, PlaybackState, LoopMode } from '../../shared/types'
+import { filterTracks } from './trackFilter'
 
 const api = window.electronAPI
 
@@ -12,6 +13,11 @@ let savedLastGuildId = ''
 let savedLastChannelId = ''
 let isSeeking = false
 let draggedTrackId: string | null = null
+
+// Filter state
+let searchQuery = ''
+let activeTagFilters: string[] = []
+let openTagEditorId: string | null = null
 
 // DOM references
 const guildSelect = document.getElementById('guild-select') as HTMLSelectElement
@@ -46,6 +52,9 @@ const defaultVolumeInput = document.getElementById('default-volume-input') as HT
 const restoreConnectionInput = document.getElementById('restore-connection-input') as HTMLInputElement
 const saveSettingsBtn = document.getElementById('save-settings-btn') as HTMLButtonElement
 const cancelSettingsBtn = document.getElementById('cancel-settings-btn') as HTMLButtonElement
+
+const trackSearchInput = document.getElementById('track-search-input') as HTMLInputElement
+const tagFilterBar = document.getElementById('tag-filter-bar') as HTMLDivElement
 
 let selectedTrackId: string | null = null
 
@@ -177,6 +186,110 @@ function renderBotList(): void {
   }
 }
 
+function renderTagFilterBar(): void {
+  const allTags = Array.from(new Set(tracks.flatMap(t => t.tags ?? []))).sort()
+  if (allTags.length === 0) {
+    tagFilterBar.classList.add('hidden')
+    return
+  }
+  tagFilterBar.classList.remove('hidden')
+  tagFilterBar.innerHTML = ''
+
+  for (const tag of allTags) {
+    const chip = document.createElement('span')
+    chip.className = 'tag-chip tag-chip-filter' + (activeTagFilters.includes(tag) ? ' active' : '')
+    chip.textContent = tag
+    chip.addEventListener('click', () => {
+      if (activeTagFilters.includes(tag)) {
+        activeTagFilters = activeTagFilters.filter(t => t !== tag)
+      } else {
+        activeTagFilters = [...activeTagFilters, tag]
+      }
+      renderTagFilterBar()
+      renderTracks()
+    })
+    tagFilterBar.appendChild(chip)
+  }
+
+  if (activeTagFilters.length > 0) {
+    const clearBtn = document.createElement('button')
+    clearBtn.className = 'btn btn-ghost tag-filter-clear'
+    clearBtn.textContent = 'クリア'
+    clearBtn.addEventListener('click', () => {
+      activeTagFilters = []
+      renderTagFilterBar()
+      renderTracks()
+    })
+    tagFilterBar.appendChild(clearBtn)
+  }
+}
+
+function renderTagEditor(track: Track, container: HTMLElement): void {
+  container.innerHTML = ''
+
+  const tags = track.tags ?? []
+  for (const tag of tags) {
+    const chip = document.createElement('span')
+    chip.className = 'tag-chip'
+    chip.textContent = tag
+
+    const removeX = document.createElement('span')
+    removeX.className = 'tag-chip-remove'
+    removeX.textContent = '×'
+    removeX.addEventListener('click', async (e) => {
+      e.stopPropagation()
+      const newTags = (track.tags ?? []).filter(t => t !== tag)
+      track.tags = newTags
+      await api.tracksUpdateTags(track.id, newTags)
+      renderTagEditor(track, container)
+      renderTagFilterBar()
+      renderTracks()
+    })
+    chip.appendChild(removeX)
+    container.appendChild(chip)
+  }
+
+  const input = document.createElement('input')
+  input.type = 'text'
+  input.className = 'tag-add-input'
+  input.placeholder = 'タグを追加...'
+
+  const addTag = async (): Promise<void> => {
+    const newTag = input.value.trim()
+    if (newTag && !(track.tags ?? []).includes(newTag)) {
+      const newTags = [...(track.tags ?? []), newTag]
+      track.tags = newTags
+      await api.tracksUpdateTags(track.id, newTags)
+      input.value = ''
+      renderTagEditor(track, container)
+      renderTagFilterBar()
+      renderTracks()
+    } else {
+      input.value = ''
+    }
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); void addTag() }
+    else if (e.key === 'Escape') {
+      openTagEditorId = null
+      renderTracks()
+    }
+  })
+  input.addEventListener('blur', () => {
+    // blur後も少し待ってから閉じる（chip×クリックの場合は再描画で対応）
+    void addTag()
+  })
+
+  const hint = document.createElement('span')
+  hint.className = 'tag-editor-hint'
+  hint.textContent = 'Enterで追加 / Escで閉じる'
+
+  container.appendChild(input)
+  container.appendChild(hint)
+  input.focus()
+}
+
 function renderTracks(): void {
   trackList.innerHTML = ''
   if (tracks.length === 0) {
@@ -186,7 +299,18 @@ function renderTracks(): void {
     trackList.appendChild(empty)
     return
   }
-  for (const track of tracks) {
+
+  const filtered = filterTracks(tracks, searchQuery, activeTagFilters)
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div')
+    empty.className = 'empty-message'
+    empty.textContent = '条件に一致するトラックがありません。'
+    trackList.appendChild(empty)
+    return
+  }
+
+  for (const track of filtered) {
     const item = document.createElement('div')
     item.className = 'track-item'
     item.dataset.trackId = track.id
@@ -239,6 +363,32 @@ function renderTracks(): void {
     nameSpan.title = track.filePath
     nameSpan.addEventListener('dblclick', () => { startRename(track.id, nameSpan) })
 
+    // Tag chips display
+    const tagsArea = document.createElement('div')
+    tagsArea.className = 'track-tags'
+    for (const tag of (track.tags ?? []).slice(0, 3)) {
+      const chip = document.createElement('span')
+      chip.className = 'tag-chip'
+      chip.textContent = tag
+      tagsArea.appendChild(chip)
+    }
+
+    // Tag edit button
+    const tagBtn = document.createElement('button')
+    tagBtn.className = 'btn btn-icon-small'
+    tagBtn.title = 'タグ編集'
+    tagBtn.textContent = '🏷'
+    tagBtn.style.fontSize = '12px'
+    tagBtn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      if (openTagEditorId === track.id) {
+        openTagEditorId = null
+      } else {
+        openTagEditorId = track.id
+      }
+      renderTracks()
+    })
+
     const playTrackBtn = document.createElement('button')
     playTrackBtn.className = 'btn btn-icon-small'
     playTrackBtn.title = '再生'
@@ -255,6 +405,8 @@ function renderTracks(): void {
       await api.tracksRemove(track.id)
       tracks = tracks.filter(t => t.id !== track.id)
       if (selectedTrackId === track.id) selectedTrackId = null
+      if (openTagEditorId === track.id) openTagEditorId = null
+      renderTagFilterBar()
       renderTracks()
       updatePlaybackUI(currentPlayback)
     })
@@ -267,9 +419,19 @@ function renderTracks(): void {
     })
 
     item.appendChild(nameSpan)
+    item.appendChild(tagsArea)
+    item.appendChild(tagBtn)
     item.appendChild(playTrackBtn)
     item.appendChild(removeBtn)
     trackList.appendChild(item)
+
+    // Tag editor (inline, below item)
+    if (openTagEditorId === track.id) {
+      const editorRow = document.createElement('div')
+      editorRow.className = 'tag-editor'
+      renderTagEditor(track, editorRow)
+      trackList.appendChild(editorRow)
+    }
   }
 }
 
@@ -358,12 +520,14 @@ disconnectBtn.addEventListener('click', async () => { await api.discordDisconnec
 addFilesBtn.addEventListener('click', async () => {
   const added = await api.tracksAdd()
   tracks.push(...added)
+  renderTagFilterBar()
   renderTracks()
 })
 
 addFolderBtn.addEventListener('click', async () => {
   const added = await api.tracksAddFolder()
   tracks.push(...added)
+  renderTagFilterBar()
   renderTracks()
 })
 
@@ -444,6 +608,11 @@ saveSettingsBtn.addEventListener('click', async () => {
   hideSettingsModal()
 })
 
+trackSearchInput.addEventListener('input', () => {
+  searchQuery = trackSearchInput.value
+  renderTracks()
+})
+
 // Keyboard shortcuts
 document.addEventListener('keydown', async (e) => {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return
@@ -518,6 +687,7 @@ async function init(): Promise<void> {
   restoreConnectionInput.checked = settings.restoreLastConnection
 
   tracks = await api.tracksGetAll()
+  renderTagFilterBar()
   renderTracks()
 
   const state = await api.playbackGetState()
