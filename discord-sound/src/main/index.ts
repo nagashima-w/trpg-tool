@@ -251,6 +251,14 @@ function setupIpcHandlers(): void {
     trackManager.rename(id, name);
   });
 
+  ipcMain.handle('tracks-update-tags', (_event, id: string, tags: string[]) => {
+    trackManager.updateTags(id, tags);
+  });
+
+  ipcMain.handle('tracks-get-all-tags', () => {
+    return trackManager.getAllTags();
+  });
+
   ipcMain.handle('open-user-guide', () => {
     return shell.openExternal('https://github.com/nagashima-w/trpg-tool/blob/main/discord-sound/USER-GUIDE.md');
   });
