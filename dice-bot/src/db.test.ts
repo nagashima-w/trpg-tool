@@ -39,6 +39,7 @@ const MOCK_CHAR = {
 const MOCK_SESSION = {
   id: 'session-uuid-1',
   guild_id: 'guild-123',
+  channel_id: 'channel-789',
   name: 'テストセッション',
   kp_user_id: 'kp-user-456',
   status: 'active',
@@ -147,14 +148,14 @@ describe('updateCharacterStat', () => {
 describe('getActiveSession', () => {
   it('activeなセッションを返す', async () => {
     const db = makeDb(MOCK_SESSION)
-    const result = await getActiveSession(db, 'guild-123')
+    const result = await getActiveSession(db, 'guild-123', 'channel-789')
     expect(result?.id).toBe('session-uuid-1')
     expect(result?.status).toBe('active')
   })
 
   it('activeなセッションがない場合はnullを返す', async () => {
     const db = makeDb(null)
-    expect(await getActiveSession(db, 'guild-123')).toBeNull()
+    expect(await getActiveSession(db, 'guild-123', 'channel-789')).toBeNull()
   })
 })
 
@@ -163,7 +164,7 @@ describe('getActiveSession', () => {
 describe('startSession', () => {
   it('セッションを作成してIDを返す', async () => {
     const db = makeDb()
-    const id = await startSession(db, 'guild-123', 'テストセッション', 'kp-user-456')
+    const id = await startSession(db, 'guild-123', 'channel-789', 'テストセッション', 'kp-user-456')
     expect(typeof id).toBe('string')
     expect(id.length).toBeGreaterThan(0)
     expect(db._stmt.run).toHaveBeenCalled()
