@@ -770,16 +770,50 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* Tag editor (inline below track item) */
 .tag-editor {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: 4px;
-  padding: 5px 10px 5px 20px;
+  padding: 6px 10px 6px 20px;
   background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border);
 }
 
-.tag-editor .tag-chip {
+.tag-editor-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-editor-section-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.tag-editor-suggestions {
+  padding: 2px 0;
+}
+
+.tag-chip-current {
   cursor: default;
+}
+
+.tag-chip-suggest {
+  cursor: pointer;
+  border-style: dashed;
+  opacity: 0.75;
+  transition: opacity 0.1s, background-color 0.1s, color 0.1s;
+}
+
+.tag-chip-suggest:hover {
+  opacity: 1;
+  background-color: rgba(88, 101, 242, 0.2);
+  color: var(--text-primary);
+  border-color: var(--accent);
+  border-style: solid;
 }
 
 .tag-add-input {
@@ -790,7 +824,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   padding: 1px 8px;
   font-size: 11px;
   outline: none;
-  width: 90px;
+  width: 120px;
 }
 
 .tag-add-input:focus {
