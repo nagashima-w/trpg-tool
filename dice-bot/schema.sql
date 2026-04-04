@@ -22,13 +22,24 @@ CREATE TABLE IF NOT EXISTS Active_Characters (
 
 CREATE TABLE IF NOT EXISTS Sessions (
   id          TEXT     PRIMARY KEY,
-  guild_id    TEXT     NOT NULL,             -- Discordサーバー単位で管理
+  guild_id    TEXT     NOT NULL,
+  channel_id  TEXT     NOT NULL DEFAULT '',       -- Discordチャンネル単位で管理
   name        TEXT     NOT NULL,
   kp_user_id  TEXT     NOT NULL,
   status      TEXT     NOT NULL DEFAULT 'active', -- 'active' | 'completed'
   system      TEXT     NOT NULL DEFAULT 'coc7',   -- 'coc7' | 'coc6'
   started_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ended_at    DATETIME
+);
+
+CREATE TABLE IF NOT EXISTS Session_Participants (
+  session_id   TEXT     NOT NULL,
+  user_id      TEXT     NOT NULL,
+  character_id TEXT     NOT NULL,
+  joined_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (session_id, user_id),
+  FOREIGN KEY (session_id) REFERENCES Sessions(id),
+  FOREIGN KEY (character_id) REFERENCES Characters(id)
 );
 
 CREATE TABLE IF NOT EXISTS Dice_Logs (
@@ -48,4 +59,4 @@ CREATE TABLE IF NOT EXISTS Dice_Logs (
 CREATE INDEX IF NOT EXISTS idx_dice_logs_session  ON Dice_Logs(session_id);
 CREATE INDEX IF NOT EXISTS idx_dice_logs_user     ON Dice_Logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_characters_user    ON Characters(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_guild     ON Sessions(guild_id, status);
+CREATE INDEX IF NOT EXISTS idx_sessions_guild_channel ON Sessions(guild_id, channel_id, status);

@@ -3,22 +3,27 @@
 // ============================================================
 
 import { parseCharasheetUrl, fetchCharasheet, mapToCharacter } from '../charasheet.ts'
-import { getActiveCharacter, upsertCharacter, setActiveCharacter, updateCharacterStat } from '../db.ts'
+import {
+  getActiveCharacter, upsertCharacter, setActiveCharacter, updateCharacterStat,
+  getActiveSession, upsertSessionParticipant,
+} from '../db.ts'
 import type { D1Database } from '../db.ts'
 import type { CommandResult } from './shared.ts'
 
 export async function handleChar(
   db: D1Database,
   userId: string,
+  guildId: string,
+  channelId: string,
   rawArgs: string,
 ): Promise<CommandResult> {
   const parts = rawArgs.trim().split(/\s+/)
   const subcommand = parts[0]?.toLowerCase()
 
   switch (subcommand) {
-    case 'set':    return handleCharSet(db, userId, parts[1] ?? '')
+    case 'set':    return handleCharSet(db, userId, guildId, channelId, parts[1] ?? '')
     case 'status': return handleCharStatus(db, userId)
-    case 'update': return handleCharUpdate(db, userId, parts[1], parts[2])
+    case 'update': return handleCharUpdate(db, userId, guildId, channelId, parts[1], parts[2])
     default:
       return {
         message: '使い方: `/char set <URL>` / `/char status` / `/char update <対象> <増減値>`',
@@ -32,8 +37,15 @@ export async function handleChar(
 async function handleCharSet(
   db: D1Database,
   userId: string,
+  guildId: string,
+  channelId: string,
   url: string,
 ): Promise<CommandResult> {
+  const session = await getActiveSession(db, guildId, channelId)
+  if (!session) {
+    return { message: '進行中のセッションがありません。`/session start` でセッションを開始してから登録してください。', ephemeral: true }
+  }
+
   if (!url) {
     return { message: 'URLを指定してください。例: `/char set https://charasheet.vampire-blood.net/4634372`', ephemeral: true }
   }
@@ -60,6 +72,7 @@ async function handleCharSet(
 
   await upsertCharacter(db, char)
   await setActiveCharacter(db, userId, char.id)
+  await upsertSessionParticipant(db, session.id, userId, char.id)
 
   return {
     message: `✅ **${char.name}** を登録しました！\nHP: ${char.hp} / MP: ${char.mp} / SAN: ${char.san} / 幸運: ${char.luck}`,
@@ -83,7 +96,7 @@ async function handleCharStatus(
     `HP: ${char.hp} | MP: ${char.mp} | SAN: ${char.san} | 幸運: ${char.luck}`,
   ]
 
-  return { message: lines.join('\n'), ephemeral: true }
+  return { message: lines.join('\n'), ephemeral: false }
 }
 
 // ── /char update ─────────────────────────────────────────────
@@ -91,9 +104,16 @@ async function handleCharStatus(
 async function handleCharUpdate(
   db: D1Database,
   userId: string,
+  guildId: string,
+  channelId: string,
   target: string | undefined,
   deltaStr: string | undefined,
 ): Promise<CommandResult> {
+  const session = await getActiveSession(db, guildId, channelId)
+  if (!session) {
+    return { message: '進行中のセッションがありません。セッション中のみ更新できます。', ephemeral: true }
+  }
+
   const validTargets = ['hp', 'mp', 'san', 'luck'] as const
   const targetLower = target?.toLowerCase() as typeof validTargets[number] | undefined
 
