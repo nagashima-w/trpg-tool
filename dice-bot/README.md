@@ -84,6 +84,8 @@ npx wrangler d1 migrations apply coc-dice-bot-db
 | ファイル | 内容 |
 |:---|:---|
 | `0001_add_game_system_columns.sql` | `Characters.game`・`Sessions.system` カラムを追加（第6版対応） |
+| `0002_add_channel_and_participants.sql` | `Sessions.channel_id`・`Session_Participants` テーブルを追加 |
+| `0003_add_extra_value_to_dice_logs.sql` | `Dice_Logs.extra_value` カラムを追加（SANチェック時のSAN減少量） |
 
 ---
 
@@ -138,6 +140,7 @@ npx wrangler d1 migrations apply coc-dice-bot-db
 | `final_dice` | INTEGER | 最終出目（ボーナス・ペナルティ適用後） |
 | `result_level` | TEXT | 判定結果（下記参照） |
 | `is_secret` | INTEGER | シークレットダイスか（0/1） |
+| `extra_value` | INTEGER | SAN減少量（SANチェック時のみ、それ以外はNULL） |
 | `timestamp` | DATETIME | 実行日時 |
 
 `result_level` の値:
