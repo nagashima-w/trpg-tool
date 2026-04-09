@@ -7,10 +7,10 @@
 
 Discordで使う用のダイスボット。  
 
-[README](./dice-bot/README.md)
+[README](./dice-bot/README.md) | [USER-GUIDE](./dice-bot/USER-GUIDE.md)
 
 ## discord-sound
 
 Discordで使う用のサウンドプレイヤー。
 
-[README](./discord-sound/README.md)
+[README](./discord-sound/README.md) | [USER-GUIDE](./discord-sound/USER-GUIDE.md)

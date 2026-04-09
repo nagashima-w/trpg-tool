@@ -55,6 +55,7 @@ const VALID_COC7_DATA: CharasheetData = {
   // 技能（配列）
   SKAN: ['威圧', '聞き耳', '目星', '回避', '図書館'],
   SKAP: ['15',   '59',     '75',   '25',   '70'],
+  SKAM: ['',     '',       '',     '',     ''],
 }
 
 const VALID_COC6_DATA: CharasheetData = {
@@ -143,9 +144,47 @@ describe('mapToCharacter', () => {
       ...VALID_COC7_DATA,
       SKAN: ['クトゥルフ神話'],
       SKAP: ['0'],
+      SKAM: [''],
     }
     const char = mapToCharacter(data, 'user-discord-123')!
     expect(char.skills).toHaveProperty('クトゥルフ神話', 0)
+  })
+
+  it('付記（SKAM）がある技能は「技能名（付記）」の形でskillsに登録される', () => {
+    const data: CharasheetData = {
+      ...VALID_COC7_DATA,
+      SKAN: ['運転', '応急手当'],
+      SKAP: ['20',   '50'],
+      SKAM: ['自動車', ''],
+    }
+    const char = mapToCharacter(data, 'user-discord-123')!
+    expect(char.skills).toHaveProperty('運転（自動車）', 20)
+    expect(char.skills).toHaveProperty('応急手当', 50)
+    expect(char.skills).not.toHaveProperty('運転')
+  })
+
+  it('同じベース名で異なる付記を持つ技能が両方登録される', () => {
+    const data: CharasheetData = {
+      ...VALID_COC7_DATA,
+      SKAN: ['運転', '運転'],
+      SKAP: ['20',   '30'],
+      SKAM: ['自動車', 'バイク'],
+    }
+    const char = mapToCharacter(data, 'user-discord-123')!
+    expect(char.skills).toHaveProperty('運転（自動車）', 20)
+    expect(char.skills).toHaveProperty('運転（バイク）', 30)
+  })
+
+  it('SKAM配列がSKAN配列より短い場合でも安全に処理される', () => {
+    const data: CharasheetData = {
+      ...VALID_COC7_DATA,
+      SKAN: ['目星', '図書館'],
+      SKAP: ['75',   '70'],
+      SKAM: [''],  // SKAN より短い
+    }
+    const char = mapToCharacter(data, 'user-discord-123')!
+    expect(char.skills).toHaveProperty('目星', 75)
+    expect(char.skills).toHaveProperty('図書館', 70)
   })
 })
 

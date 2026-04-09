@@ -93,6 +93,7 @@ async function tryRecordDiceLog(
   finalDice: number,
   resultLevel: Parameters<typeof insertDiceLog>[1]['result_level'],
   isSecret: boolean,
+  extraValue?: number,
 ): Promise<void> {
   try {
     const session = await getActiveSession(db, guildId, channelId)
@@ -110,6 +111,7 @@ async function tryRecordDiceLog(
       final_dice:     finalDice,
       result_level:   resultLevel,
       is_secret:      isSecret,
+      extra_value:    extraValue ?? null,
     })
   } catch {
     // ログ記録失敗は無視（本体の返答を妨げない）
@@ -191,6 +193,7 @@ async function routeCommand(
           result.diceLog.finalDice,
           result.diceLog.resultLevel,
           result.diceLog.isSecret,
+          result.diceLog.extraValue,
         )
       }
       return messageResponse(result.message, result.ephemeral)
