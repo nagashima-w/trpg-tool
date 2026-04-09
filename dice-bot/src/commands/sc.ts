@@ -89,5 +89,6 @@ export async function handleSc(
     finalDice: base.total,
     resultLevel: level,
     isSecret,
+    extraValue: actualLoss,
   }}
 }

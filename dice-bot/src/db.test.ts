@@ -4,6 +4,7 @@ import {
   upsertCharacter,
   setActiveCharacter,
   updateCharacterStat,
+  refreshCharacterSkillsAndStats,
   getActiveSession,
   startSession,
   endSession,
@@ -143,6 +144,43 @@ describe('updateCharacterStat', () => {
   })
 })
 
+// ── refreshCharacterSkillsAndStats ────────────────────────────
+
+describe('refreshCharacterSkillsAndStats', () => {
+  it('UPDATEを実行する', async () => {
+    const db = makeDb()
+    await refreshCharacterSkillsAndStats(db, '4634372', { '夢見': 22 }, { STR: 70, CON: 50, DEX: 50, APP: 65, POW: 50, SIZ: 75, INT: 85, EDU: 60, MOV: 8 })
+    expect(db._stmt.run).toHaveBeenCalled()
+  })
+
+  it('skillsとstatsをJSON文字列にシリアライズしてbindする', async () => {
+    const db = makeDb()
+    await refreshCharacterSkillsAndStats(db, '4634372', { '夢見': 22 }, { STR: 70, CON: 50, DEX: 50, APP: 65, POW: 50, SIZ: 75, INT: 85, EDU: 60, MOV: 8 })
+    const calls = db._stmt.bind.mock.calls[0]
+    expect(typeof calls[0]).toBe('string') // skills JSON
+    expect(typeof calls[1]).toBe('string') // stats JSON
+    expect(JSON.parse(calls[0])).toHaveProperty('夢見', 22)
+    expect(JSON.parse(calls[1])).toHaveProperty('STR', 70)
+  })
+
+  it('SQLにhp・mp・san・luckが含まれない（現在値を維持）', async () => {
+    const db = makeDb()
+    await refreshCharacterSkillsAndStats(db, '4634372', {}, { STR: 70, CON: 50, DEX: 50, APP: 65, POW: 50, SIZ: 75, INT: 85, EDU: 60, MOV: 8 })
+    const sql: string = db.prepare.mock.calls[0][0]
+    expect(sql).not.toMatch(/\bhp\b/)
+    expect(sql).not.toMatch(/\bmp\b/)
+    expect(sql).not.toMatch(/\bsan\b/)
+    expect(sql).not.toMatch(/\bluck\b/)
+  })
+
+  it('characterIdをbindする', async () => {
+    const db = makeDb()
+    await refreshCharacterSkillsAndStats(db, 'char-id-999', {}, { STR: 70, CON: 50, DEX: 50, APP: 65, POW: 50, SIZ: 75, INT: 85, EDU: 60, MOV: 8 })
+    const calls = db._stmt.bind.mock.calls[0]
+    expect(calls[2]).toBe('char-id-999')
+  })
+})
+
 // ── getActiveSession ──────────────────────────────────────────
 
 describe('getActiveSession', () => {
@@ -213,6 +251,28 @@ describe('insertDiceLog', () => {
     const calls = db._stmt.bind.mock.calls[0]
     expect(calls[7]).toBe(1) // is_secret=true → 1
   })
+
+  it('extra_valueを指定した場合その値をbindする', async () => {
+    const db = makeDb()
+    await insertDiceLog(db, {
+      session_id: 's1', user_id: 'u1', character_name: 'テスト',
+      skill_name: 'SANチェック', target_value: 45, final_dice: 78,
+      result_level: 'failure', is_secret: false, extra_value: 3,
+    })
+    const calls = db._stmt.bind.mock.calls[0]
+    expect(calls[8]).toBe(3) // extra_value
+  })
+
+  it('extra_valueを省略した場合nullをbindする', async () => {
+    const db = makeDb()
+    await insertDiceLog(db, {
+      session_id: 's1', user_id: 'u1', character_name: 'テスト',
+      skill_name: '目星', target_value: 75, final_dice: 12,
+      result_level: 'extreme', is_secret: false,
+    })
+    const calls = db._stmt.bind.mock.calls[0]
+    expect(calls[8]).toBeNull() // extra_value省略 → null
+  })
 })
 
 // ── getDiceLogsForSession ─────────────────────────────────────
@@ -234,10 +294,21 @@ describe('getDiceLogsForSession', () => {
     const mockLogs = [
       { id: 2, session_id: 's1', user_id: 'u1', character_name: 'A',
         skill_name: '目星', target_value: 50, final_dice: 1,
-        result_level: 'critical', is_secret: 1, timestamp: '2024-01-01T00:00:00Z' },
+        result_level: 'critical', is_secret: 1, extra_value: null, timestamp: '2024-01-01T00:00:00Z' },
     ]
     const db = makeDb(null, mockLogs)
     const logs = await getDiceLogsForSession(db, 's1')
     expect(logs[0].is_secret).toBe(true)
+  })
+
+  it('extra_valueを含むログを返す', async () => {
+    const mockLogs = [
+      { id: 3, session_id: 's1', user_id: 'u1', character_name: 'A',
+        skill_name: 'SANチェック', target_value: 45, final_dice: 78,
+        result_level: 'failure', is_secret: 0, extra_value: 3, timestamp: '2024-01-01T00:00:00Z' },
+    ]
+    const db = makeDb(null, mockLogs)
+    const logs = await getDiceLogsForSession(db, 's1')
+    expect(logs[0].extra_value).toBe(3)
   })
 })

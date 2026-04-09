@@ -32,6 +32,7 @@ export interface CharasheetData {
   // 技能（配列・インデックスが対応）
   SKAN: string[]  // 技能名
   SKAP: string[]  // 技能合計値
+  SKAM: string[]  // 付記（「運転」に対する「自動車」など）
 }
 
 /** DBに保存するキャラクターレコード */
@@ -114,13 +115,18 @@ export function mapToCharacter(data: CharasheetData, userId: string): CharacterR
   if (data.game !== 'coc7' && data.game !== 'coc6') return null
 
   // 技能マッピング: 値が空文字・NaNのものはスキップ
+  // 付記（SKAM）がある場合は「技能名（付記）」の形でキーを構築する
   const skills: Record<string, number> = {}
   for (let i = 0; i < data.SKAN.length; i++) {
-    const name = data.SKAN[i]
-    const val  = data.SKAP[i]
-    if (name && val !== '') {
+    const baseName = data.SKAN[i]
+    const val      = data.SKAP[i]
+    const note     = data.SKAM?.[i] ?? ''
+    if (baseName && val !== '') {
       const n = parseInt(val, 10)
-      if (!isNaN(n)) skills[name] = n
+      if (!isNaN(n)) {
+        const key = note ? `${baseName}（${note}）` : baseName
+        skills[key] = n
+      }
     }
   }
 

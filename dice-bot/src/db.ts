@@ -58,6 +58,7 @@ export interface DiceLogRow {
   final_dice: number
   result_level: ResultLevel
   is_secret: boolean
+  extra_value: number | null  // SANチェック時のSAN減少量（その他はnull）
   timestamp: string
 }
 
@@ -70,6 +71,7 @@ export interface InsertDiceLogParams {
   final_dice: number
   result_level: ResultLevel
   is_secret: boolean
+  extra_value?: number | null  // 省略時はnull
 }
 
 // ── ユーティリティ ────────────────────────────────────────────
@@ -166,6 +168,22 @@ export async function setActiveCharacter(
       VALUES (?, ?)
     `)
     .bind(userId, characterId)
+    .run()
+}
+
+/**
+ * キャラクターの技能（skills）と能力値（stats）のみを更新する。
+ * hp/mp/san/luck は更新しない（セッション中の現在値を維持するため）。
+ */
+export async function refreshCharacterSkillsAndStats(
+  db: D1Database,
+  characterId: string,
+  skills: CharacterRecord['skills'],
+  stats: CharacterRecord['stats'],
+): Promise<void> {
+  await db
+    .prepare(`UPDATE Characters SET skills = ?, stats = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+    .bind(JSON.stringify(skills), JSON.stringify(stats), characterId)
     .run()
 }
 
@@ -333,8 +351,8 @@ export async function insertDiceLog(
     .prepare(`
       INSERT INTO Dice_Logs
         (session_id, user_id, character_name, skill_name,
-         target_value, final_dice, result_level, is_secret, timestamp)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+         target_value, final_dice, result_level, is_secret, extra_value, timestamp)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `)
     .bind(
       params.session_id,
@@ -345,6 +363,7 @@ export async function insertDiceLog(
       params.final_dice,
       params.result_level,
       params.is_secret ? 1 : 0,
+      params.extra_value ?? null,
     )
     .run()
 }

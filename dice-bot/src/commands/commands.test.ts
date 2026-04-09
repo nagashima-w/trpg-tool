@@ -5,6 +5,14 @@ import { handleRoll } from './roll'
 import { handleChar } from './char'
 import { handleSession } from './session'
 import type { D1Database } from '../db'
+import * as charasheeetModule from '../charasheet'
+import type { CharasheetData } from '../charasheet'
+
+// fetchCharasheet のみ部分的にモック（parseCharasheetUrl・mapToCharacter は実装を維持）
+vi.mock('../charasheet', async () => {
+  const actual = await vi.importActual<typeof import('../charasheet')>('../charasheet')
+  return { ...actual, fetchCharasheet: vi.fn() }
+})
 
 // ── モックヘルパー ────────────────────────────────────────────
 
@@ -142,6 +150,41 @@ describe('handleCc', () => {
     expect(result.message).toContain('第6版')
     expect(result.ephemeral).toBe(true)
   })
+
+  // 付記付き技能の多段階ルックアップ
+  const charWithOneAnnotation = {
+    ...MOCK_CHAR_ROW,
+    skills: JSON.stringify({ '目星': 75, '運転（自動車）': 40 }),
+  }
+  const charWithMultipleAnnotations = {
+    ...MOCK_CHAR_ROW,
+    skills: JSON.stringify({ '運転（自動車）': 40, '運転（バイク）': 30 }),
+  }
+
+  it('付記部分のみ入力で該当技能を判定できる', async () => {
+    const result = await handleCc(makeDb(charWithOneAnnotation), 'user-A', 'guild-1', '自動車')
+    expect(result.diceLog?.targetValue).toBe(40)
+    expect(result.diceLog?.skillName).toBe('運転（自動車）')
+  })
+
+  it('完全な技能名（付記込み）でも判定できる', async () => {
+    const result = await handleCc(makeDb(charWithOneAnnotation), 'user-A', 'guild-1', '運転（自動車）')
+    expect(result.diceLog?.targetValue).toBe(40)
+  })
+
+  it('ベース名入力・1件一致でその技能を判定できる', async () => {
+    const result = await handleCc(makeDb(charWithOneAnnotation), 'user-A', 'guild-1', '運転')
+    expect(result.diceLog?.targetValue).toBe(40)
+    expect(result.diceLog?.skillName).toBe('運転（自動車）')
+  })
+
+  it('ベース名入力・複数一致でエラーメッセージを返す', async () => {
+    const result = await handleCc(makeDb(charWithMultipleAnnotations), 'user-A', 'guild-1', '運転')
+    expect(result.message).toContain('複数')
+    expect(result.message).toContain('運転（自動車）')
+    expect(result.message).toContain('運転（バイク）')
+    expect(result.ephemeral).toBe(true)
+  })
 })
 
 // ── handleSc (/sc) ────────────────────────────────────────────
@@ -184,6 +227,13 @@ describe('handleSc', () => {
     const result = await handleSc(db, 'user-A', 'guild-1', '0/1d3')
     expect(result.message).toContain('SANチェック')
     expect(result.diceLog?.targetValue).toBe(42)
+  })
+
+  it('diceLogにextraValue（SAN減少量）が含まれる', async () => {
+    const result = await handleSc(makeDb(), 'user-A', 'guild-1', '0/1d3')
+    expect(result.diceLog?.extraValue).toBeDefined()
+    expect(typeof result.diceLog?.extraValue).toBe('number')
+    expect(result.diceLog!.extraValue!).toBeGreaterThanOrEqual(0)
   })
 })
 
@@ -284,6 +334,54 @@ describe('handleChar update', () => {
   it('不明なサブコマンドは使い方を返す', async () => {
     const result = await handleChar(makeDb(), 'u', 'guild-1', 'channel-1', 'unknown')
     expect(result.message).toContain('使い方')
+  })
+})
+
+describe('handleChar refresh', () => {
+  const MOCK_FRESH_DATA: CharasheetData = {
+    game: 'coc7',
+    data_id: 111,
+    phrase: 'abc',
+    pc_name: '探索者A',
+    NP1: '85', NP2: '50', NP3: '50', NP4: '65',
+    NP5: '50', NP6: '75', NP7: '85', NP8: '60', NP9: '8',
+    NP10: '99', NP11: '99', // HP・MP（保管所の値 ← 現在値と意図的に違う値）
+    SAN_Left: '1',           // SAN（保管所の値 ← 現在値と意図的に違う値）
+    Luck_Left: '1',          // LUCK（同上）
+    SKAN: ['目星', '夢見'],
+    SKAP: ['75',   '22'],
+    SKAM: ['',     ''],
+  }
+
+  beforeEach(() => {
+    vi.mocked(charasheeetModule.fetchCharasheet).mockReset()
+  })
+
+  it('キャラなしはエラーを返す', async () => {
+    const result = await handleChar(noCharDb, 'u', 'guild-1', 'channel-1', 'refresh')
+    expect(result.message).toContain('キャラクター')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('fetchCharasheetが失敗した場合エラーを返す', async () => {
+    vi.mocked(charasheeetModule.fetchCharasheet).mockRejectedValueOnce(new Error('タイムアウト'))
+    const result = await handleChar(makeDb(), 'u', 'guild-1', 'channel-1', 'refresh')
+    expect(result.message).toContain('失敗')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('成功時に技能更新完了メッセージを返す', async () => {
+    vi.mocked(charasheeetModule.fetchCharasheet).mockResolvedValueOnce(MOCK_FRESH_DATA)
+    const result = await handleChar(makeDb(), 'u', 'guild-1', 'channel-1', 'refresh')
+    expect(result.message).toContain('更新')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('成功メッセージにHP・SAN維持の旨が含まれる', async () => {
+    vi.mocked(charasheeetModule.fetchCharasheet).mockResolvedValueOnce(MOCK_FRESH_DATA)
+    const result = await handleChar(makeDb(), 'u', 'guild-1', 'channel-1', 'refresh')
+    expect(result.message).toContain('HP')
+    expect(result.message).toContain('SAN')
   })
 })
 

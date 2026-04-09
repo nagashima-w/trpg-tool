@@ -166,9 +166,10 @@ export function generateReport(input: ReportInput): string {
         const time = formatTimestamp(log.timestamp)
         const label = RESULT_LABEL[log.result_level]
         const safeSkillName = log.skill_name.replace(/`/g, '\\`')
+        const extraStr = (log.extra_value !== null && log.extra_value !== 0) ? ` (-${log.extra_value})` : ''
         lines.push(
           `- \`${time}\`：${safeSkillName}(${log.target_value})` +
-          ` ＞ 出目: ${log.final_dice} ＞ ${label}`
+          ` ＞ 出目: ${log.final_dice} ＞ ${label}${extraStr}`
         )
       }
     }

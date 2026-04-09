@@ -66,9 +66,49 @@ export async function handleCc(
     const field = SPECIAL_FIELD_ALIASES[upperKey] ?? SPECIAL_FIELD_ALIASES[skillName]
     targetValue = char[field]
   }
-  // 3. 技能チェック（完全一致）
+  // 3. 技能チェック（多段階ルックアップ）
   else {
-    targetValue = char.skills[skillName]
+    // 3-a. 完全一致
+    if (char.skills[skillName] !== undefined) {
+      targetValue = char.skills[skillName]
+    }
+
+    // 3-b. 付記との一致: 「技能名（skillName）」の形のキーを検索
+    // [^（）]+ で括弧を含まない文字列のみマッチし、入れ子括弧による誤検出を防ぐ
+    if (targetValue === undefined) {
+      const annotationMatches = Object.entries(char.skills).filter(([key]) => {
+        const m = key.match(/^[^（）]+（([^（）]+)）$/)
+        return m !== null && m[1] === skillName
+      })
+      if (annotationMatches.length === 1) {
+        resolvedName  = annotationMatches[0][0]
+        targetValue   = annotationMatches[0][1]
+      } else if (annotationMatches.length > 1) {
+        const names = annotationMatches.map(([k]) => k).join('、')
+        return {
+          message: `「${skillName}」に該当する技能が複数あります: ${names}\n技能名を詳しく指定してください。`,
+          ephemeral: true,
+        }
+      }
+    }
+
+    // 3-c. ベース名との一致: 「skillName（付記）」の形のキーを検索
+    if (targetValue === undefined) {
+      const baseMatches = Object.entries(char.skills).filter(([key]) => {
+        const m = key.match(/^([^（）]+)（[^（）]+）$/)
+        return m !== null && m[1] === skillName
+      })
+      if (baseMatches.length === 1) {
+        resolvedName = baseMatches[0][0]
+        targetValue  = baseMatches[0][1]
+      } else if (baseMatches.length > 1) {
+        const names = baseMatches.map(([k]) => k).join('、')
+        return {
+          message: `「${skillName}」に該当する技能が複数あります: ${names}\n技能名を詳しく指定してください。`,
+          ephemeral: true,
+        }
+      }
+    }
   }
 
   if (targetValue === undefined) {

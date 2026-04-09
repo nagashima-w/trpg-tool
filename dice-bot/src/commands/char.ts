@@ -5,7 +5,7 @@
 import { parseCharasheetUrl, fetchCharasheet, mapToCharacter } from '../charasheet.ts'
 import {
   getActiveCharacter, upsertCharacter, setActiveCharacter, updateCharacterStat,
-  getActiveSession, upsertSessionParticipant,
+  refreshCharacterSkillsAndStats, getActiveSession, upsertSessionParticipant,
 } from '../db.ts'
 import type { D1Database } from '../db.ts'
 import type { CommandResult } from './shared.ts'
@@ -21,12 +21,13 @@ export async function handleChar(
   const subcommand = parts[0]?.toLowerCase()
 
   switch (subcommand) {
-    case 'set':    return handleCharSet(db, userId, guildId, channelId, parts[1] ?? '')
-    case 'status': return handleCharStatus(db, userId)
-    case 'update': return handleCharUpdate(db, userId, guildId, channelId, parts[1], parts[2])
+    case 'set':     return handleCharSet(db, userId, guildId, channelId, parts[1] ?? '')
+    case 'status':  return handleCharStatus(db, userId)
+    case 'update':  return handleCharUpdate(db, userId, guildId, channelId, parts[1], parts[2])
+    case 'refresh': return handleCharRefresh(db, userId)
     default:
       return {
-        message: '使い方: `/char set <URL>` / `/char status` / `/char update <対象> <増減値>`',
+        message: '使い方: `/char set <URL>` / `/char status` / `/char update <対象> <増減値>` / `/char refresh`',
         ephemeral: true,
       }
   }
@@ -97,6 +98,41 @@ async function handleCharStatus(
   ]
 
   return { message: lines.join('\n'), ephemeral: false }
+}
+
+// ── /char refresh ────────────────────────────────────────────
+
+async function handleCharRefresh(
+  db: D1Database,
+  userId: string,
+): Promise<CommandResult> {
+  const char = await getActiveCharacter(db, userId)
+  if (!char) {
+    return { message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。', ephemeral: true }
+  }
+
+  let data
+  try {
+    data = await fetchCharasheet(char.id)
+  } catch (e) {
+    return { message: `キャラクターデータの取得に失敗しました: ${(e as Error).message}`, ephemeral: true }
+  }
+
+  const fresh = mapToCharacter(data, userId)
+  if (!fresh) {
+    return {
+      message: 'このシートはクトゥルフ神話TRPG（第6版・第7版）のキャラクターではありません。',
+      ephemeral: true,
+    }
+  }
+
+  await refreshCharacterSkillsAndStats(db, char.id, fresh.skills, fresh.stats)
+
+  const skillCount = Object.keys(fresh.skills).length
+  return {
+    message: `✅ **${fresh.name}** の技能・能力値を更新しました。（技能数: ${skillCount}）\nHP・MP・SAN・幸運は現在値を維持します。`,
+    ephemeral: true,
+  }
 }
 
 // ── /char update ─────────────────────────────────────────────

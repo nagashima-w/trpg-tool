@@ -10,22 +10,22 @@ const BASE_INPUT: ReportInput = {
     {
       id: 1, session_id: 's1', user_id: 'user-A', character_name: '探索者A',
       skill_name: '目星', target_value: 75, final_dice: 12,
-      result_level: 'extreme', is_secret: false, timestamp: '2024-01-01T10:30:00Z',
+      result_level: 'extreme', is_secret: false, extra_value: null, timestamp: '2024-01-01T10:30:00Z',
     },
     {
       id: 2, session_id: 's1', user_id: 'user-A', character_name: '探索者A',
       skill_name: '回避', target_value: 25, final_dice: 85,
-      result_level: 'failure', is_secret: false, timestamp: '2024-01-01T11:00:00Z',
+      result_level: 'failure', is_secret: false, extra_value: null, timestamp: '2024-01-01T11:00:00Z',
     },
     {
       id: 3, session_id: 's1', user_id: 'user-B', character_name: '探索者B',
       skill_name: '図書館', target_value: 70, final_dice: 98,
-      result_level: 'fumble', is_secret: false, timestamp: '2024-01-01T11:30:00Z',
+      result_level: 'fumble', is_secret: false, extra_value: null, timestamp: '2024-01-01T11:30:00Z',
     },
     {
       id: 4, session_id: 's1', user_id: 'kp-user-456', character_name: 'KP',
       skill_name: '隠密', target_value: 50, final_dice: 30,
-      result_level: 'regular', is_secret: true, timestamp: '2024-01-01T12:00:00Z',
+      result_level: 'regular', is_secret: true, extra_value: null, timestamp: '2024-01-01T12:00:00Z',
     },
   ],
   participants: [
@@ -121,5 +121,29 @@ describe('generateReport', () => {
     }
     const report = generateReport(input)
     expect(report).toContain('-')
+  })
+
+  it('SANチェックでextra_valueがある場合、詳細ログにSAN減少量が表示される', () => {
+    const input: ReportInput = {
+      ...BASE_INPUT,
+      logs: [
+        {
+          id: 10, session_id: 's1', user_id: 'user-A', character_name: '探索者A',
+          skill_name: 'SANチェック', target_value: 45, final_dice: 78,
+          result_level: 'failure', is_secret: false, extra_value: 3,
+          timestamp: '2024-01-01T10:30:00Z',
+        },
+      ],
+    }
+    const report = generateReport(input)
+    expect(report).toContain('SANチェック')
+    expect(report).toContain('-3')
+  })
+
+  it('extra_valueがnullのログは減少量を表示しない', () => {
+    const report = generateReport(BASE_INPUT)
+    // 通常ログ（extra_value: null）に余分な「-X」が出ないこと
+    // BASE_INPUTのlogsにfinal_dice=12, 85, 98があるが「-12」等が出ないことを確認
+    expect(report).not.toMatch(/出目: \d+ ＞ .+ \(-\d+\)/)
   })
 })

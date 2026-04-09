@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS Dice_Logs (
   final_dice     INTEGER  NOT NULL,
   result_level   TEXT     NOT NULL, -- 'critical'|'extreme'|'hard'|'regular'|'failure'|'fumble'
   is_secret      INTEGER  NOT NULL DEFAULT 0, -- 0=false, 1=true
+  extra_value    INTEGER,           -- SANチェック時のSAN減少量（その他はNULL）
   timestamp      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (session_id) REFERENCES Sessions(id)
 );

@@ -11,6 +11,7 @@ export interface DiceLogDetail {
   finalDice: number
   resultLevel: ResultLevel
   isSecret: boolean
+  extraValue?: number  // SANチェック時のSAN減少量
 }
 
 export interface CommandResult {
