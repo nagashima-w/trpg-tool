@@ -23,6 +23,7 @@ export async function handleCc(
   db: D1Database,
   userId: string,
   guildId: string,
+  channelId: string,
   rawArgs: string,
 ): Promise<CommandResult> {
   // secret抽出
@@ -31,7 +32,7 @@ export async function handleCc(
   const { args: skillName, modifier } = extractModifier(argsNoSecret)
 
   const [session, char] = await Promise.all([
-    getActiveSession(db, guildId),
+    getActiveSession(db, guildId, channelId),
     getActiveCharacter(db, userId),
   ])
   const system = session?.system ?? 'coc7'
