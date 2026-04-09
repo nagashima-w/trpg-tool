@@ -31,6 +31,7 @@ export async function handleSc(
   db: D1Database,
   userId: string,
   guildId: string,
+  channelId: string,
   rawArgs: string,
 ): Promise<CommandResult> {
   const { args, isSecret } = extractSecret(rawArgs)
@@ -45,7 +46,7 @@ export async function handleSc(
 
   const [char, session] = await Promise.all([
     getActiveCharacter(db, userId),
-    getActiveSession(db, guildId),
+    getActiveSession(db, guildId, channelId),
   ])
 
   if (!char) {

@@ -170,7 +170,7 @@ async function routeCommand(
 ): Promise<Response> {
   switch (commandName) {
     case 'cc': {
-      const result = await handleCc(env.DB, userId, guildId, args)
+      const result = await handleCc(env.DB, userId, guildId, channelId, args)
       if (result.diceLog) {
         await tryRecordDiceLog(
           env.DB, guildId, channelId, userId,
@@ -184,7 +184,7 @@ async function routeCommand(
       return messageResponse(result.message, result.ephemeral)
     }
     case 'sc': {
-      const result = await handleSc(env.DB, userId, guildId, args)
+      const result = await handleSc(env.DB, userId, guildId, channelId, args)
       if (result.diceLog) {
         await tryRecordDiceLog(
           env.DB, guildId, channelId, userId,
