@@ -10,6 +10,7 @@ import { handleChar } from './commands/char.ts'
 import { handleSession } from './commands/session.ts'
 import { handleHelp } from './commands/help.ts'
 import { insertDiceLog, getActiveSession, getActiveCharacter } from './db.ts'
+import { parseCommandOptions } from './parseCommandOptions.ts'
 import type { D1Database } from './db.ts'
 
 export interface Env {
@@ -279,32 +280,8 @@ export default {
       const channelId        = (interaction.channel_id as string) ?? ''
       const interactionToken = interaction.token as string
 
-      // session はサブコマンド構造（options[0] が SUB_COMMAND）のため個別にパース
-      // その他のコマンドは options[0].value に文字列引数が入る
       const dataOptions = (interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined
-      let args: string
-      let ccTargetUserId: string | undefined
-      if (commandName === 'cc') {
-        args = dataOptions?.find(o => o.name === 'args')?.value as string ?? ''
-        ccTargetUserId = dataOptions?.find(o => o.name === 'target')?.value as string | undefined
-      } else if (commandName === 'session') {
-        const subCmd      = dataOptions?.[0]?.name as string ?? ''
-        const subCmdOpts  = dataOptions?.[0]?.options as Array<Record<string, unknown>> | undefined
-        const sessionName   = subCmdOpts?.find(o => o.name === 'name')?.value as string ?? ''
-        const sessionSystem = subCmdOpts?.find(o => o.name === 'system')?.value as string ?? ''
-        const pcParam       = subCmdOpts?.find(o => o.name === 'param')?.value as string ?? ''
-        if (subCmd === 'pc') {
-          args = `pc ${pcParam}`
-        } else if (sessionName && sessionSystem) {
-          args = `${subCmd} ${sessionName} ${sessionSystem}`
-        } else if (sessionName) {
-          args = `${subCmd} ${sessionName}`
-        } else {
-          args = subCmd
-        }
-      } else {
-        args = dataOptions?.[0]?.value as string ?? ''
-      }
+      const { args, ccTargetUserId } = parseCommandOptions(commandName, dataOptions)
 
       return routeCommand(env, ctx, commandName, userId, guildId, channelId, args, interactionToken, ccTargetUserId)
     }
