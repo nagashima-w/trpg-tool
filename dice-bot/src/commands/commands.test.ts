@@ -187,6 +187,55 @@ describe('handleCc', () => {
   })
 })
 
+// ── handleCc KPターゲット指定ロール ──────────────────────────
+
+describe('handleCc KPターゲット指定', () => {
+  it('KPが対象PLの技能値でロールできる', async () => {
+    const db = makeSessionDb({ session: MOCK_SESSION_ROW })
+    const result = await handleCc(db, 'kp-user', 'guild-1', 'channel-1', '目星', 'user-A')
+    expect(result.message).toContain('目星')
+    expect(result.message).toContain('75') // MOCK_CHAR_ROW の目星値
+    expect(result.message).toContain('探索者A') // 対象キャラ名
+    expect(result.ephemeral).toBe(true) // 常にエフェメラル
+    expect(result.diceLog).toBeUndefined() // KPターゲットはログ記録なし
+  })
+
+  it('KP以外がターゲット指定するとエラー', async () => {
+    const db = makeSessionDb({ session: MOCK_SESSION_ROW })
+    const result = await handleCc(db, 'user-A', 'guild-1', 'channel-1', '目星', 'user-B')
+    expect(result.message).toContain('KP')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('セッションなしでターゲット指定するとエラー', async () => {
+    const db = makeSessionDb({ session: null })
+    const result = await handleCc(db, 'kp-user', 'guild-1', 'channel-1', '目星', 'user-A')
+    expect(result.message).toContain('セッション')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('対象PLにキャラクターがない場合エラー', async () => {
+    const db = makeSessionDb({ session: MOCK_SESSION_ROW, char: null })
+    const result = await handleCc(db, 'kp-user', 'guild-1', 'channel-1', '目星', 'user-A')
+    expect(result.message).toContain('キャラクター')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('対象PLの技能が見つからない場合エラー', async () => {
+    const db = makeSessionDb({ session: MOCK_SESSION_ROW })
+    const result = await handleCc(db, 'kp-user', 'guild-1', 'channel-1', '存在しない技能', 'user-A')
+    expect(result.message).toContain('見つかりません')
+    expect(result.ephemeral).toBe(true)
+  })
+
+  it('第6版セッションでボーナスダイス指定はエラー', async () => {
+    const db = makeSessionDb({ session: { ...MOCK_SESSION_ROW, system: 'coc6' } })
+    const result = await handleCc(db, 'kp-user', 'guild-1', 'channel-1', '目星 +1', 'user-A')
+    expect(result.message).toContain('第6版')
+    expect(result.ephemeral).toBe(true)
+  })
+})
+
 // ── handleSc (/sc) ────────────────────────────────────────────
 
 describe('handleSc', () => {

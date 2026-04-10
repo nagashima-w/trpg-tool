@@ -88,17 +88,27 @@ describe('generateReport', () => {
     expect(report).toContain('12')  // dice
   })
 
-  it('is_secret=trueのログは詳細ログに含まれない', () => {
-    const report = generateReport(BASE_INPUT)
-    // secretログのskill_name='隠密'は出力されない
-    expect(report).not.toContain('隠密')
+  it('is_secret=trueの参加者ログは（シークレット）付きで詳細ログに含まれる', () => {
+    const input: ReportInput = {
+      ...BASE_INPUT,
+      logs: [
+        {
+          id: 10, session_id: 's1', user_id: 'user-A', character_name: '探索者A',
+          skill_name: '心理学', target_value: 60, final_dice: 30,
+          result_level: 'regular', is_secret: true, extra_value: null,
+          timestamp: '2024-01-01T10:30:00Z',
+        },
+      ],
+    }
+    const report = generateReport(input)
+    expect(report).toContain('心理学')
+    expect(report).toContain('（シークレット）')
   })
 
-  it('is_secret=trueのログはサマリ集計にも含まれない', () => {
-    // KPのシークレットログを除外してもサマリに影響しないこと
+  it('is_secret=trueのログはサマリ集計にも含まれる', () => {
+    // user-A の2件（extreme成功・failure）→ 成功率50%
     const report = generateReport(BASE_INPUT)
-    // KPキャラ'KP'の名前がサマリに出ない
-    expect(report).not.toContain('**KP**のサマリ')
+    expect(report).toContain('50%')
   })
 
   it('ログが0件のプレイヤーがいても正常に動作する', () => {
@@ -112,7 +122,7 @@ describe('generateReport', () => {
     expect(() => generateReport(input)).not.toThrow()
   })
 
-  it('全ログがシークレットのプレイヤーは成功率が「-」表示になる', () => {
+  it('全ログがシークレットでも参加者の成功率が集計される', () => {
     const input: ReportInput = {
       ...BASE_INPUT,
       logs: BASE_INPUT.logs.map(l =>
@@ -120,7 +130,8 @@ describe('generateReport', () => {
       ),
     }
     const report = generateReport(input)
-    expect(report).toContain('-')
+    // user-A: 2件中1件成功(extreme) → 50%（シークレットでも集計に含まれる）
+    expect(report).toContain('50%')
   })
 
   it('SANチェックでextra_valueがある場合、詳細ログにSAN減少量が表示される', () => {

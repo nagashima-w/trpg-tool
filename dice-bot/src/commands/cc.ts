@@ -6,6 +6,7 @@ import { rollD100, judgeResult, judgeResult6, applyBonusPenalty } from '../dice.
 import { getActiveCharacter, getActiveSession } from '../db.ts'
 import { extractSecret, extractModifier, resultLabel, type CommandResult } from './shared.ts'
 import type { D1Database } from '../db.ts'
+import type { CharacterRecord } from '../charasheet.ts'
 
 // char.stats に存在する能力値キー（英語大文字）
 const STAT_KEYS = ['STR','CON','DEX','APP','POW','SIZ','INT','EDU','MOV'] as const
@@ -19,39 +20,17 @@ const SPECIAL_FIELD_ALIASES: Record<string, 'hp' | 'mp' | 'san' | 'luck'> = {
   'LUCK': 'luck', '幸運': 'luck',
 }
 
-export async function handleCc(
-  db: D1Database,
-  userId: string,
-  guildId: string,
-  channelId: string,
-  rawArgs: string,
-): Promise<CommandResult> {
-  // secret抽出
-  const { args: argsNoSecret, isSecret } = extractSecret(rawArgs)
-  // modifier抽出
-  const { args: skillName, modifier } = extractModifier(argsNoSecret)
+// ── 技能・能力値解決ヘルパー ──────────────────────────────────
 
-  const [session, char] = await Promise.all([
-    getActiveSession(db, guildId, channelId),
-    getActiveCharacter(db, userId),
-  ])
-  const system = session?.system ?? 'coc7'
+type SkillResolution =
+  | { targetValue: number; resolvedName: string }
+  | { error: string }
 
-  if (system === 'coc6' && modifier !== 0) {
-    return {
-      message: 'ボーナス/ペナルティダイスはクトゥルフ神話TRPG第6版では使用しません。',
-      ephemeral: true,
-    }
-  }
-
-  if (!char) {
-    return {
-      message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。',
-      ephemeral: true,
-    }
-  }
-
-  // 目標値を解決（技能 or 能力値）
+/**
+ * キャラクターから技能名を多段階ルックアップして目標値を返す。
+ * 見つからない場合や複数一致の場合は error を返す。
+ */
+function resolveSkill(char: CharacterRecord, skillName: string): SkillResolution {
   const upperKey = skillName.toUpperCase()
   let targetValue: number | undefined
   let resolvedName = skillName
@@ -62,7 +41,6 @@ export async function handleCc(
     resolvedName = upperKey
   }
   // 2. 特殊フィールドチェック (HP/MP/SAN/LUCK/幸運)
-  //    大文字変換後と元のキー名の両方をチェック
   else if (SPECIAL_FIELD_ALIASES[upperKey] !== undefined || SPECIAL_FIELD_ALIASES[skillName] !== undefined) {
     const field = SPECIAL_FIELD_ALIASES[upperKey] ?? SPECIAL_FIELD_ALIASES[skillName]
     targetValue = char[field]
@@ -86,10 +64,7 @@ export async function handleCc(
         targetValue   = annotationMatches[0][1]
       } else if (annotationMatches.length > 1) {
         const names = annotationMatches.map(([k]) => k).join('、')
-        return {
-          message: `「${skillName}」に該当する技能が複数あります: ${names}\n技能名を詳しく指定してください。`,
-          ephemeral: true,
-        }
+        return { error: `「${skillName}」に該当する技能が複数あります: ${names}\n技能名を詳しく指定してください。` }
       }
     }
 
@@ -104,43 +79,133 @@ export async function handleCc(
         targetValue  = baseMatches[0][1]
       } else if (baseMatches.length > 1) {
         const names = baseMatches.map(([k]) => k).join('、')
-        return {
-          message: `「${skillName}」に該当する技能が複数あります: ${names}\n技能名を詳しく指定してください。`,
-          ephemeral: true,
-        }
+        return { error: `「${skillName}」に該当する技能が複数あります: ${names}\n技能名を詳しく指定してください。` }
       }
     }
   }
 
   if (targetValue === undefined) {
+    return { error: `技能・能力値「${skillName}」が見つかりません。` }
+  }
+
+  return { targetValue, resolvedName }
+}
+
+// ── コマンドハンドラ ──────────────────────────────────────────
+
+export async function handleCc(
+  db: D1Database,
+  userId: string,
+  guildId: string,
+  channelId: string,
+  rawArgs: string,
+  targetUserId?: string,
+): Promise<CommandResult> {
+  // secret・modifier抽出
+  const { args: argsNoSecret, isSecret } = extractSecret(rawArgs)
+  const { args: skillName, modifier } = extractModifier(argsNoSecret)
+
+  // セッション情報取得（システム判定・KP確認に使用）
+  const session = await getActiveSession(db, guildId, channelId)
+  const system = session?.system ?? 'coc7'
+
+  if (system === 'coc6' && modifier !== 0) {
     return {
-      message: `技能・能力値「${skillName}」が見つかりません。`,
+      message: 'ボーナス/ペナルティダイスはクトゥルフ神話TRPG第6版では使用しません。',
       ephemeral: true,
     }
   }
 
-  // ダイスロール
+  // ── KPターゲット指定ロール ──
+  if (targetUserId !== undefined) {
+    if (!session) {
+      return { message: '進行中のセッションがありません。', ephemeral: true }
+    }
+    if (session.kp_user_id !== userId) {
+      return { message: 'ターゲット指定ロールはKPのみ使用できます。', ephemeral: true }
+    }
+
+    const targetChar = await getActiveCharacter(db, targetUserId)
+    if (!targetChar) {
+      return {
+        message: '対象プレイヤーにアクティブキャラクターが設定されていません。',
+        ephemeral: true,
+      }
+    }
+
+    const resolution = resolveSkill(targetChar, skillName)
+    if ('error' in resolution) {
+      return { message: resolution.error, ephemeral: true }
+    }
+    const { targetValue, resolvedName } = resolution
+    const base = rollD100(true)
+
+    if (system === 'coc6') {
+      const level = judgeResult6(base.total, targetValue)
+      return {
+        message: [
+          `🎲 **${resolvedName}** (${targetChar.name}: ${targetValue})`,
+          `出目：**${base.total}** ＞ ${resultLabel(level)}`,
+        ].join('\n'),
+        ephemeral: true,
+      }
+    } else {
+      const { final, extraRolls } = applyBonusPenalty(base, modifier)
+      const level = judgeResult(final, targetValue)
+      const lines = [
+        `🎲 **${resolvedName}** (${targetChar.name}: ${targetValue})`,
+        `ベース出目：${base.total}（10の位: ${base.tens}, 1の位: ${base.ones}）`,
+      ]
+      if (modifier !== 0) {
+        const label = modifier > 0 ? 'ボーナス' : 'ペナルティ'
+        lines.push(`${label}出目（10の位）：${extraRolls.join(', ')}`)
+        lines.push(`最終結果：**${final}** ＞ ${resultLabel(level)}`)
+      } else {
+        lines.push(`結果：**${final}** ＞ ${resultLabel(level)}`)
+      }
+      return { message: lines.join('\n'), ephemeral: true }
+    }
+  }
+
+  // ── 通常ロール ──
+  const char = await getActiveCharacter(db, userId)
+  if (!char) {
+    return {
+      message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。',
+      ephemeral: true,
+    }
+  }
+
+  const resolution = resolveSkill(char, skillName)
+  if ('error' in resolution) {
+    return { message: resolution.error, ephemeral: true }
+  }
+  const { targetValue, resolvedName } = resolution
   const base = rollD100(true)
-  const lines: string[] = []
 
   if (system === 'coc6') {
     const level = judgeResult6(base.total, targetValue)
-    lines.push(`🎲 **${resolvedName}** (目標値: ${targetValue})`)
-    lines.push(`出目：**${base.total}** ＞ ${resultLabel(level)}`)
-    return { message: lines.join('\n'), ephemeral: isSecret, diceLog: {
-      skillName: resolvedName,
-      targetValue,
-      finalDice: base.total,
-      resultLevel: level,
-      isSecret,
-    }}
+    return {
+      message: [
+        `🎲 **${resolvedName}** (目標値: ${targetValue})`,
+        `出目：**${base.total}** ＞ ${resultLabel(level)}`,
+      ].join('\n'),
+      ephemeral: isSecret,
+      diceLog: {
+        skillName: resolvedName,
+        targetValue,
+        finalDice: base.total,
+        resultLevel: level,
+        isSecret,
+      },
+    }
   } else {
     const { final, extraRolls } = applyBonusPenalty(base, modifier)
     const level = judgeResult(final, targetValue)
-
-    lines.push(`🎲 **${resolvedName}** (目標値: ${targetValue})`)
-    lines.push(`ベース出目：${base.total}（10の位: ${base.tens}, 1の位: ${base.ones}）`)
-
+    const lines = [
+      `🎲 **${resolvedName}** (目標値: ${targetValue})`,
+      `ベース出目：${base.total}（10の位: ${base.tens}, 1の位: ${base.ones}）`,
+    ]
     if (modifier !== 0) {
       const label = modifier > 0 ? 'ボーナス' : 'ペナルティ'
       lines.push(`${label}出目（10の位）：${extraRolls.join(', ')}`)
@@ -148,13 +213,16 @@ export async function handleCc(
     } else {
       lines.push(`結果：**${final}** ＞ ${resultLabel(level)}`)
     }
-
-    return { message: lines.join('\n'), ephemeral: isSecret, diceLog: {
-      skillName: resolvedName,
-      targetValue,
-      finalDice: final,
-      resultLevel: level,
-      isSecret,
-    }}
+    return {
+      message: lines.join('\n'),
+      ephemeral: isSecret,
+      diceLog: {
+        skillName: resolvedName,
+        targetValue,
+        finalDice: final,
+        resultLevel: level,
+        isSecret,
+      },
+    }
   }
 }

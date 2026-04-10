@@ -167,10 +167,11 @@ async function routeCommand(
   channelId: string,
   args: string,
   interactionToken: string,
+  ccTargetUserId?: string,
 ): Promise<Response> {
   switch (commandName) {
     case 'cc': {
-      const result = await handleCc(env.DB, userId, guildId, channelId, args)
+      const result = await handleCc(env.DB, userId, guildId, channelId, args, ccTargetUserId)
       if (result.diceLog) {
         await tryRecordDiceLog(
           env.DB, guildId, channelId, userId,
@@ -282,7 +283,11 @@ export default {
       // その他のコマンドは options[0].value に文字列引数が入る
       const dataOptions = (interaction.data as Record<string, unknown>)?.options as Array<Record<string, unknown>> | undefined
       let args: string
-      if (commandName === 'session') {
+      let ccTargetUserId: string | undefined
+      if (commandName === 'cc') {
+        args = dataOptions?.find(o => o.name === 'args')?.value as string ?? ''
+        ccTargetUserId = dataOptions?.find(o => o.name === 'target')?.value as string | undefined
+      } else if (commandName === 'session') {
         const subCmd      = dataOptions?.[0]?.name as string ?? ''
         const subCmdOpts  = dataOptions?.[0]?.options as Array<Record<string, unknown>> | undefined
         const sessionName   = subCmdOpts?.find(o => o.name === 'name')?.value as string ?? ''
@@ -301,7 +306,7 @@ export default {
         args = dataOptions?.[0]?.value as string ?? ''
       }
 
-      return routeCommand(env, ctx, commandName, userId, guildId, channelId, args, interactionToken)
+      return routeCommand(env, ctx, commandName, userId, guildId, channelId, args, interactionToken, ccTargetUserId)
     }
 
     return new Response('Bad Request', { status: 400 })

@@ -62,10 +62,7 @@ function calcAverage(sum: number, count: number): string {
 export function generateReport(input: ReportInput): string {
   const { sessionName, kpUserId, startedAt, endedAt, logs, participants } = input
 
-  // シークレットログを除外
-  const publicLogs = logs.filter(l => !l.is_secret)
-
-  // プレイヤーごとにログを集計
+  // プレイヤーごとにログを集計（シークレットも含める）
   const statsByUser = new Map<string, PlayerStats>()
   const logsByUser  = new Map<string, DiceLogRow[]>()
 
@@ -77,7 +74,7 @@ export function generateReport(input: ReportInput): string {
     logsByUser.set(p.userId, [])
   }
 
-  for (const log of publicLogs) {
+  for (const log of logs) {
     const stats = statsByUser.get(log.user_id)
     const userLogs = logsByUser.get(log.user_id)
     if (!stats || !userLogs) continue
@@ -167,9 +164,10 @@ export function generateReport(input: ReportInput): string {
         const label = RESULT_LABEL[log.result_level]
         const safeSkillName = log.skill_name.replace(/`/g, '\\`')
         const extraStr = (log.extra_value !== null && log.extra_value !== 0) ? ` (-${log.extra_value})` : ''
+        const secretMark = log.is_secret ? ' （シークレット）' : ''
         lines.push(
           `- \`${time}\`：${safeSkillName}(${log.target_value})` +
-          ` ＞ 出目: ${log.final_dice} ＞ ${label}${extraStr}`
+          ` ＞ 出目: ${log.final_dice} ＞ ${label}${extraStr}${secretMark}`
         )
       }
     }
