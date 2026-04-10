@@ -3,6 +3,7 @@
 // ============================================================
 
 import { rollD100, judgeResult, judgeResult6, applyBonusPenalty } from '../dice.ts'
+import type { D100Detail, ResultLevel } from '../dice.ts'
 import { getActiveCharacter, getActiveSession } from '../db.ts'
 import { extractSecret, extractModifier, resultLabel, type CommandResult } from './shared.ts'
 import type { D1Database } from '../db.ts'
@@ -91,6 +92,39 @@ function resolveSkill(char: CharacterRecord, skillName: string): SkillResolution
   return { targetValue, resolvedName }
 }
 
+// ── メッセージ生成ヘルパー ────────────────────────────────────
+
+function buildCoc6Message(resolvedName: string, header: string, targetValue: number, total: number, level: ResultLevel): string {
+  return [
+    `🎲 **${resolvedName}** (${header}: ${targetValue})`,
+    `出目：**${total}** ＞ ${resultLabel(level)}`,
+  ].join('\n')
+}
+
+function buildCoc7Message(
+  resolvedName: string,
+  header: string,
+  targetValue: number,
+  base: D100Detail,
+  modifier: number,
+  final: number,
+  extraRolls: number[],
+  level: ResultLevel,
+): string {
+  const lines = [
+    `🎲 **${resolvedName}** (${header}: ${targetValue})`,
+    `ベース出目：${base.total}（10の位: ${base.tens}, 1の位: ${base.ones}）`,
+  ]
+  if (modifier !== 0) {
+    const label = modifier > 0 ? 'ボーナス' : 'ペナルティ'
+    lines.push(`${label}出目（10の位）：${extraRolls.join(', ')}`)
+    lines.push(`最終結果：**${final}** ＞ ${resultLabel(level)}`)
+  } else {
+    lines.push(`結果：**${final}** ＞ ${resultLabel(level)}`)
+  }
+  return lines.join('\n')
+}
+
 // ── コマンドハンドラ ──────────────────────────────────────────
 
 export async function handleCc(
@@ -105,8 +139,11 @@ export async function handleCc(
   const { args: argsNoSecret, isSecret } = extractSecret(rawArgs)
   const { args: skillName, modifier } = extractModifier(argsNoSecret)
 
-  // セッション情報取得（システム判定・KP確認に使用）
-  const session = await getActiveSession(db, guildId, channelId)
+  // セッションと（通常ロール時は）自キャラを並行取得
+  const [session, ownChar] = await Promise.all([
+    getActiveSession(db, guildId, channelId),
+    targetUserId === undefined ? getActiveCharacter(db, userId) : Promise.resolve(null),
+  ])
   const system = session?.system ?? 'coc7'
 
   if (system === 'coc6' && modifier !== 0) {
@@ -138,58 +175,39 @@ export async function handleCc(
       return { message: resolution.error, ephemeral: true }
     }
     const { targetValue, resolvedName } = resolution
+    const header = targetChar.name
     const base = rollD100(true)
 
     if (system === 'coc6') {
       const level = judgeResult6(base.total, targetValue)
-      return {
-        message: [
-          `🎲 **${resolvedName}** (${targetChar.name}: ${targetValue})`,
-          `出目：**${base.total}** ＞ ${resultLabel(level)}`,
-        ].join('\n'),
-        ephemeral: true,
-      }
+      return { message: buildCoc6Message(resolvedName, header, targetValue, base.total, level), ephemeral: true }
     } else {
       const { final, extraRolls } = applyBonusPenalty(base, modifier)
       const level = judgeResult(final, targetValue)
-      const lines = [
-        `🎲 **${resolvedName}** (${targetChar.name}: ${targetValue})`,
-        `ベース出目：${base.total}（10の位: ${base.tens}, 1の位: ${base.ones}）`,
-      ]
-      if (modifier !== 0) {
-        const label = modifier > 0 ? 'ボーナス' : 'ペナルティ'
-        lines.push(`${label}出目（10の位）：${extraRolls.join(', ')}`)
-        lines.push(`最終結果：**${final}** ＞ ${resultLabel(level)}`)
-      } else {
-        lines.push(`結果：**${final}** ＞ ${resultLabel(level)}`)
-      }
-      return { message: lines.join('\n'), ephemeral: true }
+      return { message: buildCoc7Message(resolvedName, header, targetValue, base, modifier, final, extraRolls, level), ephemeral: true }
     }
   }
 
   // ── 通常ロール ──
-  const char = await getActiveCharacter(db, userId)
-  if (!char) {
+  if (!ownChar) {
     return {
       message: 'キャラクターが設定されていません。`/char set <URL>` で登録してください。',
       ephemeral: true,
     }
   }
 
-  const resolution = resolveSkill(char, skillName)
+  const resolution = resolveSkill(ownChar, skillName)
   if ('error' in resolution) {
     return { message: resolution.error, ephemeral: true }
   }
   const { targetValue, resolvedName } = resolution
+  const header = '目標値'
   const base = rollD100(true)
 
   if (system === 'coc6') {
     const level = judgeResult6(base.total, targetValue)
     return {
-      message: [
-        `🎲 **${resolvedName}** (目標値: ${targetValue})`,
-        `出目：**${base.total}** ＞ ${resultLabel(level)}`,
-      ].join('\n'),
+      message: buildCoc6Message(resolvedName, header, targetValue, base.total, level),
       ephemeral: isSecret,
       diceLog: {
         skillName: resolvedName,
@@ -202,19 +220,8 @@ export async function handleCc(
   } else {
     const { final, extraRolls } = applyBonusPenalty(base, modifier)
     const level = judgeResult(final, targetValue)
-    const lines = [
-      `🎲 **${resolvedName}** (目標値: ${targetValue})`,
-      `ベース出目：${base.total}（10の位: ${base.tens}, 1の位: ${base.ones}）`,
-    ]
-    if (modifier !== 0) {
-      const label = modifier > 0 ? 'ボーナス' : 'ペナルティ'
-      lines.push(`${label}出目（10の位）：${extraRolls.join(', ')}`)
-      lines.push(`最終結果：**${final}** ＞ ${resultLabel(level)}`)
-    } else {
-      lines.push(`結果：**${final}** ＞ ${resultLabel(level)}`)
-    }
     return {
-      message: lines.join('\n'),
+      message: buildCoc7Message(resolvedName, header, targetValue, base, modifier, final, extraRolls, level),
       ephemeral: isSecret,
       diceLog: {
         skillName: resolvedName,
