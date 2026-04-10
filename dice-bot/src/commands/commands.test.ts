@@ -26,9 +26,19 @@ const MOCK_SESSION_ROW = {
   status: 'active' as const, system: 'coc7' as const, started_at: '2024-01-01T10:00:00Z', ended_at: null,
 }
 
+// D1 は undefined を bind パラメータとして受け取るとランタイムエラーになる。
+// モックでも同じ挙動を再現し、パラメータ渡し漏れを早期検出する。
+function assertNoBind(args: unknown[]): void {
+  const idx = args.findIndex(a => a === undefined)
+  if (idx !== -1) throw new Error(`D1_TYPE_ERROR: Type 'undefined' not supported for value at index ${idx}`)
+}
+
 function makeDb(char = MOCK_CHAR_ROW as unknown) {
   const stmt = {
-    bind: vi.fn().mockReturnThis(),
+    bind: vi.fn().mockImplementation(function(this: unknown, ...args: unknown[]) {
+      assertNoBind(args)
+      return this
+    }),
     first: vi.fn().mockResolvedValue(char),
     run:   vi.fn().mockResolvedValue({ success: true }),
     all:   vi.fn().mockResolvedValue({ results: [] }),
@@ -39,7 +49,7 @@ function makeDb(char = MOCK_CHAR_ROW as unknown) {
 function makeSessionDb({ session = null as unknown, char = MOCK_CHAR_ROW as unknown, logs = [] as unknown[] } = {}) {
   return {
     prepare: (sql: string) => ({
-      bind: function() { return this },
+      bind: function(this: unknown, ...args: unknown[]) { assertNoBind(args); return this },
       first: async () => sql.includes("status = 'active'") ? session : char,
       run:   async () => ({ success: true }),
       all:   async () => ({ results: logs }),
@@ -184,6 +194,25 @@ describe('handleCc', () => {
     expect(result.message).toContain('運転（自動車）')
     expect(result.message).toContain('運転（バイク）')
     expect(result.ephemeral).toBe(true)
+  })
+})
+
+// ── bindモック: undefinedパラメータの検出 ──────────────────────
+// D1 は undefined を bind すると D1_TYPE_ERROR を投げる。モックが同様に
+// 検出できることを確認し、パラメータ渡し漏れが本番前に判明するようにする。
+
+describe('D1モック: undefinedバインドの検出', () => {
+  it('makeDb: undefinedをbindするとエラーになる', async () => {
+    // getActiveCharacter は userId を bind するため、undefined を渡すとクラッシュする
+    const db = makeDb()
+    // @ts-expect-error テスト用に意図的に undefined を渡す
+    await expect(handleCc(db, undefined, 'guild-1', 'channel-1', '目星')).rejects.toThrow('D1_TYPE_ERROR')
+  })
+
+  it('makeSessionDb: undefinedをbindするとエラーになる', async () => {
+    const db = makeSessionDb({ session: MOCK_SESSION_ROW })
+    // @ts-expect-error テスト用に意図的に undefined を渡す
+    await expect(handleCc(db, 'user-A', 'guild-1', undefined, '目星')).rejects.toThrow('D1_TYPE_ERROR')
   })
 })
 
