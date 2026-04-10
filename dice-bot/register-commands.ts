@@ -26,6 +26,12 @@ const commands = [
         type: 3, // STRING
         required: true,
       },
+      {
+        name: 'target',
+        description: '（KP専用）対象PLのメンション。PLのキャラクター技能値でロールします',
+        type: 6, // USER
+        required: false,
+      },
     ],
   },
   {
