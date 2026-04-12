@@ -8,6 +8,15 @@
 - 既存のPRが open/closed どちらの状態でも、新しい変更には新しいPRを作ること
 - "update existing PR" や "amend PR" は絶対に行わない
 
+## Documentation Maintenance
+
+**コマンドを追加・変更する際は、必ず以下を同時に更新すること。**
+
+- `dice-bot/src/commands/help.ts` — `/dicehelp` コマンドのボット内ヘルプ
+- `dice-bot/USER-GUIDE.md` — ユーザー向けガイド
+
+実装と上記ドキュメントを常に一致させること。コマンド追加後にガイドのみ・ヘルプのみ更新するのは不可。
+
 ## Test-Driven Development
 
 **コードを実装する前に、必ずテストを先に書くこと。**
