@@ -1,4 +1,4 @@
-name: Scenario Converter Test
+name: Scenario Converter Build
 
 on:
   push:
@@ -6,19 +6,29 @@ on:
     paths:
       - 'scenario-converter/src/**'
       - 'scenario-converter/package*.json'
+      - 'scenario-converter/electron*.ts'
       - 'scenario-converter/tsconfig*.json'
+      - 'scenario-converter/electron-builder.yml'
+      - 'scenario-converter/build/**'
       - 'scenario-converter/vitest.config.*'
   pull_request:
     branches: [main]
     paths:
       - 'scenario-converter/src/**'
       - 'scenario-converter/package*.json'
+      - 'scenario-converter/electron*.ts'
       - 'scenario-converter/tsconfig*.json'
+      - 'scenario-converter/electron-builder.yml'
+      - 'scenario-converter/build/**'
       - 'scenario-converter/vitest.config.*'
+  workflow_dispatch:
 
 defaults:
   run:
     working-directory: scenario-converter
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   test:
@@ -39,3 +49,89 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  build:
+    name: Build (${{ matrix.os }})
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: package:win
+            artifact: dist/*.exe
+          - os: macos-latest
+            script: package:mac
+            artifact: dist/*.dmg
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scenario-converter/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create icon.ico from icon.png (Windows)
+        if: matrix.os == 'windows-latest'
+        run: magick "build/icon.png" -define icon:auto-resize=256,48,32,16 "build/icon.ico"
+
+      - name: Build and package
+        run: npm run ${{ matrix.script }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: scenario-converter-${{ matrix.os }}
+          path: scenario-converter/${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    name: Update Release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create or update versioned release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: scenario-converter-v${{ steps.version.outputs.version }}
+          name: Scenario Converter v${{ steps.version.outputs.version }}
+          body: |
+            Scenario Converter v${{ steps.version.outputs.version }}
+          files: artifacts/**
+          make_latest: true
+
+      - name: Update latest release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: scenario-converter-latest
+          name: Scenario Converter (latest)
+          body: |
+            mainブランチの最新ビルドです。現在のバージョン: v${{ steps.version.outputs.version }}
+          files: artifacts/**
