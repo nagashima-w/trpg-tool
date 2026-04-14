@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoC 6→7版 シナリオコンバーター</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ヘッダー -->
+    <header class="header">
+      <h1>CoC 6→7版 シナリオコンバーター</h1>
+      <button id="open-btn" class="btn btn-primary">ファイルを開く</button>
+      <button id="settings-btn" class="btn btn-secondary">設定</button>
+    </header>
+
+    <!-- ドロップゾーン（ファイル未読込時） -->
+    <div id="drop-zone" class="drop-zone">
+      <p>txt / PDF ファイルをドロップ</p>
+      <small>または「ファイルを開く」ボタンから選択</small>
+    </div>
+
+    <!-- ステータスバー（読込後に表示） -->
+    <div id="statusbar" class="statusbar hidden">
+      <span id="status-file"></span>
+      <span>変換ブロック: <span id="status-blocks" class="count">0</span> 件</span>
+      <span>技能リネーム: <span id="status-renames" class="count">0</span> 件</span>
+    </div>
+
+    <!-- 差分ビュー（読込後に表示） -->
+    <div id="diff-area" class="diff-area hidden">
+      <div class="diff-pane">
+        <div class="pane-header">元の文書（6版）</div>
+        <div id="pane-original" class="pane-content"></div>
+      </div>
+      <div class="diff-pane">
+        <div class="pane-header">変換後（7版）― クリックで編集</div>
+        <div id="pane-converted" class="pane-content"></div>
+      </div>
+    </div>
+
+    <!-- フッター -->
+    <footer id="footer" class="footer hidden">
+      <button id="save-btn" class="btn btn-success">txt で保存</button>
+    </footer>
+  </div>
+
+  <!-- 設定モーダル（将来のAI連携用） -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>設定</h3>
+      <div class="form-group">
+        <label>AI連携（将来対応）</label>
+        <select id="ai-provider-select">
+          <option value="none">使用しない</option>
+          <option value="claude">Claude API（未実装）</option>
+          <option value="gemini">Gemini API（未実装）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>API キー</label>
+        <input type="password" id="ai-apikey-input" placeholder="将来対応予定" disabled />
+      </div>
+      <div class="modal-footer">
+        <button id="settings-save-btn" class="btn btn-primary">保存</button>
+        <button id="settings-cancel-btn" class="btn btn-secondary">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

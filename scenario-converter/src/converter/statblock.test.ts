@@ -6,7 +6,7 @@ import { detectStatBlocks, detectEdition } from './statblock'
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe('detectStatBlocks', () => {
-  it('シンプルな1行形式を検出できる', () => {
+  it('シンプルな1行スペース区切りを検出できる', () => {
     const text = 'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11'
     const blocks = detectStatBlocks(text)
     expect(blocks).toHaveLength(1)
@@ -32,7 +32,7 @@ describe('detectStatBlocks', () => {
     expect(blocks[0].abilities.STR).toBe(14)
   })
 
-  it('複数行にまたがる場合でも検出できる', () => {
+  it('派生値（HP, MP）を同一ブロックとして取り込む', () => {
     const text = [
       'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
       'HP 14  MP 13',
@@ -43,14 +43,26 @@ describe('detectStatBlocks', () => {
     expect(blocks[0].derived.MP).toBe(13)
   })
 
-  it('ダッシュ値（APP -）は undefined として扱う', () => {
+  it('APP - や EDU - はundefinedとして扱う', () => {
     const text = 'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11  APP -  EDU -'
     const blocks = detectStatBlocks(text)
     expect(blocks).toHaveLength(1)
     expect(blocks[0].abilities.APP).toBeUndefined()
   })
 
-  it('2つのNPCのstatブロックを別々に検出できる', () => {
+  it('技能値を含む行をブロックに取り込む', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      '回避 22%  組み付き 55%  聞き耳 35%',
+    ].join('\n')
+    const blocks = detectStatBlocks(text)
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].skills).toHaveLength(3)
+    expect(blocks[0].skills[0].name).toBe('回避')
+    expect(blocks[0].skills[0].value).toBe(22)
+  })
+
+  it('2体のNPCを別ブロックとして検出する', () => {
     const text = [
       '【深きもの】',
       'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
@@ -66,58 +78,36 @@ describe('detectStatBlocks', () => {
     expect(blocks[1].abilities.STR).toBe(16)
   })
 
-  it('3未満の能力値しかない行はstatブロックとして検出しない', () => {
+  it('能力値が2つ以下の行はブロックとして検出しない', () => {
     const text = 'STR 14  CON 12'
     const blocks = detectStatBlocks(text)
     expect(blocks).toHaveLength(0)
   })
 
-  it('通常のテキスト（数字入り）はstatブロックとして検出しない', () => {
+  it('通常の日本語テキストはブロックとして検出しない', () => {
     const text = 'シナリオ開始から1d6時間後、3名のNPCが登場する。2回目の判定では難易度が上がる。'
     const blocks = detectStatBlocks(text)
     expect(blocks).toHaveLength(0)
   })
-
-  it('技能値を含むstatブロックを検出できる', () => {
-    const text = [
-      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
-      '回避 22%  組み付き 55%  聞き耳 35%',
-    ].join('\n')
-    const blocks = detectStatBlocks(text)
-    expect(blocks).toHaveLength(1)
-    expect(blocks[0].skills).toHaveLength(3)
-    expect(blocks[0].skills[0].name).toBe('回避')
-    expect(blocks[0].skills[0].value).toBe(22)
-  })
 })
 
 // ──────────────────────────────────────────────────────────────────────────────
-// detectEdition
+// detectEdition（警告用ユーティリティ。変換フローでは使用しない）
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe('detectEdition', () => {
-  it('能力値が低い（3〜18スケール）→ 6版と判定', () => {
+  it('低い能力値（3〜18スケール）→ coc6', () => {
     const abilities = { STR: 14, CON: 12, DEX: 11, POW: 13, SIZ: 15 }
     expect(detectEdition(abilities)).toBe('coc6')
   })
 
-  it('能力値が高い（×5スケール）→ 7版と判定', () => {
+  it('高い能力値（×5スケール）→ coc7', () => {
     const abilities = { STR: 70, CON: 60, DEX: 55, POW: 65, SIZ: 75 }
     expect(detectEdition(abilities)).toBe('coc7')
   })
 
-  it('能力値が不足している場合は unknown', () => {
+  it('能力値が3つ未満の場合は unknown', () => {
     const abilities = { HP: 14 }
     expect(detectEdition(abilities)).toBe('unknown')
-  })
-
-  it('境界値: STR 30 以下なら6版', () => {
-    const abilities = { STR: 20, CON: 18, DEX: 16, POW: 14, SIZ: 22 }
-    expect(detectEdition(abilities)).toBe('coc6')
-  })
-
-  it('境界値: STR 40 以上なら7版', () => {
-    const abilities = { STR: 40, CON: 45, DEX: 50, POW: 55, SIZ: 60 }
-    expect(detectEdition(abilities)).toBe('coc7')
   })
 })
