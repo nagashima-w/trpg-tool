@@ -8,6 +8,7 @@ import type {
 import { recalcDerived } from './rules'
 import { convertSkills } from './skills'
 import { detectStatBlocks } from './statblock'
+import { escapeRe } from './utils'
 
 /** ×5しない能力値キー */
 const NO_MULTIPLY: Array<keyof AbilityStats> = ['MOV']
@@ -148,9 +149,7 @@ function buildConvertedText(
   for (const newSkill of newSkills) {
     if (!newSkill.renamed) continue
     const originalName = newSkill.originalName
-    // "技能名 数値%" のパターンで技能名部分のみ置換
-    const escapedName = originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const re = new RegExp(`${escapedName}(\\s*\\d{1,3}%)`, 'g')
+    const re = new RegExp(`${escapeRe(originalName)}(\\s*\\d{1,3}%)`, 'g')
     text = text.replace(re, `${newSkill.name}$1`)
   }
 

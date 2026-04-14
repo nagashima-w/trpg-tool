@@ -1,4 +1,5 @@
 import type { ConversionResult, ConvertedBlock } from '../../converter/types'
+import { escapeRe } from '../../converter/utils'
 
 const api = window.converterAPI
 
@@ -29,9 +30,13 @@ let editedConvertedText = ''
 // ── ファイル読み込み ─────────────────────────────────────────────────────────
 
 async function loadFile(): Promise<void> {
-  const file = await api.openFile()
-  if (!file) return
-  await processText(file.text, file.filePath)
+  try {
+    const file = await api.openFile()
+    if (!file) return
+    await processText(file.text, file.filePath)
+  } catch (err) {
+    alert(`ファイルの読み込みに失敗しました:\n${err}`)
+  }
 }
 
 async function processText(text: string, label: string): Promise<void> {
@@ -131,16 +136,15 @@ function buildBlockHtml(block: ConvertedBlock): string {
 function syncEditedText(result: ConversionResult): void {
   const spans = paneConverted.querySelectorAll<HTMLSpanElement>('[data-block-idx]')
   let text = result.convertedText
-  // ブロックを後ろから置換することでインデックスズレを防ぐ
-  const sorted = Array.from(spans).sort((a, b) =>
-    parseInt(b.dataset['blockIdx']!) - parseInt(a.dataset['blockIdx']!)
-  )
-  for (const span of sorted) {
-    const idx = parseInt(span.dataset['blockIdx']!)
+  // ブロックを後ろから置換することでインデックスズレを防ぐ（降順ソート）
+  const sorted = Array.from(spans)
+    .map(el => ({ el, idx: parseInt(el.dataset['blockIdx']!, 10) }))
+    .sort((a, b) => b.idx - a.idx)
+  for (const { el, idx } of sorted) {
     const block = result.blocks[idx]
-    const before = text.slice(0, block.original.startIndex)
-    const after  = text.slice(block.original.endIndex)
-    text = before + (span.textContent ?? '') + after
+    text = text.slice(0, block.original.startIndex) +
+           (el.textContent ?? '') +
+           text.slice(block.original.endIndex)
   }
   editedConvertedText = text
 }
@@ -202,8 +206,8 @@ dropZone.addEventListener('drop', async e => {
   }
   const reader = new FileReader()
   reader.onload = async () => {
-    const text = reader.result as string
-    await processText(text, file.name)
+    if (typeof reader.result !== 'string') return
+    await processText(reader.result, file.name)
   }
   reader.readAsText(file, 'utf-8')
 })
@@ -233,8 +237,4 @@ function escHtml(s: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-}
-
-function escapeRe(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

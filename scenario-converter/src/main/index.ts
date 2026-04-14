@@ -5,6 +5,7 @@ import { SettingsManager } from './settings'
 import { readTextFile, extractTextFromPdf } from './pdf'
 import { convertText } from '../converter/convert6to7'
 import type { ConversionResult } from '../converter/types'
+import type { Settings } from './settings'
 
 let mainWindow: BrowserWindow | null = null
 let settingsManager: SettingsManager
@@ -76,7 +77,7 @@ function setupIpcHandlers(): void {
 
   // ── 設定 ────────────────────────────────────────────────────────────
   ipcMain.handle('get-settings', () => settingsManager.get())
-  ipcMain.handle('save-settings', (_event, settings) => settingsManager.save(settings))
+  ipcMain.handle('save-settings', (_event, settings: Settings) => settingsManager.save(settings))
 }
 
 app.whenReady().then(() => {

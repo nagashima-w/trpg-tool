@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs'
+import { readFile } from 'fs/promises'
 
 /**
  * PDFファイルからテキストを抽出する。
@@ -8,7 +9,7 @@ export async function extractTextFromPdf(filePath: string): Promise<string> {
   // pdf-parseはCJSモジュールのため動的requireで読み込む
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
-  const buf = readFileSync(filePath)
+  const buf = await readFile(filePath)
   const data = await pdfParse(buf)
   return data.text
 }
