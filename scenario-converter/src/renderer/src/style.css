@@ -95,6 +95,11 @@ html, body { width: 100%; height: 100%; overflow: hidden;
   background: rgba(59,165,93,0.12);
   border-left: 3px solid var(--changed-border);
   padding: 4px 6px; margin: 2px 0; border-radius: 2px;
+  cursor: text;
+}
+.block-converted:hover {
+  background: rgba(59,165,93,0.22);
+  outline: 1px solid var(--changed-border);
 }
 
 /* 変更された値（数値） */
