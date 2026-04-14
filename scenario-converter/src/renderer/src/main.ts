@@ -69,7 +69,10 @@ function renderDiff(result: ConversionResult): void {
       syncEditedText(result)
     })
     el.addEventListener('keydown', e => {
-      if (e.key === 'Escape') (e.target as HTMLElement).blur()
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault()
+        ;(e.target as HTMLElement).blur()
+      }
     })
   })
 }
@@ -126,7 +129,7 @@ function buildBlockHtml(block: ConvertedBlock): string {
     if (!skill.renamed) continue
     const escaped = escapeRe(skill.name)
     const re = new RegExp(`${escaped}(\\s*\\d{1,3}%)`, 'g')
-    text = text.replace(re, `<span class="skill-renamed">${skill.name}</span>$1`)
+    text = text.replace(re, `<span class="skill-renamed">${escHtml(skill.name)}</span>$1`)
   }
 
   return text
