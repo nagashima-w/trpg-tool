@@ -1,5 +1,9 @@
 # Project Rules
 
+## Language
+
+**ユーザーとのコミュニケーションは常に日本語で行うこと。**
+
 ## PR Management
 
 **PRを作成する際は、既存のPRを更新せず、必ず新しいPRを作成すること。**
