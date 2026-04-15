@@ -11,6 +11,13 @@ export async function extractTextFromPdf(filePath: string): Promise<string> {
   const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
   const buf = await readFile(filePath)
   const data = await pdfParse(buf)
+  if (!data.text || data.text.trim().length === 0) {
+    throw new Error(
+      'PDFからテキストを抽出できませんでした。\n' +
+      'スキャン画像のみのPDFはテキスト抽出に非対応です。\n' +
+      'テキストレイヤー付きのPDFをご利用ください。'
+    )
+  }
   return data.text
 }
 
