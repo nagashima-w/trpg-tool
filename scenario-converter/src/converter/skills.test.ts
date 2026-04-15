@@ -11,6 +11,10 @@ describe('mapSkillName', () => {
     expect(mapSkillName('こぶし（パンチ）')).toBe('近接戦闘（格闘）')
   })
 
+  it('パンチ → 近接戦闘（格闘）', () => {
+    expect(mapSkillName('パンチ')).toBe('近接戦闘（格闘）')
+  })
+
   it('キック → 近接戦闘（格闘）', () => {
     expect(mapSkillName('キック')).toBe('近接戦闘（格闘）')
   })

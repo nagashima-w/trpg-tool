@@ -8,6 +8,7 @@ import type { SkillEntry } from './types'
 const MERGE_GROUPS: Record<string, string> = {
   'こぶし':           '近接戦闘（格闘）',
   'こぶし（パンチ）': '近接戦闘（格闘）',
+  'パンチ':           '近接戦闘（格闘）',
   'キック':           '近接戦闘（格闘）',
   '頭突き':           '近接戦闘（格闘）',
   '組み付き':         '近接戦闘（格闘）',
