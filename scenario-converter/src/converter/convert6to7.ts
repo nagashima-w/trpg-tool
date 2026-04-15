@@ -150,13 +150,13 @@ function buildConvertedText(
   const winnerOriginalNames = new Set(newSkills.map(s => s.originalName))
   for (const oldSkill of oldSkills) {
     if (winnerOriginalNames.has(oldSkill.name)) continue
-    const re = new RegExp(`[《〈]?${escapeRe(oldSkill.name)}[》〉]?\\s*\\d{1,3}%`, 'g')
+    const re = new RegExp(`[《〈]?${escapeRe(oldSkill.name)}[》〉]?\\s*\\d{1,3}%?`, 'g')
     text = text.replace(re, '')
   }
-  // 勝者の技能名を置換（《》〈〉括弧を保持）
+  // 勝者の技能名を置換（《》〈〉括弧・%有無を保持）
   for (const newSkill of newSkills) {
     if (!newSkill.renamed) continue
-    const re = new RegExp(`([《〈]?)${escapeRe(newSkill.originalName)}([》〉]?)(\\s*\\d{1,3}%)`, 'g')
+    const re = new RegExp(`([《〈]?)${escapeRe(newSkill.originalName)}([》〉]?)(\\s*\\d{1,3}%?)`, 'g')
     text = text.replace(re, `$1${newSkill.name}$2$3`)
   }
 

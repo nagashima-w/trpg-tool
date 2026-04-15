@@ -13,9 +13,9 @@ type DerivedKey = typeof DERIVED_KEYS[number]
 const STAT_RE =
   /\b(STR|CON|DEX|APP|POW|SIZ|INT|EDU|MOV|HP|MP|SAN)\s*[：:／]?\s*(\d+|-)/g
 
-/** 技能行: "技能名 XX%" or "技能名　XX%" */
+/** 技能行: "技能名 XX%" or "技能名 XX"（%なし）or "技能名:XX%" */
 const SKILL_RE =
-  /([^\s　\n\d\-%（）【】「」『』・、。]{2,}(?:（[^）\n]+）)?)\s*(\d{1,3})%/g
+  /([^\s　\n\d\-%（）【】「」『』・、。]{2,}(?:（[^）\n]+）)?)\s*(\d{1,3})(?:%|(?=[\s　\n,、。《〈]|$))/g
 
 /** stat間にこのパターンがあれば別ブロック扱い（1行以上の空行） */
 const BLOCK_SEPARATOR_RE = /\n\s*\n/
@@ -71,7 +71,7 @@ function extractSkillsFromText(text: string): SkillEntry[] {
   const skills: SkillEntry[] = []
   let m: RegExpExecArray | null
   while ((m = re.exec(text)) !== null) {
-    const name = m[1].trim().replace(/^[《〈]|[》〉]$/g, '')
+    const name = m[1].trim().replace(/^[《〈]|[》〉]$/g, '').replace(/[:：]$/, '')
     // 能力値キーワードと誤検出しないよう除外
     if ([...ABILITY_KEYS, ...DERIVED_KEYS].includes(name as AbilityKey)) continue
     skills.push({
