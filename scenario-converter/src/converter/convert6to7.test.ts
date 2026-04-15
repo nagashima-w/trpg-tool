@@ -213,6 +213,17 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('【備考】このNPCは敵対的である。')
   })
 
+  it('%なしの技能値でも変換される', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      'キック 70  目星 55',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.convertedText).toContain('近接戦闘（格闘） 70')
+    expect(result.convertedText).toContain('目星 55')
+    expect(result.convertedText).not.toContain('キック')
+  })
+
   it('《》で囲まれた技能名を変換し、括弧を保持する', () => {
     const text = [
       'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
