@@ -213,6 +213,40 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('【備考】このNPCは敵対的である。')
   })
 
+  it('《》で囲まれた技能名を変換し、括弧を保持する', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      '《キック》70%  《目星》55%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.convertedText).toContain('《近接戦闘（格闘）》70%')
+    expect(result.convertedText).not.toContain('《キック》')
+    expect(result.convertedText).toContain('《目星》55%')
+  })
+
+  it('値切りを言いくるめに変換する', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      '値切り 40%  心理学 55%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.convertedText).toContain('言いくるめ 40%')
+    expect(result.convertedText).not.toContain('値切り')
+  })
+
+  it('値切りと言いくるめが両方ある場合、高い方を採用して敗者を削除する', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      '値切り 40%  言いくるめ 55%',
+    ].join('\n')
+    const result = convertText(text)
+    const count = (result.convertedText.match(/言いくるめ/g) ?? []).length
+    expect(count).toBe(1)
+    expect(result.convertedText).toContain('言いくるめ 55%')
+    expect(result.convertedText).not.toContain('値切り')
+  })
+
   it('複数のstatブロックをそれぞれ変換する', () => {
     const text = [
       '【深きもの】',

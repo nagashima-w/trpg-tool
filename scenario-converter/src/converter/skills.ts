@@ -15,6 +15,8 @@ const MERGE_GROUPS: Record<string, string> = {
   '忍び歩き':         '隠密',
   '潜む':             '隠密',
   '隠す':             '隠密',
+  '値切り':           '言いくるめ',
+  '言いくるめ':       '言いくるめ',
 }
 
 /** 1対1リネームマップ */
@@ -84,7 +86,7 @@ export function convertSkills(skills: Array<{ name: string; value: number }>): S
           name: mergeTarget,
           originalName: best.originalName,
           value: best.value,
-          renamed: true,
+          renamed: mergeTarget !== best.originalName,
         })
       }
       // 統合済みの技能（最高値以外）はスキップ

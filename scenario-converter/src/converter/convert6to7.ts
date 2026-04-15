@@ -146,11 +146,18 @@ function buildConvertedText(
   }
 
   // 4. 技能名を置換（旧名→新名）
+  // マージで除外された敗者技能をテキストから削除（先に処理）
+  const winnerOriginalNames = new Set(newSkills.map(s => s.originalName))
+  for (const oldSkill of oldSkills) {
+    if (winnerOriginalNames.has(oldSkill.name)) continue
+    const re = new RegExp(`《?${escapeRe(oldSkill.name)}》?\\s*\\d{1,3}%`, 'g')
+    text = text.replace(re, '')
+  }
+  // 勝者の技能名を置換（《》括弧を保持）
   for (const newSkill of newSkills) {
     if (!newSkill.renamed) continue
-    const originalName = newSkill.originalName
-    const re = new RegExp(`${escapeRe(originalName)}(\\s*\\d{1,3}%)`, 'g')
-    text = text.replace(re, `${newSkill.name}$1`)
+    const re = new RegExp(`(《?)${escapeRe(newSkill.originalName)}(》?)(\\s*\\d{1,3}%)`, 'g')
+    text = text.replace(re, `$1${newSkill.name}$2$3`)
   }
 
   return text
