@@ -62,6 +62,18 @@ describe('detectStatBlocks', () => {
     expect(blocks[0].skills[0].value).toBe(22)
   })
 
+  it('《》で囲まれた技能名を括弧なしで取り込む', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      '《キック》70%  《目星》55%',
+    ].join('\n')
+    const blocks = detectStatBlocks(text)
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].skills).toHaveLength(2)
+    expect(blocks[0].skills[0].name).toBe('キック')
+    expect(blocks[0].skills[1].name).toBe('目星')
+  })
+
   it('2体のNPCを別ブロックとして検出する', () => {
     const text = [
       '【深きもの】',

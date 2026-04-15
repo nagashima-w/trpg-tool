@@ -71,7 +71,7 @@ function extractSkillsFromText(text: string): SkillEntry[] {
   const skills: SkillEntry[] = []
   let m: RegExpExecArray | null
   while ((m = re.exec(text)) !== null) {
-    const name = m[1].trim()
+    const name = m[1].trim().replace(/^《|》$/g, '')
     // 能力値キーワードと誤検出しないよう除外
     if ([...ABILITY_KEYS, ...DERIVED_KEYS].includes(name as AbilityKey)) continue
     skills.push({

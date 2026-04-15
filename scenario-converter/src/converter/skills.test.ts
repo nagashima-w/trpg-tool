@@ -120,7 +120,14 @@ describe('mapSkillName', () => {
     expect(mapSkillName('飛行機操縦')).toBe('操縦（航空機）')
   })
 
-  // ── マッピングなし（そのまま） ────────────────────────────────────────
+  // ── 値切り ────────────────────────────────────────────────────────────
+  it('値切り → 言いくるめ', () => {
+    expect(mapSkillName('値切り')).toBe('言いくるめ')
+  })
+
+  it('言いくるめ → そのまま（7版では有効な技能名）', () => {
+    expect(mapSkillName('言いくるめ')).toBe('言いくるめ')
+  })
   it('心理学 → そのまま', () => {
     expect(mapSkillName('心理学')).toBe('心理学')
   })
@@ -186,5 +193,33 @@ describe('convertSkills', () => {
     const result = convertSkills(skills)
     expect(result[0].name).toBe('近接戦闘（格闘）')
     expect(result[0].renamed).toBe(true)
+  })
+
+  it('値切りのみの場合、言いくるめにリネームされる', () => {
+    const skills = [{ name: '値切り', value: 40 }]
+    const result = convertSkills(skills)
+    expect(result).toHaveLength(1)
+    expect(result[0].name).toBe('言いくるめ')
+    expect(result[0].value).toBe(40)
+    expect(result[0].renamed).toBe(true)
+  })
+
+  it('値切りと言いくるめが両方ある場合、高い方を採用して1つにまとめる', () => {
+    const skills = [
+      { name: '値切り', value: 40 },
+      { name: '言いくるめ', value: 55 },
+    ]
+    const result = convertSkills(skills)
+    const fastTalk = result.filter(s => s.name === '言いくるめ')
+    expect(fastTalk).toHaveLength(1)
+    expect(fastTalk[0].value).toBe(55)
+  })
+
+  it('言いくるめのみの場合、リネームフラグは立たない', () => {
+    const skills = [{ name: '言いくるめ', value: 50 }]
+    const result = convertSkills(skills)
+    expect(result).toHaveLength(1)
+    expect(result[0].name).toBe('言いくるめ')
+    expect(result[0].renamed).toBe(false)
   })
 })
