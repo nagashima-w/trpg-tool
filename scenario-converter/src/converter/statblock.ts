@@ -11,11 +11,11 @@ type DerivedKey = typeof DERIVED_KEYS[number]
 
 /** 能力値キーワード + 区切り + 数値 or ダッシュ にマッチするパターン */
 const STAT_RE =
-  /\b(STR|CON|DEX|APP|POW|SIZ|INT|EDU|MOV|HP|MP|SAN)\s*[：:／]?\s*(\d+|-)/g
+  /\b(STR|CON|DEX|APP|POW|SIZ|INT|EDU|MOV|HP|MP|SAN)\s*[：:／|｜]?\s*(\d+|-)/g
 
-/** 技能行: "技能名 XX%" or "技能名 XX"（%なし）or "技能名:XX%" */
+/** 技能行: "技能名 XX%" or "技能名 XX"（%なし）or "技能名:XX%" or "技能名|XX%" */
 const SKILL_RE =
-  /([^\s　\n\d\-%（）【】「」『』・、。]{2,}(?:（[^）\n]+）)?)\s*(\d{1,3})(?:%|(?=[\s　\n,、。《〈]|$))/g
+  /([^\s　\n\d\-%（）【】「」『』・、。|｜]{2,}(?:（[^）\n]+）)?)[|｜]?\s*(\d{1,3})(?:%|(?=[\s　\n,、。《〈|｜]|$))/g
 
 /** stat間にこのパターンがあれば別ブロック扱い（1行以上の空行） */
 const BLOCK_SEPARATOR_RE = /\n\s*\n/
