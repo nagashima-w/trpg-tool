@@ -122,8 +122,8 @@ function buildConvertedText(
   for (const [k, oldVal] of Object.entries(oldAbilities) as [keyof AbilityStats, number][]) {
     const newVal = newAbilities[k]
     if (newVal === undefined) continue
-    // "STAT数値" / "STAT:数値" / "STAT：数値" 等にマッチして値部分だけ置換
-    const re = new RegExp(`(\\b${k}\\s*[：:／]?\\s*)${oldVal}\\b`, 'g')
+    // "STAT数値" / "STAT:数値" / "STAT：数値" / "STAT|数値" 等にマッチして値部分だけ置換
+    const re = new RegExp(`(\\b${k}\\s*[：:／|｜]?\\s*)${oldVal}\\b`, 'g')
     text = text.replace(re, `$1${newVal}`)
   }
 
@@ -133,14 +133,14 @@ function buildConvertedText(
   }
   for (const [k, newVal] of Object.entries(derivedMap)) {
     if (newVal === undefined) continue
-    const re = new RegExp(`(\\b${k}\\s*[：:／]?\\s*)\\d+`, 'g')
+    const re = new RegExp(`(\\b${k}\\s*[：:／|｜]?\\s*)\\d+`, 'g')
     text = text.replace(re, `$1${newVal}`)
   }
 
   // 3. DB を置換（例: "DB:+1D4" → "DB:+1D4" または "-1D6" → "-2"）
   if (newDerived.db !== undefined) {
     text = text.replace(
-      /\b(DB\s*[：:／]?\s*)[-+]?(?:\d+D\d+|\d+)/gi,
+      /\b(DB\s*[：:／|｜]?\s*)[-+]?(?:\d+D\d+|\d+)/gi,
       `$1${newDerived.db}`,
     )
   }
@@ -150,13 +150,13 @@ function buildConvertedText(
   const winnerOriginalNames = new Set(newSkills.map(s => s.originalName))
   for (const oldSkill of oldSkills) {
     if (winnerOriginalNames.has(oldSkill.name)) continue
-    const re = new RegExp(`[《〈]?${escapeRe(oldSkill.name)}[》〉]?\\s*\\d{1,3}%?`, 'g')
+    const re = new RegExp(`[《〈]?${escapeRe(oldSkill.name)}[》〉]?[|｜]?\\s*\\d{1,3}%?`, 'g')
     text = text.replace(re, '')
   }
-  // 勝者の技能名を置換（《》〈〉括弧・%有無を保持）
+  // 勝者の技能名を置換（《》〈〉括弧・%有無・パイプ区切りを保持）
   for (const newSkill of newSkills) {
     if (!newSkill.renamed) continue
-    const re = new RegExp(`([《〈]?)${escapeRe(newSkill.originalName)}([》〉]?)(\\s*\\d{1,3}%?)`, 'g')
+    const re = new RegExp(`([《〈]?)${escapeRe(newSkill.originalName)}([》〉]?)([|｜]?\\s*\\d{1,3}%?)`, 'g')
     text = text.replace(re, `$1${newSkill.name}$2$3`)
   }
 

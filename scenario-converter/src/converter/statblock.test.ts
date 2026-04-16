@@ -139,6 +139,36 @@ describe('detectStatBlocks', () => {
     const blocks = detectStatBlocks(text)
     expect(blocks).toHaveLength(0)
   })
+
+  it('パイプ区切り（STR|19）形式を検出できる', () => {
+    const text = 'STR|19  CON|15  SIZ|16  INT|10  POW|12  DEX|14'
+    const blocks = detectStatBlocks(text)
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].abilities.STR).toBe(19)
+    expect(blocks[0].abilities.CON).toBe(15)
+    expect(blocks[0].abilities.SIZ).toBe(16)
+  })
+
+  it('全角パイプ区切り（STR｜19）形式を検出できる', () => {
+    const text = 'STR｜19　CON｜15　SIZ｜16　INT｜10　POW｜12　DEX｜14'
+    const blocks = detectStatBlocks(text)
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].abilities.STR).toBe(19)
+  })
+
+  it('パイプ区切り形式の技能値を取り込む', () => {
+    const text = [
+      'STR|14  CON|12  SIZ|15  INT|7  POW|13  DEX|11',
+      'こぶし|75%  目星|55%  聞き耳|40%',
+    ].join('\n')
+    const blocks = detectStatBlocks(text)
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].skills).toHaveLength(3)
+    expect(blocks[0].skills[0].name).toBe('こぶし')
+    expect(blocks[0].skills[0].value).toBe(75)
+    expect(blocks[0].skills[1].name).toBe('目星')
+    expect(blocks[0].skills[1].value).toBe(55)
+  })
 })
 
 // ──────────────────────────────────────────────────────────────────────────────
