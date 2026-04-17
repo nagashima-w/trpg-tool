@@ -271,6 +271,18 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('目星|55%')
   })
 
+  it('スペースありパイプ区切り（STR | 14）形式を変換する', () => {
+    const text = [
+      'STR | 14  CON | 12  SIZ | 15  INT | 7  POW | 13  DEX | 11',
+      'こぶし | 75%  目星 | 55%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.convertedText).toContain('STR | 70')
+    expect(result.convertedText).toContain('近接戦闘（格闘） | 75%')
+    expect(result.convertedText).toContain('目星 | 55%')
+  })
+
   it('複数のstatブロックをそれぞれ変換する', () => {
     const text = [
       '【深きもの】',

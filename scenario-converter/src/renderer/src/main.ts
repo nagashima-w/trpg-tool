@@ -128,7 +128,7 @@ function buildBlockHtml(block: ConvertedBlock): string {
   for (const skill of block.skills) {
     if (!skill.renamed) continue
     const escaped = escapeRe(skill.name)
-    const re = new RegExp(`([《〈]?)${escaped}([》〉]?)([|｜]?\\s*\\d{1,3}%?)`, 'g')
+    const re = new RegExp(`([《〈]?)${escaped}([》〉]?)(\\s*[|｜]?\\s*\\d{1,3}%?)`, 'g')
     text = text.replace(re, `$1<span class="skill-renamed">${escHtml(skill.name)}</span>$2$3`)
   }
 
