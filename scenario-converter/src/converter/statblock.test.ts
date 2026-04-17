@@ -170,6 +170,14 @@ describe('detectStatBlocks', () => {
     expect(blocks[0].skills[1].value).toBe(55)
   })
 
+  it('罫線文字パイプ（STR│19）形式を検出できる', () => {
+    const text = 'STR│14  CON│12  SIZ│15  INT│7  POW│13  DEX│11'
+    const blocks = detectStatBlocks(text)
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].abilities.STR).toBe(14)
+    expect(blocks[0].abilities.CON).toBe(12)
+  })
+
   it('スペースありパイプ区切り（STR | 14, こぶし | 75%）形式を検出できる', () => {
     const text = [
       'STR | 14  CON | 12  SIZ | 15  INT | 7  POW | 13  DEX | 11',
