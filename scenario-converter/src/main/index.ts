@@ -34,6 +34,22 @@ function createWindow(): void {
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
+function sendProgress(msg: string): void {
+  mainWindow?.webContents.send('loading-progress', msg)
+}
+
+async function loadPdf(filePath: string): Promise<string> {
+  const settings = settingsManager.get()
+  if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
+    try {
+      return await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
+    } catch {
+      return extractTextFromPdf(filePath)
+    }
+  }
+  return extractTextFromPdf(filePath)
+}
+
 function setupIpcHandlers(): void {
   // ── ファイルを開く ──────────────────────────────────────────────────
   ipcMain.handle('open-file', async (): Promise<{ text: string; filePath: string } | null> => {
@@ -50,21 +66,9 @@ function setupIpcHandlers(): void {
 
     const filePath = result.filePaths[0]
     try {
-      let text: string
-      if (filePath.toLowerCase().endsWith('.pdf')) {
-        const settings = settingsManager.get()
-        if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
-          try {
-            text = await extractPdfTextWithClaude(filePath, settings.aiApiKey)
-          } catch {
-            text = await extractTextFromPdf(filePath)
-          }
-        } else {
-          text = await extractTextFromPdf(filePath)
-        }
-      } else {
-        text = readTextFile(filePath)
-      }
+      const text = filePath.toLowerCase().endsWith('.pdf')
+        ? await loadPdf(filePath)
+        : readTextFile(filePath)
       return { text, filePath }
     } catch (err) {
       throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
@@ -74,21 +78,9 @@ function setupIpcHandlers(): void {
   // ── パスを指定してファイルを開く（ドロップ用） ───────────────────────────────
   ipcMain.handle('open-file-by-path', async (_event, filePath: string): Promise<{ text: string; filePath: string } | null> => {
     try {
-      let text: string
-      if (filePath.toLowerCase().endsWith('.pdf')) {
-        const settings = settingsManager.get()
-        if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
-          try {
-            text = await extractPdfTextWithClaude(filePath, settings.aiApiKey)
-          } catch {
-            text = await extractTextFromPdf(filePath)
-          }
-        } else {
-          text = await extractTextFromPdf(filePath)
-        }
-      } else {
-        text = readTextFile(filePath)
-      }
+      const text = filePath.toLowerCase().endsWith('.pdf')
+        ? await loadPdf(filePath)
+        : readTextFile(filePath)
       return { text, filePath }
     } catch (err) {
       throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
@@ -116,8 +108,8 @@ function setupIpcHandlers(): void {
   ipcMain.handle('reformat-with-ai', async (_event, text: string): Promise<string> => {
     const settings = settingsManager.get()
     if (!settings.aiApiKey) throw new Error('APIキーが設定されていません')
-    if (settings.aiProvider === 'claude') return reformatWithClaude(text, settings.aiApiKey)
-    if (settings.aiProvider === 'gemini') return reformatWithGemini(text, settings.aiApiKey)
+    if (settings.aiProvider === 'claude') return reformatWithClaude(text, settings.aiApiKey, sendProgress)
+    if (settings.aiProvider === 'gemini') return reformatWithGemini(text, settings.aiApiKey, sendProgress)
     throw new Error('AIプロバイダーが設定されていません')
   })
 

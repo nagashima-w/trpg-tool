@@ -26,6 +26,12 @@ const api = {
 
   reformatWithAI: (text: string): Promise<string> =>
     ipcRenderer.invoke('reformat-with-ai', text),
+
+  onLoadingProgress: (callback: (msg: string) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, msg: string) => callback(msg)
+    ipcRenderer.on('loading-progress', handler)
+    return () => ipcRenderer.removeListener('loading-progress', handler)
+  },
 }
 
 contextBridge.exposeInMainWorld('converterAPI', api)

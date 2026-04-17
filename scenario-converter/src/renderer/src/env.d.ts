@@ -10,6 +10,7 @@ interface ConverterAPI {
   getSettings(): Promise<Settings>
   saveSettings(settings: Settings): Promise<void>
   reformatWithAI(text: string): Promise<string>
+  onLoadingProgress(callback: (msg: string) => void): () => void
 }
 
 declare global {

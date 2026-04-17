@@ -35,6 +35,8 @@ let currentLabel = ''
 
 // ── ローディング制御 ─────────────────────────────────────────────────────────
 
+api.onLoadingProgress(msg => { loadingMsg.textContent = msg })
+
 function showLoading(msg: string): void {
   loadingMsg.textContent = msg
   loadingOverlay.classList.remove('hidden')

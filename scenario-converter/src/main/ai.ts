@@ -26,14 +26,26 @@ const REFORMAT_PROMPT = `以下はPDFから抽出したTRPGシナリオのテキ
 テキスト:
 `
 
-export async function extractPdfTextWithClaude(filePath: string, apiKey: string): Promise<string> {
+type ProgressCallback = (msg: string) => void
+
+async function waitForRateLimit(headers: Record<string, string> | Headers, onProgress: ProgressCallback | undefined): Promise<void> {
+  const raw = headers instanceof Headers
+    ? headers.get('retry-after')
+    : (headers as Record<string, string>)['retry-after']
+  const seconds = Math.min(parseInt(raw ?? '60', 10), 120)
+  for (let remaining = seconds; remaining > 0; remaining--) {
+    onProgress?.(`レート制限のため ${remaining} 秒待機中...`)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  }
+  onProgress?.('再試行中...')
+}
+
+export async function extractPdfTextWithClaude(filePath: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
   const buf = await readFile(filePath)
   const base64 = buf.toString('base64')
 
-  const client = new Anthropic({ apiKey })
-  // PDF対応はbeta機能のため型アサーションを使用
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const message = await (client.beta.messages as any).create({
+  const client = new Anthropic({ apiKey, maxRetries: 0 })
+  const requestBody = {
     model: 'claude-sonnet-4-6',
     max_tokens: 8192,
     betas: ['pdfs-2024-09-25'],
@@ -47,34 +59,73 @@ export async function extractPdfTextWithClaude(filePath: string, apiKey: string)
         { type: 'text', text: PDF_EXTRACT_PROMPT },
       ],
     }],
-  }) as { content: Array<{ type: string; text: string }> }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const callApi = () => (client.beta.messages as any).create(requestBody) as Promise<{ content: Array<{ type: string; text: string }> }>
+
+  let message: { content: Array<{ type: string; text: string }> }
+  try {
+    message = await callApi()
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      await waitForRateLimit(err.headers as Headers, onProgress)
+      message = await callApi()
+    } else {
+      throw err
+    }
+  }
 
   const block = message.content[0]
   if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
   return block.text
 }
 
-export async function reformatWithClaude(text: string, apiKey: string): Promise<string> {
-  const client = new Anthropic({ apiKey })
-  const message = await client.messages.create({
+export async function reformatWithClaude(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+  const client = new Anthropic({ apiKey, maxRetries: 0 })
+  const requestBody = {
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 8192,
     messages: [{ role: 'user', content: REFORMAT_PROMPT + text }],
-  })
+  }
+
+  const callApi = () => client.messages.create(requestBody)
+
+  let message: Awaited<ReturnType<typeof callApi>>
+  try {
+    message = await callApi()
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      await waitForRateLimit(err.headers as Headers, onProgress)
+      message = await callApi()
+    } else {
+      throw err
+    }
+  }
+
   const block = message.content[0]
   if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
   return block.text
 }
 
-export async function reformatWithGemini(text: string, apiKey: string): Promise<string> {
+export async function reformatWithGemini(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
-  const res = await fetch(url, {
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: REFORMAT_PROMPT + text }] }],
+  })
+
+  const callApi = () => fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: REFORMAT_PROMPT + text }] }],
-    }),
+    body,
   })
+
+  let res = await callApi()
+  if (res.status === 429) {
+    const retryAfterHeader = res.headers.get('retry-after') ?? res.headers.get('x-ratelimit-reset-requests') ?? '60'
+    await waitForRateLimit({ 'retry-after': retryAfterHeader }, onProgress)
+    res = await callApi()
+  }
   if (!res.ok) {
     const err = await res.text()
     throw new Error(`Gemini API エラー: ${res.status} ${err}`)
