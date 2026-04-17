@@ -1,4 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { readFile } from 'fs/promises'
+
+const PDF_EXTRACT_PROMPT = `このTRPGシナリオのPDFからテキストを抽出してください。
+
+以下の点を守ってください：
+- 文章の内容を変えず、そのまま書き出す
+- 能力値（STR/CON/SIZ等）、数値、技能名はそのまま保持
+- 見出しや段落の構造を改行で表現する
+- 余計な説明や前置きなしに、抽出テキストのみを返す`
 
 const REFORMAT_PROMPT = `以下はPDFから抽出したTRPGシナリオのテキストです。文字間の余分なスペースや途中改行などのPDF抽出アーティファクトを修正し、自然な日本語テキストに整形してください。
 
@@ -12,6 +21,34 @@ const REFORMAT_PROMPT = `以下はPDFから抽出したTRPGシナリオのテキ
 
 テキスト:
 `
+
+export async function extractPdfTextWithClaude(filePath: string, apiKey: string): Promise<string> {
+  const buf = await readFile(filePath)
+  const base64 = buf.toString('base64')
+
+  const client = new Anthropic({ apiKey })
+  // PDF対応はbeta機能のため型アサーションを使用
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const message = await (client.beta.messages as any).create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8192,
+    betas: ['pdfs-2024-09-25'],
+    messages: [{
+      role: 'user',
+      content: [
+        {
+          type: 'document',
+          source: { type: 'base64', media_type: 'application/pdf', data: base64 },
+        },
+        { type: 'text', text: PDF_EXTRACT_PROMPT },
+      ],
+    }],
+  }) as { content: Array<{ type: string; text: string }> }
+
+  const block = message.content[0]
+  if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
+  return block.text
+}
 
 export async function reformatWithClaude(text: string, apiKey: string): Promise<string> {
   const client = new Anthropic({ apiKey })

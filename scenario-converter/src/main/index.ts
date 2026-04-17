@@ -3,7 +3,7 @@ import { join } from 'path'
 import { writeFileSync } from 'fs'
 import { SettingsManager } from './settings'
 import { readTextFile, extractTextFromPdf } from './pdf'
-import { reformatWithClaude, reformatWithGemini } from './ai'
+import { extractPdfTextWithClaude, reformatWithClaude, reformatWithGemini } from './ai'
 import { convertText } from '../converter/convert6to7'
 import type { ConversionResult } from '../converter/types'
 import type { Settings } from './settings'
@@ -50,9 +50,21 @@ function setupIpcHandlers(): void {
 
     const filePath = result.filePaths[0]
     try {
-      const text = filePath.toLowerCase().endsWith('.pdf')
-        ? await extractTextFromPdf(filePath)
-        : readTextFile(filePath)
+      let text: string
+      if (filePath.toLowerCase().endsWith('.pdf')) {
+        const settings = settingsManager.get()
+        if (settings.aiProvider === 'claude' && settings.aiApiKey) {
+          try {
+            text = await extractPdfTextWithClaude(filePath, settings.aiApiKey)
+          } catch {
+            text = await extractTextFromPdf(filePath)
+          }
+        } else {
+          text = await extractTextFromPdf(filePath)
+        }
+      } else {
+        text = readTextFile(filePath)
+      }
       return { text, filePath }
     } catch (err) {
       throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
