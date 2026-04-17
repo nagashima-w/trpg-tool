@@ -140,6 +140,21 @@ html, body { width: 100%; height: 100%; overflow: hidden;
 }
 .modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
 
+/* ── 警告バナー ── */
+.warning-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; background: rgba(250,166,26,0.15);
+  border-bottom: 1px solid var(--warn);
+  font-size: 11px; color: var(--warn); flex-shrink: 0;
+}
+.warning-banner.hidden { display: none; }
+.warning-banner span { flex: 1; }
+.warning-close {
+  background: none; border: none; color: var(--warn);
+  cursor: pointer; font-size: 12px; padding: 0 4px; opacity: 0.7;
+}
+.warning-close:hover { opacity: 1; }
+
 /* ── 設定モーダル補足 ── */
 .toggle-label {
   display: flex; align-items: center; gap: 8px;

@@ -2,8 +2,8 @@ import type { ConversionResult } from '../../converter/types'
 import type { Settings } from '../../main/settings'
 
 interface ConverterAPI {
-  openFile(): Promise<{ text: string; filePath: string } | null>
-  openFileByPath(filePath: string): Promise<{ text: string; filePath: string } | null>
+  openFile(): Promise<{ text: string; filePath: string; warning?: string } | null>
+  openFileByPath(filePath: string): Promise<{ text: string; filePath: string; warning?: string } | null>
   getPathForFile(file: File): string
   convert(text: string): Promise<ConversionResult>
   saveFile(text: string): Promise<boolean>

@@ -38,16 +38,18 @@ function sendProgress(msg: string): void {
   mainWindow?.webContents.send('loading-progress', msg)
 }
 
-async function loadPdf(filePath: string): Promise<string> {
+async function loadPdf(filePath: string): Promise<{ text: string; warning?: string }> {
   const settings = settingsManager.get()
   if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
     try {
-      return await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
+      const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
+      return { text }
     } catch {
-      return extractTextFromPdf(filePath)
+      const text = await extractTextFromPdf(filePath)
+      return { text, warning: 'AIによるPDF抽出に失敗しました。通常のテキスト抽出を使用しています（文字化けが生じる場合があります）。' }
     }
   }
-  return extractTextFromPdf(filePath)
+  return { text: await extractTextFromPdf(filePath) }
 }
 
 function setupIpcHandlers(): void {
@@ -66,22 +68,24 @@ function setupIpcHandlers(): void {
 
     const filePath = result.filePaths[0]
     try {
-      const text = filePath.toLowerCase().endsWith('.pdf')
-        ? await loadPdf(filePath)
-        : readTextFile(filePath)
-      return { text, filePath }
+      if (filePath.toLowerCase().endsWith('.pdf')) {
+        const { text, warning } = await loadPdf(filePath)
+        return { text, filePath, warning }
+      }
+      return { text: readTextFile(filePath), filePath }
     } catch (err) {
       throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
     }
   })
 
   // ── パスを指定してファイルを開く（ドロップ用） ───────────────────────────────
-  ipcMain.handle('open-file-by-path', async (_event, filePath: string): Promise<{ text: string; filePath: string } | null> => {
+  ipcMain.handle('open-file-by-path', async (_event, filePath: string): Promise<{ text: string; filePath: string; warning?: string } | null> => {
     try {
-      const text = filePath.toLowerCase().endsWith('.pdf')
-        ? await loadPdf(filePath)
-        : readTextFile(filePath)
-      return { text, filePath }
+      if (filePath.toLowerCase().endsWith('.pdf')) {
+        const { text, warning } = await loadPdf(filePath)
+        return { text, filePath, warning }
+      }
+      return { text: readTextFile(filePath), filePath }
     } catch (err) {
       throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
     }

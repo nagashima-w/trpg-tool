@@ -23,6 +23,9 @@ const aiPdfExtractInput = document.getElementById('ai-pdf-extract-input') as HTM
 const settingsSaveBtn   = document.getElementById('settings-save-btn')    as HTMLButtonElement
 const settingsCancelBtn = document.getElementById('settings-cancel-btn')  as HTMLButtonElement
 const aiReformatBtn     = document.getElementById('ai-reformat-btn')      as HTMLButtonElement
+const warningBanner     = document.getElementById('warning-banner')       as HTMLDivElement
+const warningText       = document.getElementById('warning-text')         as HTMLSpanElement
+const warningClose      = document.getElementById('warning-close')        as HTMLButtonElement
 const loadingOverlay    = document.getElementById('loading-overlay')      as HTMLDivElement
 const loadingMsg        = document.getElementById('loading-msg')          as HTMLParagraphElement
 
@@ -48,11 +51,22 @@ function hideLoading(): void {
 
 // ── ファイル読み込み ─────────────────────────────────────────────────────────
 
+function showWarning(msg: string): void {
+  warningText.textContent = msg
+  warningBanner.classList.remove('hidden')
+}
+
+function hideWarning(): void {
+  warningBanner.classList.add('hidden')
+}
+
 async function loadFile(): Promise<void> {
   showLoading('ファイルを読み込み中...')
   try {
     const file = await api.openFile()
     if (!file) return
+    hideWarning()
+    if (file.warning) showWarning(file.warning)
     await processText(file.text, file.filePath)
   } catch (err) {
     alert(`ファイルの読み込みに失敗しました:\n${err}`)
@@ -259,6 +273,8 @@ dropZone.addEventListener('drop', async e => {
     try {
       const result = await api.openFileByPath(filePath)
       if (!result) return
+      hideWarning()
+      if (result.warning) showWarning(result.warning)
       await processText(result.text, result.filePath)
     } catch (err) {
       alert(`ファイルの読み込みに失敗しました:\n${err}`)
@@ -277,6 +293,7 @@ dropZone.addEventListener('drop', async e => {
 
 // ── イベントリスナー ─────────────────────────────────────────────────────────
 
+warningClose.addEventListener('click', hideWarning)
 openBtn.addEventListener('click', () => { void loadFile() })
 saveBtn.addEventListener('click', () => { void saveFile() })
 settingsBtn.addEventListener('click', () => { void openSettings() })
