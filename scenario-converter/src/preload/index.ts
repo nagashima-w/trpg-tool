@@ -17,6 +17,9 @@ const api = {
 
   saveSettings: (settings: Settings): Promise<void> =>
     ipcRenderer.invoke('save-settings', settings),
+
+  reformatWithAI: (text: string): Promise<string> =>
+    ipcRenderer.invoke('reformat-with-ai', text),
 }
 
 contextBridge.exposeInMainWorld('converterAPI', api)

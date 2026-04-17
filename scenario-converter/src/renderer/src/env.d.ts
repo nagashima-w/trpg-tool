@@ -7,6 +7,7 @@ interface ConverterAPI {
   saveFile(text: string): Promise<boolean>
   getSettings(): Promise<Settings>
   saveSettings(settings: Settings): Promise<void>
+  reformatWithAI(text: string): Promise<string>
 }
 
 declare global {

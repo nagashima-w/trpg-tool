@@ -18,7 +18,9 @@ export async function extractTextFromPdf(filePath: string): Promise<string> {
       'テキストレイヤー付きのPDFをご利用ください。'
     )
   }
-  return data.text
+  // CJK文字間の余分なスペース（PDF抽出アーティファクト）を除去
+  const text = data.text.replace(/(?<=[\u3000-\u9FFF\uFF00-\uFFEF]) (?=[\u3000-\u9FFF\uFF00-\uFFEF])/g, '')
+  return text
 }
 
 /**

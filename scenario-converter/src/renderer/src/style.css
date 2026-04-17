@@ -41,6 +41,9 @@ html, body { width: 100%; height: 100%; overflow: hidden;
 .btn-secondary:hover { background: var(--border); }
 .btn-success { background: var(--success); color: #fff; }
 .btn-success:hover { filter: brightness(1.1); }
+.btn-ai { background: #7c3aed; color: #fff; }
+.btn-ai:hover { background: #6d28d9; }
+.btn-ai:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── ドロップゾーン ── */
@@ -65,8 +68,9 @@ html, body { width: 100%; height: 100%; overflow: hidden;
   padding: 4px 12px; background: var(--bg2);
   border-bottom: 1px solid var(--border);
   font-size: 11px; color: var(--text2);
-  flex-shrink: 0; display: flex; gap: 16px;
+  flex-shrink: 0; display: flex; gap: 16px; align-items: center;
 }
+.statusbar .btn-ai { margin-left: auto; }
 .statusbar span.count { color: var(--success); font-weight: 600; }
 
 /* ── 差分エリア ── */

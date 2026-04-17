@@ -3,6 +3,7 @@ import { join } from 'path'
 import { writeFileSync } from 'fs'
 import { SettingsManager } from './settings'
 import { readTextFile, extractTextFromPdf } from './pdf'
+import { reformatWithClaude, reformatWithGemini } from './ai'
 import { convertText } from '../converter/convert6to7'
 import type { ConversionResult } from '../converter/types'
 import type { Settings } from './settings'
@@ -73,6 +74,15 @@ function setupIpcHandlers(): void {
     if (result.canceled || !result.filePath) return false
     writeFileSync(result.filePath, text, 'utf-8')
     return true
+  })
+
+  // ── AI整形 ──────────────────────────────────────────────────────────
+  ipcMain.handle('reformat-with-ai', async (_event, text: string): Promise<string> => {
+    const settings = settingsManager.get()
+    if (!settings.aiApiKey) throw new Error('APIキーが設定されていません')
+    if (settings.aiProvider === 'claude') return reformatWithClaude(text, settings.aiApiKey)
+    if (settings.aiProvider === 'gemini') return reformatWithGemini(text, settings.aiApiKey)
+    throw new Error('AIプロバイダーが設定されていません')
   })
 
   // ── 設定 ────────────────────────────────────────────────────────────

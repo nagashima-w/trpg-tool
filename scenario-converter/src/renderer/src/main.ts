@@ -21,11 +21,14 @@ const aiProviderSel  = document.getElementById('ai-provider-select') as HTMLSele
 const aiApikeyInput  = document.getElementById('ai-apikey-input') as HTMLInputElement
 const settingsSaveBtn   = document.getElementById('settings-save-btn')   as HTMLButtonElement
 const settingsCancelBtn = document.getElementById('settings-cancel-btn') as HTMLButtonElement
+const aiReformatBtn  = document.getElementById('ai-reformat-btn') as HTMLButtonElement
 
 // ── 状態 ────────────────────────────────────────────────────────────────────
 let currentResult: ConversionResult | null = null
 /** ユーザーが手動編集した変換後テキスト */
 let editedConvertedText = ''
+/** 現在表示中のファイルラベル */
+let currentLabel = ''
 
 // ── ファイル読み込み ─────────────────────────────────────────────────────────
 
@@ -40,6 +43,7 @@ async function loadFile(): Promise<void> {
 }
 
 async function processText(text: string, label: string): Promise<void> {
+  currentLabel = label
   const result = await api.convert(text)
   currentResult = result
   editedConvertedText = result.convertedText
@@ -175,6 +179,29 @@ async function saveFile(): Promise<void> {
   await api.saveFile(editedConvertedText)
 }
 
+// ── AI整形 ────────────────────────────────────────────────────────────────────
+
+async function reformatWithAI(): Promise<void> {
+  if (!currentResult) return
+  aiReformatBtn.disabled = true
+  aiReformatBtn.textContent = '整形中...'
+  try {
+    const reformatted = await api.reformatWithAI(currentResult.originalText)
+    await processText(reformatted, currentLabel + ' (AI整形済み)')
+  } catch (err) {
+    alert(`AI整形に失敗しました:\n${err}`)
+  } finally {
+    aiReformatBtn.disabled = false
+    aiReformatBtn.textContent = 'AI整形'
+  }
+}
+
+async function updateAiButtonVisibility(): Promise<void> {
+  const settings = await api.getSettings()
+  const aiEnabled = settings.aiProvider !== 'none' && settings.aiApiKey.trim() !== ''
+  aiReformatBtn.classList.toggle('hidden', !aiEnabled)
+}
+
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
 
 async function openSettings(): Promise<void> {
@@ -221,13 +248,17 @@ openBtn.addEventListener('click', () => { void loadFile() })
 saveBtn.addEventListener('click', () => { void saveFile() })
 settingsBtn.addEventListener('click', () => { void openSettings() })
 
+void updateAiButtonVisibility()
+
 settingsSaveBtn.addEventListener('click', async () => {
   await api.saveSettings({
     aiProvider: aiProviderSel.value as 'none' | 'claude' | 'gemini',
     aiApiKey:   aiApikeyInput.value,
   })
   settingsModal.classList.add('hidden')
+  void updateAiButtonVisibility()
 })
+aiReformatBtn.addEventListener('click', () => { void reformatWithAI() })
 settingsCancelBtn.addEventListener('click', () => settingsModal.classList.add('hidden'))
 settingsModal.addEventListener('click', e => {
   if (e.target === settingsModal) settingsModal.classList.add('hidden')
