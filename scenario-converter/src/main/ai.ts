@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { readFile } from 'fs/promises'
+import { PDFDocument } from 'pdf-lib'
 
 const PDF_EXTRACT_PROMPT = `このTRPGシナリオのPDFからテキストを抽出してください。
 
@@ -26,6 +27,8 @@ const REFORMAT_PROMPT = `以下はPDFから抽出したTRPGシナリオのテキ
 テキスト:
 `
 
+const CHUNK_PAGES = 10
+
 type ProgressCallback = (msg: string) => void
 
 async function waitForRateLimit(headers: Record<string, string> | Headers, onProgress: ProgressCallback | undefined): Promise<void> {
@@ -40,11 +43,24 @@ async function waitForRateLimit(headers: Record<string, string> | Headers, onPro
   onProgress?.('再試行中...')
 }
 
-export async function extractPdfTextWithClaude(filePath: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
-  const buf = await readFile(filePath)
-  const base64 = buf.toString('base64')
+async function splitPdfBufferByPages(buf: Buffer, chunkSize: number): Promise<{ chunks: Buffer[]; totalPages: number }> {
+  const doc = await PDFDocument.load(buf)
+  const totalPages = doc.getPageCount()
+  const chunks: Buffer[] = []
+  for (let start = 0; start < totalPages; start += chunkSize) {
+    const end = Math.min(start + chunkSize, totalPages)
+    const chunk = await PDFDocument.create()
+    const indices = Array.from({ length: end - start }, (_, i) => start + i)
+    const copied = await chunk.copyPagesFrom(doc, indices)
+    copied.forEach(p => chunk.addPage(p))
+    chunks.push(Buffer.from(await chunk.save()))
+  }
+  return { chunks, totalPages }
+}
 
+async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined): Promise<string> {
   const client = new Anthropic({ apiKey, maxRetries: 0 })
+  const base64 = buf.toString('base64')
   const requestBody = {
     model: 'claude-sonnet-4-6',
     max_tokens: 8192,
@@ -52,15 +68,11 @@ export async function extractPdfTextWithClaude(filePath: string, apiKey: string,
     messages: [{
       role: 'user',
       content: [
-        {
-          type: 'document',
-          source: { type: 'base64', media_type: 'application/pdf', data: base64 },
-        },
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
         { type: 'text', text: PDF_EXTRACT_PROMPT },
       ],
     }],
   }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const callApi = () => (client.beta.messages as any).create(requestBody) as Promise<{ content: Array<{ type: string; text: string }> }>
 
@@ -75,10 +87,36 @@ export async function extractPdfTextWithClaude(filePath: string, apiKey: string,
       throw err
     }
   }
-
   const block = message.content[0]
   if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
   return block.text
+}
+
+async function extractPdfInChunks(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined): Promise<string> {
+  const { chunks, totalPages } = await splitPdfBufferByPages(buf, CHUNK_PAGES)
+  const results: string[] = []
+  for (let i = 0; i < chunks.length; i++) {
+    const pageStart = i * CHUNK_PAGES + 1
+    const pageEnd = Math.min((i + 1) * CHUNK_PAGES, totalPages)
+    onProgress?.(`ページ ${pageStart}〜${pageEnd} / ${totalPages} を処理中...`)
+    results.push(await extractChunkWithClaude(chunks[i], apiKey, onProgress))
+  }
+  return results.join('\n\n')
+}
+
+export async function extractPdfTextWithClaude(filePath: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+  const buf = await readFile(filePath)
+
+  try {
+    return await extractChunkWithClaude(buf, apiKey, onProgress)
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      // 1ファイルとして送るとTPM超過 → ページ分割して再処理
+      onProgress?.('PDFを分割して再処理します...')
+      return extractPdfInChunks(buf, apiKey, onProgress)
+    }
+    throw err
+  }
 }
 
 export async function reformatWithClaude(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {

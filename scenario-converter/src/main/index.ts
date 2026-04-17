@@ -46,7 +46,7 @@ async function loadPdf(filePath: string): Promise<{ text: string; warning?: stri
       return { text }
     } catch {
       const text = await extractTextFromPdf(filePath)
-      return { text, warning: 'AIによるPDF抽出に失敗しました。通常のテキスト抽出を使用しています（文字化けが生じる場合があります）。' }
+      return { text, warning: 'AIによるPDF抽出に失敗しました。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。' }
     }
   }
   return { text: await extractTextFromPdf(filePath) }
