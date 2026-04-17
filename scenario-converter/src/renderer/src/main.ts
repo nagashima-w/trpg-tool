@@ -155,14 +155,14 @@ function syncEditedText(result: ConversionResult): void {
 // ── UI 表示切り替え ─────────────────────────────────────────────────────────
 
 function showDiffView(): void {
-  dropZone.classList.add('hidden')
+  dropZone.classList.add('compact')
   statusbar.classList.remove('hidden')
   diffArea.classList.remove('hidden')
   footer.classList.remove('hidden')
 }
 
 function showDropZone(): void {
-  dropZone.classList.remove('hidden')
+  dropZone.classList.remove('compact')
   statusbar.classList.add('hidden')
   diffArea.classList.add('hidden')
   footer.classList.add('hidden')
@@ -231,6 +231,22 @@ settingsSaveBtn.addEventListener('click', async () => {
 settingsCancelBtn.addEventListener('click', () => settingsModal.classList.add('hidden'))
 settingsModal.addEventListener('click', e => {
   if (e.target === settingsModal) settingsModal.classList.add('hidden')
+})
+
+// ── スクロール同期 ────────────────────────────────────────────────────────────
+
+let scrollSyncing = false
+paneOriginal.addEventListener('scroll', () => {
+  if (scrollSyncing) return
+  scrollSyncing = true
+  paneConverted.scrollTop = paneOriginal.scrollTop
+  scrollSyncing = false
+})
+paneConverted.addEventListener('scroll', () => {
+  if (scrollSyncing) return
+  scrollSyncing = true
+  paneOriginal.scrollTop = paneConverted.scrollTop
+  scrollSyncing = false
 })
 
 // ── ユーティリティ ────────────────────────────────────────────────────────────
