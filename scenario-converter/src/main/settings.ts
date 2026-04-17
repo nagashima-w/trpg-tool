@@ -2,14 +2,15 @@ import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 export interface Settings {
-  /** AI連携: 将来対応のための拡張ポイント */
   aiProvider: 'none' | 'claude' | 'gemini'
   aiApiKey: string
+  aiPdfExtract: boolean
 }
 
 const DEFAULT_SETTINGS: Settings = {
   aiProvider: 'none',
   aiApiKey: '',
+  aiPdfExtract: false,
 }
 
 export class SettingsManager {

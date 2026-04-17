@@ -15,10 +15,10 @@
       <button id="settings-btn" class="btn btn-secondary">設定</button>
     </header>
 
-    <!-- ドロップゾーン（ファイル未読込時） -->
+    <!-- ドロップゾーン -->
     <div id="drop-zone" class="drop-zone">
-      <p>テキスト(.txt)ファイルをドロップ</p>
-      <small>PDF は「ファイルを開く」ボタンから選択</small>
+      <p>テキスト / PDF をここにドロップ</p>
+      <small>または「ファイルを開く」ボタンから選択</small>
     </div>
 
     <!-- ステータスバー（読込後に表示） -->
@@ -63,10 +63,25 @@
         <label>API キー</label>
         <input type="password" id="ai-apikey-input" placeholder="APIキーを入力" />
       </div>
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox" id="ai-pdf-extract-input" />
+          PDFの内容をAIで抽出する
+        </label>
+        <small class="form-hint">ClaudeのAPIキー設定時のみ有効。PDF読み込みにAPIが使われます。</small>
+      </div>
       <div class="modal-footer">
         <button id="settings-save-btn" class="btn btn-primary">保存</button>
         <button id="settings-cancel-btn" class="btn btn-secondary">キャンセル</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ローディングオーバーレイ -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <p id="loading-msg">処理中...</p>
     </div>
   </div>
 

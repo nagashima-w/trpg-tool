@@ -16,12 +16,15 @@ const paneOriginal   = document.getElementById('pane-original')   as HTMLDivElem
 const paneConverted  = document.getElementById('pane-converted')  as HTMLDivElement
 const footer         = document.getElementById('footer')          as HTMLElement
 const saveBtn        = document.getElementById('save-btn')        as HTMLButtonElement
-const settingsModal  = document.getElementById('settings-modal')  as HTMLDivElement
-const aiProviderSel  = document.getElementById('ai-provider-select') as HTMLSelectElement
-const aiApikeyInput  = document.getElementById('ai-apikey-input') as HTMLInputElement
-const settingsSaveBtn   = document.getElementById('settings-save-btn')   as HTMLButtonElement
-const settingsCancelBtn = document.getElementById('settings-cancel-btn') as HTMLButtonElement
-const aiReformatBtn  = document.getElementById('ai-reformat-btn') as HTMLButtonElement
+const settingsModal     = document.getElementById('settings-modal')       as HTMLDivElement
+const aiProviderSel     = document.getElementById('ai-provider-select')   as HTMLSelectElement
+const aiApikeyInput     = document.getElementById('ai-apikey-input')      as HTMLInputElement
+const aiPdfExtractInput = document.getElementById('ai-pdf-extract-input') as HTMLInputElement
+const settingsSaveBtn   = document.getElementById('settings-save-btn')    as HTMLButtonElement
+const settingsCancelBtn = document.getElementById('settings-cancel-btn')  as HTMLButtonElement
+const aiReformatBtn     = document.getElementById('ai-reformat-btn')      as HTMLButtonElement
+const loadingOverlay    = document.getElementById('loading-overlay')      as HTMLDivElement
+const loadingMsg        = document.getElementById('loading-msg')          as HTMLParagraphElement
 
 // ── 状態 ────────────────────────────────────────────────────────────────────
 let currentResult: ConversionResult | null = null
@@ -30,15 +33,29 @@ let editedConvertedText = ''
 /** 現在表示中のファイルラベル */
 let currentLabel = ''
 
+// ── ローディング制御 ─────────────────────────────────────────────────────────
+
+function showLoading(msg: string): void {
+  loadingMsg.textContent = msg
+  loadingOverlay.classList.remove('hidden')
+}
+
+function hideLoading(): void {
+  loadingOverlay.classList.add('hidden')
+}
+
 // ── ファイル読み込み ─────────────────────────────────────────────────────────
 
 async function loadFile(): Promise<void> {
+  showLoading('ファイルを読み込み中...')
   try {
     const file = await api.openFile()
     if (!file) return
     await processText(file.text, file.filePath)
   } catch (err) {
     alert(`ファイルの読み込みに失敗しました:\n${err}`)
+  } finally {
+    hideLoading()
   }
 }
 
@@ -159,14 +176,12 @@ function syncEditedText(result: ConversionResult): void {
 // ── UI 表示切り替え ─────────────────────────────────────────────────────────
 
 function showDiffView(): void {
-  dropZone.classList.add('compact')
   statusbar.classList.remove('hidden')
   diffArea.classList.remove('hidden')
   footer.classList.remove('hidden')
 }
 
 function showDropZone(): void {
-  dropZone.classList.remove('compact')
   statusbar.classList.add('hidden')
   diffArea.classList.add('hidden')
   footer.classList.add('hidden')
@@ -183,16 +198,14 @@ async function saveFile(): Promise<void> {
 
 async function reformatWithAI(): Promise<void> {
   if (!currentResult) return
-  aiReformatBtn.disabled = true
-  aiReformatBtn.textContent = '整形中...'
+  showLoading('AIで整形中...')
   try {
     const reformatted = await api.reformatWithAI(currentResult.originalText)
     await processText(reformatted, currentLabel + ' (AI整形済み)')
   } catch (err) {
     alert(`AI整形に失敗しました:\n${err}`)
   } finally {
-    aiReformatBtn.disabled = false
-    aiReformatBtn.textContent = 'AI整形'
+    hideLoading()
   }
 }
 
@@ -204,10 +217,18 @@ async function updateAiButtonVisibility(): Promise<void> {
 
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
 
+function updatePdfExtractToggle(): void {
+  const claudeReady = aiProviderSel.value === 'claude' && aiApikeyInput.value.trim() !== ''
+  aiPdfExtractInput.disabled = !claudeReady
+  if (!claudeReady) aiPdfExtractInput.checked = false
+}
+
 async function openSettings(): Promise<void> {
   const settings = await api.getSettings()
-  aiProviderSel.value  = settings.aiProvider
-  aiApikeyInput.value  = settings.aiApiKey
+  aiProviderSel.value       = settings.aiProvider
+  aiApikeyInput.value       = settings.aiApiKey
+  aiPdfExtractInput.checked = settings.aiPdfExtract
+  updatePdfExtractToggle()
   settingsModal.classList.remove('hidden')
 }
 
@@ -231,7 +252,17 @@ dropZone.addEventListener('drop', async e => {
     return
   }
   if (ext === 'pdf') {
-    alert('PDFはドロップ非対応です。「ファイルを開く」ボタンからご利用ください。')
+    const filePath = api.getPathForFile(file)
+    showLoading('PDFを読み込み中...')
+    try {
+      const result = await api.openFileByPath(filePath)
+      if (!result) return
+      await processText(result.text, result.filePath)
+    } catch (err) {
+      alert(`ファイルの読み込みに失敗しました:\n${err}`)
+    } finally {
+      hideLoading()
+    }
     return
   }
   const reader = new FileReader()
@@ -250,10 +281,14 @@ settingsBtn.addEventListener('click', () => { void openSettings() })
 
 void updateAiButtonVisibility()
 
+aiProviderSel.addEventListener('change', updatePdfExtractToggle)
+aiApikeyInput.addEventListener('input', updatePdfExtractToggle)
+
 settingsSaveBtn.addEventListener('click', async () => {
   await api.saveSettings({
-    aiProvider: aiProviderSel.value as 'none' | 'claude' | 'gemini',
-    aiApiKey:   aiApikeyInput.value,
+    aiProvider:    aiProviderSel.value as 'none' | 'claude' | 'gemini',
+    aiApiKey:      aiApikeyInput.value,
+    aiPdfExtract:  aiPdfExtractInput.checked,
   })
   settingsModal.classList.add('hidden')
   void updateAiButtonVisibility()

@@ -53,7 +53,31 @@ function setupIpcHandlers(): void {
       let text: string
       if (filePath.toLowerCase().endsWith('.pdf')) {
         const settings = settingsManager.get()
-        if (settings.aiProvider === 'claude' && settings.aiApiKey) {
+        if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
+          try {
+            text = await extractPdfTextWithClaude(filePath, settings.aiApiKey)
+          } catch {
+            text = await extractTextFromPdf(filePath)
+          }
+        } else {
+          text = await extractTextFromPdf(filePath)
+        }
+      } else {
+        text = readTextFile(filePath)
+      }
+      return { text, filePath }
+    } catch (err) {
+      throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
+    }
+  })
+
+  // ── パスを指定してファイルを開く（ドロップ用） ───────────────────────────────
+  ipcMain.handle('open-file-by-path', async (_event, filePath: string): Promise<{ text: string; filePath: string } | null> => {
+    try {
+      let text: string
+      if (filePath.toLowerCase().endsWith('.pdf')) {
+        const settings = settingsManager.get()
+        if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
           try {
             text = await extractPdfTextWithClaude(filePath, settings.aiApiKey)
           } catch {
