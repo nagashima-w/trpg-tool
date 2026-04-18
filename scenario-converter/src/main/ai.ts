@@ -51,7 +51,7 @@ async function splitPdfBufferByPages(buf: Buffer, chunkSize: number): Promise<{ 
     const end = Math.min(start + chunkSize, totalPages)
     const chunk = await PDFDocument.create()
     const indices = Array.from({ length: end - start }, (_, i) => start + i)
-    const copied = await chunk.copyPagesFrom(doc, indices)
+    const copied = await chunk.copyPages(doc, indices)
     copied.forEach(p => chunk.addPage(p))
     chunks.push(Buffer.from(await chunk.save()))
   }
