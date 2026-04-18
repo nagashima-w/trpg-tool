@@ -31,10 +31,10 @@ const CHUNK_PAGES = 10
 
 type ProgressCallback = (msg: string) => void
 
-async function waitForRateLimit(headers: Record<string, string> | Headers, onProgress: ProgressCallback | undefined): Promise<void> {
+async function waitForRateLimit(headers: Record<string, string> | Headers | undefined, onProgress: ProgressCallback | undefined): Promise<void> {
   const raw = headers instanceof Headers
     ? headers.get('retry-after')
-    : (headers as Record<string, string>)['retry-after']
+    : headers?.['retry-after']
   const seconds = Math.min(parseInt(raw ?? '60', 10), 120)
   for (let remaining = seconds; remaining > 0; remaining--) {
     onProgress?.(`レート制限のため ${remaining} 秒待機中...`)
@@ -66,7 +66,7 @@ async function callWithClaudeRetry<T>(
     return await apiCall()
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) {
-      await waitForRateLimit(err.headers as Headers, onProgress)
+      await waitForRateLimit(err.headers, onProgress)
       return apiCall()
     }
     throw err
@@ -165,5 +165,7 @@ export async function reformatWithGemini(text: string, apiKey: string, onProgres
   const data = await res.json() as {
     candidates: Array<{ content: { parts: Array<{ text: string }> } }>
   }
-  return data.candidates[0].content.parts[0].text
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
+  if (!text) throw new Error('Gemini API からの応答が空です（安全フィルターでブロックされた可能性があります）')
+  return text
 }
