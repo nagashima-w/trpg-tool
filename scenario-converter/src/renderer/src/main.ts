@@ -32,14 +32,11 @@ const loadingMsg        = document.getElementById('loading-msg')          as HTM
 
 // ── 状態 ────────────────────────────────────────────────────────────────────
 let currentResult: ConversionResult | null = null
-/** ユーザーが手動編集した変換後テキスト */
 let editedConvertedText = ''
-/** 現在表示中のファイルラベル */
 let currentLabel = ''
-/** 現在開いているファイルの実パス（AI再抽出用） */
 let currentFilePath = ''
-/** 現在開いているファイルがPDFかどうか */
 let currentIsPdf = false
+let cachedSettings: Awaited<ReturnType<typeof api.getSettings>> | null = null
 
 // ── ローディング制御 ─────────────────────────────────────────────────────────
 
@@ -56,13 +53,9 @@ function hideLoading(): void {
 
 // ── ファイル読み込み ─────────────────────────────────────────────────────────
 
-function showWarning(msg: string): void {
-  warningText.textContent = msg
-  warningBanner.classList.remove('hidden')
-}
-
-function hideWarning(): void {
-  warningBanner.classList.add('hidden')
+function applyWarning(warning: string | undefined): void {
+  warningBanner.classList.toggle('hidden', !warning)
+  warningText.textContent = warning ?? ''
 }
 
 async function loadFile(): Promise<void> {
@@ -70,8 +63,7 @@ async function loadFile(): Promise<void> {
   try {
     const file = await api.openFile()
     if (!file) return
-    hideWarning()
-    if (file.warning) showWarning(file.warning)
+    applyWarning(file.warning)
     currentFilePath = file.filePath
     currentIsPdf = file.filePath.toLowerCase().endsWith('.pdf')
     await processText(file.text, file.filePath)
@@ -98,7 +90,7 @@ async function processText(text: string, label: string): Promise<void> {
 
   renderDiff(result)
   showDiffView()
-  void updateAiButtonVisibility()
+  updateAiButtonVisibility(await getSettings())
 }
 
 // ── 差分レンダリング ─────────────────────────────────────────────────────────
@@ -205,12 +197,6 @@ function showDiffView(): void {
   footer.classList.remove('hidden')
 }
 
-function showDropZone(): void {
-  statusbar.classList.add('hidden')
-  diffArea.classList.add('hidden')
-  footer.classList.add('hidden')
-}
-
 // ── 保存 ────────────────────────────────────────────────────────────────────
 
 async function saveFile(): Promise<void> {
@@ -233,12 +219,16 @@ async function reformatWithAI(): Promise<void> {
   }
 }
 
-async function updateAiButtonVisibility(): Promise<void> {
-  const settings = await api.getSettings()
+function updateAiButtonVisibility(settings: Awaited<ReturnType<typeof api.getSettings>>): void {
   const aiEnabled = settings.aiProvider !== 'none' && settings.aiApiKey.trim() !== ''
   const claudeReady = settings.aiProvider === 'claude' && settings.aiApiKey.trim() !== ''
   aiReformatBtn.classList.toggle('hidden', !aiEnabled)
   aiReExtractBtn.classList.toggle('hidden', !(claudeReady && currentIsPdf))
+}
+
+async function getSettings() {
+  if (!cachedSettings) cachedSettings = await api.getSettings()
+  return cachedSettings
 }
 
 async function reExtractWithAI(): Promise<void> {
@@ -264,7 +254,7 @@ function updatePdfExtractToggle(): void {
 }
 
 async function openSettings(): Promise<void> {
-  const settings = await api.getSettings()
+  const settings = await getSettings()
   aiProviderSel.value       = settings.aiProvider
   aiApikeyInput.value       = settings.aiApiKey
   aiPdfExtractInput.checked = settings.aiPdfExtract
@@ -297,8 +287,7 @@ dropZone.addEventListener('drop', async e => {
     try {
       const result = await api.openFileByPath(filePath)
       if (!result) return
-      hideWarning()
-      if (result.warning) showWarning(result.warning)
+      applyWarning(result.warning)
       currentFilePath = filePath
       currentIsPdf = true
       await processText(result.text, result.filePath)
@@ -314,29 +303,32 @@ dropZone.addEventListener('drop', async e => {
     if (typeof reader.result !== 'string') return
     await processText(reader.result, file.name)
   }
+  reader.onerror = () => alert('ファイルの読み込みに失敗しました。')
   reader.readAsText(file, 'utf-8')
 })
 
 // ── イベントリスナー ─────────────────────────────────────────────────────────
 
-warningClose.addEventListener('click', hideWarning)
+warningClose.addEventListener('click', () => applyWarning(undefined))
 openBtn.addEventListener('click', () => { void loadFile() })
 saveBtn.addEventListener('click', () => { void saveFile() })
 settingsBtn.addEventListener('click', () => { void openSettings() })
 
-void updateAiButtonVisibility()
+getSettings().then(updateAiButtonVisibility)
 
 aiProviderSel.addEventListener('change', updatePdfExtractToggle)
 aiApikeyInput.addEventListener('input', updatePdfExtractToggle)
 
 settingsSaveBtn.addEventListener('click', async () => {
-  await api.saveSettings({
-    aiProvider:    aiProviderSel.value as 'none' | 'claude' | 'gemini',
-    aiApiKey:      aiApikeyInput.value,
-    aiPdfExtract:  aiPdfExtractInput.checked,
-  })
+  const settings = {
+    aiProvider:   aiProviderSel.value as 'none' | 'claude' | 'gemini',
+    aiApiKey:     aiApikeyInput.value,
+    aiPdfExtract: aiPdfExtractInput.checked,
+  }
+  await api.saveSettings(settings)
+  cachedSettings = settings
   settingsModal.classList.add('hidden')
-  void updateAiButtonVisibility()
+  updateAiButtonVisibility(settings)
 })
 aiReExtractBtn.addEventListener('click', () => { void reExtractWithAI() })
 aiReformatBtn.addEventListener('click', () => { void reformatWithAI() })

@@ -58,6 +58,21 @@ async function splitPdfBufferByPages(buf: Buffer, chunkSize: number): Promise<{ 
   return { chunks, totalPages }
 }
 
+async function callWithClaudeRetry<T>(
+  apiCall: () => Promise<T>,
+  onProgress: ProgressCallback | undefined,
+): Promise<T> {
+  try {
+    return await apiCall()
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      await waitForRateLimit(err.headers as Headers, onProgress)
+      return apiCall()
+    }
+    throw err
+  }
+}
+
 async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined): Promise<string> {
   const client = new Anthropic({ apiKey, maxRetries: 0 })
   const base64 = buf.toString('base64')
@@ -76,17 +91,7 @@ async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: P
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const callApi = () => (client.beta.messages as any).create(requestBody) as Promise<{ content: Array<{ type: string; text: string }> }>
 
-  let message: { content: Array<{ type: string; text: string }> }
-  try {
-    message = await callApi()
-  } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) {
-      await waitForRateLimit(err.headers as Headers, onProgress)
-      message = await callApi()
-    } else {
-      throw err
-    }
-  }
+  const message = await callWithClaudeRetry(callApi, onProgress)
   const block = message.content[0]
   if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
   return block.text
@@ -129,21 +134,7 @@ export async function reformatWithClaude(text: string, apiKey: string, onProgres
     max_tokens: 8192,
     messages: [{ role: 'user', content: REFORMAT_PROMPT + text }],
   }
-
-  const callApi = () => client.messages.create(requestBody)
-
-  let message: Awaited<ReturnType<typeof callApi>>
-  try {
-    message = await callApi()
-  } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) {
-      await waitForRateLimit(err.headers as Headers, onProgress)
-      message = await callApi()
-    } else {
-      throw err
-    }
-  }
-
+  const message = await callWithClaudeRetry(() => client.messages.create(requestBody), onProgress)
   const block = message.content[0]
   if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
   return block.text
