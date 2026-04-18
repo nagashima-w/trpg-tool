@@ -247,7 +247,6 @@ async function reExtractWithAI(): Promise<void> {
   try {
     const result = await api.extractPdfWithAI(currentFilePath)
     hideWarning()
-    if (result.warning) showWarning(result.warning)
     await processText(result.text, result.filePath)
   } catch (err) {
     alert(`AI再抽出に失敗しました:\n${err}`)

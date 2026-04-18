@@ -9,7 +9,7 @@ const api = {
   openFileByPath: (filePath: string): Promise<{ text: string; filePath: string; warning?: string } | null> =>
     ipcRenderer.invoke('open-file-by-path', filePath),
 
-  extractPdfWithAI: (filePath: string): Promise<{ text: string; filePath: string; warning?: string }> =>
+  extractPdfWithAI: (filePath: string): Promise<{ text: string; filePath: string }> =>
     ipcRenderer.invoke('extract-pdf-with-ai', filePath),
 
   getPathForFile: (file: File): string =>

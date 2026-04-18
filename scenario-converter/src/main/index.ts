@@ -44,9 +44,10 @@ async function loadPdf(filePath: string): Promise<{ text: string; warning?: stri
     try {
       const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
       return { text }
-    } catch {
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err)
       const text = await extractTextFromPdf(filePath)
-      return { text, warning: 'AIによるPDF抽出に失敗しました。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。' }
+      return { text, warning: `AIによるPDF抽出に失敗しました（${reason}）。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。` }
     }
   }
   return { text: await extractTextFromPdf(filePath) }
@@ -109,18 +110,13 @@ function setupIpcHandlers(): void {
   })
 
   // ── AI再抽出（ボタンから明示的に呼び出し） ──────────────────────────────────
-  ipcMain.handle('extract-pdf-with-ai', async (_event, filePath: string): Promise<{ text: string; filePath: string; warning?: string }> => {
+  ipcMain.handle('extract-pdf-with-ai', async (_event, filePath: string): Promise<{ text: string; filePath: string }> => {
     const settings = settingsManager.get()
     if (settings.aiProvider !== 'claude' || !settings.aiApiKey) {
       throw new Error('Claude APIキーが設定されていません')
     }
-    try {
-      const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
-      return { text, filePath }
-    } catch {
-      const text = await extractTextFromPdf(filePath)
-      return { text, filePath, warning: 'AIによるPDF抽出に失敗しました。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。' }
-    }
+    const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
+    return { text, filePath }
   })
 
   // ── AI整形 ──────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import type { Settings } from '../../main/settings'
 interface ConverterAPI {
   openFile(): Promise<{ text: string; filePath: string; warning?: string } | null>
   openFileByPath(filePath: string): Promise<{ text: string; filePath: string; warning?: string } | null>
-  extractPdfWithAI(filePath: string): Promise<{ text: string; filePath: string; warning?: string }>
+  extractPdfWithAI(filePath: string): Promise<{ text: string; filePath: string }>
   getPathForFile(file: File): string
   convert(text: string): Promise<ConversionResult>
   saveFile(text: string): Promise<boolean>
