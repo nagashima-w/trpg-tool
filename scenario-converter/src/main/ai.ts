@@ -165,7 +165,7 @@ export async function reformatWithGemini(text: string, apiKey: string, onProgres
   const data = await res.json() as {
     candidates: Array<{ content: { parts: Array<{ text: string }> } }>
   }
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) throw new Error('Gemini API からの応答が空です（安全フィルターでブロックされた可能性があります）')
-  return text
+  const result = data.candidates?.[0]?.content?.parts?.[0]?.text
+  if (!result) throw new Error('Gemini API からの応答が空です（安全フィルターでブロックされた可能性があります）')
+  return result
 }
