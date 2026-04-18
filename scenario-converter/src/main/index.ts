@@ -108,6 +108,21 @@ function setupIpcHandlers(): void {
     return true
   })
 
+  // ── AI再抽出（ボタンから明示的に呼び出し） ──────────────────────────────────
+  ipcMain.handle('extract-pdf-with-ai', async (_event, filePath: string): Promise<{ text: string; filePath: string; warning?: string }> => {
+    const settings = settingsManager.get()
+    if (settings.aiProvider !== 'claude' || !settings.aiApiKey) {
+      throw new Error('Claude APIキーが設定されていません')
+    }
+    try {
+      const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
+      return { text, filePath }
+    } catch {
+      const text = await extractTextFromPdf(filePath)
+      return { text, filePath, warning: 'AIによるPDF抽出に失敗しました。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。' }
+    }
+  })
+
   // ── AI整形 ──────────────────────────────────────────────────────────
   ipcMain.handle('reformat-with-ai', async (_event, text: string): Promise<string> => {
     const settings = settingsManager.get()

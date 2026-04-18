@@ -22,6 +22,7 @@ const aiApikeyInput     = document.getElementById('ai-apikey-input')      as HTM
 const aiPdfExtractInput = document.getElementById('ai-pdf-extract-input') as HTMLInputElement
 const settingsSaveBtn   = document.getElementById('settings-save-btn')    as HTMLButtonElement
 const settingsCancelBtn = document.getElementById('settings-cancel-btn')  as HTMLButtonElement
+const aiReExtractBtn    = document.getElementById('ai-reextract-btn')     as HTMLButtonElement
 const aiReformatBtn     = document.getElementById('ai-reformat-btn')      as HTMLButtonElement
 const warningBanner     = document.getElementById('warning-banner')       as HTMLDivElement
 const warningText       = document.getElementById('warning-text')         as HTMLSpanElement
@@ -35,6 +36,10 @@ let currentResult: ConversionResult | null = null
 let editedConvertedText = ''
 /** 現在表示中のファイルラベル */
 let currentLabel = ''
+/** 現在開いているファイルの実パス（AI再抽出用） */
+let currentFilePath = ''
+/** 現在開いているファイルがPDFかどうか */
+let currentIsPdf = false
 
 // ── ローディング制御 ─────────────────────────────────────────────────────────
 
@@ -67,6 +72,8 @@ async function loadFile(): Promise<void> {
     if (!file) return
     hideWarning()
     if (file.warning) showWarning(file.warning)
+    currentFilePath = file.filePath
+    currentIsPdf = file.filePath.toLowerCase().endsWith('.pdf')
     await processText(file.text, file.filePath)
   } catch (err) {
     alert(`ファイルの読み込みに失敗しました:\n${err}`)
@@ -91,6 +98,7 @@ async function processText(text: string, label: string): Promise<void> {
 
   renderDiff(result)
   showDiffView()
+  void updateAiButtonVisibility()
 }
 
 // ── 差分レンダリング ─────────────────────────────────────────────────────────
@@ -228,7 +236,24 @@ async function reformatWithAI(): Promise<void> {
 async function updateAiButtonVisibility(): Promise<void> {
   const settings = await api.getSettings()
   const aiEnabled = settings.aiProvider !== 'none' && settings.aiApiKey.trim() !== ''
+  const claudeReady = settings.aiProvider === 'claude' && settings.aiApiKey.trim() !== ''
   aiReformatBtn.classList.toggle('hidden', !aiEnabled)
+  aiReExtractBtn.classList.toggle('hidden', !(claudeReady && currentIsPdf))
+}
+
+async function reExtractWithAI(): Promise<void> {
+  if (!currentFilePath) return
+  showLoading('AIでPDFを再抽出中...')
+  try {
+    const result = await api.extractPdfWithAI(currentFilePath)
+    hideWarning()
+    if (result.warning) showWarning(result.warning)
+    await processText(result.text, result.filePath)
+  } catch (err) {
+    alert(`AI再抽出に失敗しました:\n${err}`)
+  } finally {
+    hideLoading()
+  }
 }
 
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
@@ -275,6 +300,8 @@ dropZone.addEventListener('drop', async e => {
       if (!result) return
       hideWarning()
       if (result.warning) showWarning(result.warning)
+      currentFilePath = filePath
+      currentIsPdf = true
       await processText(result.text, result.filePath)
     } catch (err) {
       alert(`ファイルの読み込みに失敗しました:\n${err}`)
@@ -312,6 +339,7 @@ settingsSaveBtn.addEventListener('click', async () => {
   settingsModal.classList.add('hidden')
   void updateAiButtonVisibility()
 })
+aiReExtractBtn.addEventListener('click', () => { void reExtractWithAI() })
 aiReformatBtn.addEventListener('click', () => { void reformatWithAI() })
 settingsCancelBtn.addEventListener('click', () => settingsModal.classList.add('hidden'))
 settingsModal.addEventListener('click', e => {
