@@ -110,8 +110,10 @@ export async function extractPdfTextWithClaude(filePath: string, apiKey: string,
   try {
     return await extractChunkWithClaude(buf, apiKey, onProgress)
   } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) {
-      // 1ファイルとして送るとTPM超過 → ページ分割して再処理
+    const shouldChunk =
+      err instanceof Anthropic.RateLimitError ||
+      (err instanceof Anthropic.APIStatusError && err.status === 413)
+    if (shouldChunk) {
       onProgress?.('PDFを分割して再処理します...')
       return extractPdfInChunks(buf, apiKey, onProgress)
     }
