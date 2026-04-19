@@ -27,11 +27,50 @@ async function run() {
   for (let i = 1; i <= doc.numPages; i++) {
     try {
       const page = await doc.getPage(i)
+      const viewport = page.getViewport({ scale: 1 })
       const content = await page.getTextContent()
-      const text = content.items
-        .filter(item => 'str' in item)
-        .map(item => item.str + (item.hasEOL ? '\\n' : ''))
-        .join('')
+
+      // 座標付きアイテムのみ抽出（TextMarkedContent 等を除外）
+      const items = content.items
+        .filter(item => 'str' in item && item.str.trim())
+        .map(item => ({
+          str: item.str,
+          hasEOL: !!item.hasEOL,
+          x: item.transform[4],
+          y: item.transform[5],
+        }))
+
+      if (items.length === 0) continue
+
+      // 段組み検出: x座標の中央値でページを左右に分割
+      const midX = viewport.width / 2
+      const hasRightCol = items.some(it => it.x >= midX)
+
+      let text
+      if (hasRightCol) {
+        // 二段組: 左列を先に、次に右列（上から下の順）
+        const byCol = (col) => items
+          .filter(it => col === 'left' ? it.x < midX : it.x >= midX)
+          .sort((a, b) => b.y - a.y)
+        const colText = (its) => {
+          let out = '', prevY = null
+          for (const it of its) {
+            if (prevY !== null && prevY - it.y > 3) out += '\\n'
+            out += it.str
+            if (it.hasEOL) out += '\\n'
+            prevY = it.y
+          }
+          return out
+        }
+        text = colText(byCol('left')) + '\\n' + colText(byCol('right'))
+      } else {
+        // 一段: 上から下の順
+        text = items
+          .sort((a, b) => b.y - a.y)
+          .map(it => it.str + (it.hasEOL ? '\\n' : ''))
+          .join('')
+      }
+
       if (text.trim()) pages.push(text)
     } catch {
       // 問題のあるページをスキップして継続
