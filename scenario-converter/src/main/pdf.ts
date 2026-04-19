@@ -96,36 +96,3 @@ function decodeShiftJis(buf: Buffer): string {
   const decoder = new TextDecoder('shift_jis', { fatal: false })
   return decoder.decode(buf)
 }
-  if (!rawText || rawText.trim().length === 0) {
-    throw new Error(
-      'PDFからテキストを抽出できませんでした。\n' +
-      'スキャン画像のみのPDFはテキスト抽出に非対応です。\n' +
-      'テキストレイヤー付きのPDFをご利用ください。'
-    )
-  }
-  // CJK文字間の余分なスペース（PDF抽出アーティファクト）を除去
-  return rawText.replace(/(?<=[\u3000-\u9FFF\uFF00-\uFFEF]) (?=[\u3000-\u9FFF\uFF00-\uFFEF])/g, '')
-}
-
-/**
- * テキストファイルを読み込む。UTF-8とShift-JISを自動判別する。
- */
-export function readTextFile(filePath: string): string {
-  const buf = readFileSync(filePath)
-  if (isValidUtf8(buf)) return buf.toString('utf-8')
-  return decodeShiftJis(buf)
-}
-
-function isValidUtf8(buf: Buffer): boolean {
-  try {
-    const str = buf.toString('utf-8')
-    return !str.includes('\uFFFD')
-  } catch {
-    return false
-  }
-}
-
-function decodeShiftJis(buf: Buffer): string {
-  const decoder = new TextDecoder('shift_jis', { fatal: false })
-  return decoder.decode(buf)
-}
