@@ -8,7 +8,7 @@ import type {
 import { recalcDerived } from './rules'
 import { convertSkills } from './skills'
 import { detectStatBlocks } from './statblock'
-import { escapeRe } from './utils'
+import { escapeRe, normalizeFullWidthDigits } from './utils'
 
 /** ×5しない能力値キー */
 const NO_MULTIPLY: Array<keyof AbilityStats> = ['MOV']
@@ -68,6 +68,7 @@ export function convertStatBlock(block: StatBlock): ConvertedBlock {
  * テキスト全体を変換する。
  */
 export function convertText(text: string): ConversionResult {
+  text = normalizeFullWidthDigits(text)
   const blocks    = detectStatBlocks(text)
   const warnings: string[] = []
   const converted: ConvertedBlock[] = []

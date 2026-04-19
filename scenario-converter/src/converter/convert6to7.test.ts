@@ -294,6 +294,18 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('目星 | 55%')
   })
 
+  it('全角数字を含むstatブロックを変換する', () => {
+    const text = [
+      'STR １４  CON １２  SIZ １５  INT ７  POW １３  DEX １１',
+      'こぶし ７５%  目星 ５５%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.convertedText).toContain('STR 70')
+    expect(result.convertedText).toContain('CON 60')
+    expect(result.convertedText).toContain('近接戦闘（格闘）')
+  })
+
   it('複数のstatブロックをそれぞれ変換する', () => {
     const text = [
       '【深きもの】',
