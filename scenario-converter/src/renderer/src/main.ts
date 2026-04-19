@@ -76,21 +76,25 @@ async function loadFile(): Promise<void> {
 
 async function processText(text: string, label: string): Promise<void> {
   currentLabel = label
-  const result = await api.convert(text)
-  currentResult = result
-  editedConvertedText = result.convertedText
+  showLoading('変換処理中...')
+  try {
+    const result = await api.convert(text)
+    currentResult = result
+    editedConvertedText = result.convertedText
 
-  // ステータス更新
-  const totalRenames = result.blocks.reduce(
-    (acc, b) => acc + b.skills.filter(s => s.renamed).length, 0
-  )
-  statusFile.textContent = label
-  statusBlocks.textContent  = String(result.blocks.length)
-  statusRenames.textContent = String(totalRenames)
+    const totalRenames = result.blocks.reduce(
+      (acc, b) => acc + b.skills.filter(s => s.renamed).length, 0
+    )
+    statusFile.textContent = label
+    statusBlocks.textContent  = String(result.blocks.length)
+    statusRenames.textContent = String(totalRenames)
 
-  renderDiff(result)
-  showDiffView()
-  updateAiButtonVisibility(await getSettings())
+    renderDiff(result)
+    showDiffView()
+    updateAiButtonVisibility(await getSettings())
+  } finally {
+    hideLoading()
+  }
 }
 
 // ── 差分レンダリング ─────────────────────────────────────────────────────────
