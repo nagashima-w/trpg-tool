@@ -12,7 +12,9 @@ require(workerData.pdfParsePath)(Buffer.from(workerData.data))
   .catch(err => parentPort.postMessage({ error: String(err) }))
 `
 
-async function parsePdfInWorker(buf: Buffer): Promise<string> {
+type ProgressCallback = (msg: string) => void
+
+async function parsePdfInWorker(buf: Buffer, onProgress?: ProgressCallback): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pdfParsePath = require.resolve('pdf-parse')
   return new Promise<string>((resolve, reject) => {
@@ -20,25 +22,38 @@ async function parsePdfInWorker(buf: Buffer): Promise<string> {
       eval: true,
       workerData: { pdfParsePath, data: new Uint8Array(buf) },
     })
-    const timer = setTimeout(() => {
+
+    onProgress?.('PDFを解析中...')
+    let elapsed = 0
+    const progressInterval = setInterval(() => {
+      elapsed += 3
+      onProgress?.(`PDFを解析中... (${elapsed}秒経過)`)
+    }, 3000)
+
+    const cleanup = () => { clearInterval(progressInterval) }
+
+    const timeoutTimer = setTimeout(() => {
+      cleanup()
       void worker.terminate()
       reject(new Error(`PDFの解析がタイムアウトしました（${PDF_PARSE_TIMEOUT_MS / 1000}秒）。ファイルが破損しているか、非対応の形式の可能性があります。`))
     }, PDF_PARSE_TIMEOUT_MS)
+
     worker.on('message', ({ text, error }: { text?: string; error?: string }) => {
-      clearTimeout(timer)
+      cleanup()
+      clearTimeout(timeoutTimer)
       void worker.terminate()
       text !== undefined ? resolve(text) : reject(new Error(error ?? 'PDF解析エラー'))
     })
-    worker.on('error', err => { clearTimeout(timer); reject(err) })
+    worker.on('error', err => { cleanup(); clearTimeout(timeoutTimer); reject(err) })
   })
 }
 
 /**
  * PDFファイルからテキストを抽出する。
  */
-export async function extractTextFromPdf(filePath: string): Promise<string> {
+export async function extractTextFromPdf(filePath: string, onProgress?: ProgressCallback): Promise<string> {
   const buf = await readFile(filePath)
-  const rawText = await parsePdfInWorker(buf)
+  const rawText = await parsePdfInWorker(buf, onProgress)
   if (!rawText || rawText.trim().length === 0) {
     throw new Error(
       'PDFからテキストを抽出できませんでした。\n' +

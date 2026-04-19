@@ -46,11 +46,11 @@ async function loadPdf(filePath: string): Promise<{ text: string; warning?: stri
       return { text }
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
-      const text = await extractTextFromPdf(filePath)
+      const text = await extractTextFromPdf(filePath, sendProgress)
       return { text, warning: `AIによるPDF抽出に失敗しました（${reason}）。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。` }
     }
   }
-  return { text: await extractTextFromPdf(filePath) }
+  return { text: await extractTextFromPdf(filePath, sendProgress) }
 }
 
 function setupIpcHandlers(): void {
