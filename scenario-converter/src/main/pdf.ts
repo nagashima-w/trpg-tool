@@ -1,14 +1,20 @@
 import { readFileSync } from 'fs'
+import { readFile } from 'fs/promises'
 import { Worker } from 'worker_threads'
+import { PDFDocument } from 'pdf-lib'
 
 const PDF_PARSE_TIMEOUT_MS = 30_000
+const PAGES_PER_CHUNK = 10
 
-// ファイルパスをワーカーに渡して直接読み込ませる（バッファのコピーを避ける）
-// 結果テキストは ArrayBuffer として transfer して structured clone のサイズ問題を回避する
+// filePath か base64 のどちらかで PDF バッファを受け取る
 const WORKER_SCRIPT = `
 const { parentPort, workerData } = require('worker_threads')
 const { readFile } = require('fs/promises')
-readFile(workerData.filePath)
+async function getBuf() {
+  if (workerData.filePath) return readFile(workerData.filePath)
+  return Buffer.from(workerData.base64, 'base64')
+}
+getBuf()
   .then(buf => require(workerData.pdfParsePath)(buf))
   .then(data => {
     const ab = Buffer.from(data.text, 'utf-8')
@@ -20,49 +26,89 @@ readFile(workerData.filePath)
 
 type ProgressCallback = (msg: string) => void
 
-async function parsePdfInWorker(filePath: string, onProgress?: ProgressCallback): Promise<string> {
+function runWorker(workerData: Record<string, unknown>): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pdfParsePath = require.resolve('pdf-parse')
   return new Promise<string>((resolve, reject) => {
-    const worker = new Worker(WORKER_SCRIPT, {
-      eval: true,
-      workerData: { pdfParsePath, filePath },
-    })
-
-    onProgress?.('PDFを解析中...')
-    let elapsed = 0
-    const progressInterval = setInterval(() => {
-      elapsed += 3
-      onProgress?.(`PDFを解析中... (${elapsed}秒経過)`)
-    }, 3000)
-
-    const cleanup = () => { clearInterval(progressInterval) }
-
-    const timeoutTimer = setTimeout(() => {
-      cleanup()
+    const worker = new Worker(WORKER_SCRIPT, { eval: true, workerData: { pdfParsePath, ...workerData } })
+    const timer = setTimeout(() => {
       void worker.terminate()
-      reject(new Error(`PDFの解析がタイムアウトしました（${PDF_PARSE_TIMEOUT_MS / 1000}秒）。ファイルが破損しているか、非対応の形式の可能性があります。`))
+      reject(new Error('timeout'))
     }, PDF_PARSE_TIMEOUT_MS)
-
     worker.on('message', ({ textBuf, error }: { textBuf?: ArrayBuffer; error?: string }) => {
-      cleanup()
-      clearTimeout(timeoutTimer)
+      clearTimeout(timer)
       void worker.terminate()
-      if (textBuf !== undefined) {
-        resolve(Buffer.from(textBuf).toString('utf-8'))
-      } else {
-        reject(new Error(error ?? 'PDF解析エラー'))
-      }
+      textBuf !== undefined ? resolve(Buffer.from(textBuf).toString('utf-8')) : reject(new Error(error ?? 'PDF解析エラー'))
     })
-    worker.on('error', err => { cleanup(); clearTimeout(timeoutTimer); reject(err) })
+    worker.on('error', err => { clearTimeout(timer); reject(err) })
   })
+}
+
+// ページ単位に分割して処理する（特定ページで止まっても残りを継続）
+async function extractInChunks(buf: Buffer, onProgress?: ProgressCallback): Promise<string> {
+  const doc = await PDFDocument.load(buf, { ignoreEncryption: true })
+  const totalPages = doc.getPageCount()
+  const results: string[] = []
+
+  for (let start = 0; start < totalPages; start += PAGES_PER_CHUNK) {
+    const end = Math.min(start + PAGES_PER_CHUNK, totalPages)
+    onProgress?.(`PDFを解析中... (${start + 1}〜${end} / ${totalPages} ページ)`)
+
+    const chunk = await PDFDocument.create()
+    const copied = await chunk.copyPages(doc, Array.from({ length: end - start }, (_, i) => start + i))
+    copied.forEach(p => chunk.addPage(p))
+    const base64 = Buffer.from(await chunk.save()).toString('base64')
+
+    try {
+      const text = await runWorker({ base64 })
+      if (text.trim()) results.push(text)
+    } catch {
+      // 問題のあるチャンクをスキップして続行
+    }
+  }
+
+  return results.join('\n\n')
+}
+
+function normalize(text: string): string {
+  return text.replace(/(?<=[\u3000-\u9FFF\uFF00-\uFFEF]) (?=[\u3000-\u9FFF\uFF00-\uFFEF])/g, '')
 }
 
 /**
  * PDFファイルからテキストを抽出する。
+ * まず全体を一括処理し、失敗またはテキストが空の場合はページ分割して再試行する。
  */
 export async function extractTextFromPdf(filePath: string, onProgress?: ProgressCallback): Promise<string> {
-  const rawText = await parsePdfInWorker(filePath, onProgress)
+  const buf = await readFile(filePath)
+
+  // 全体一括処理（高速）
+  onProgress?.('PDFを解析中...')
+  let elapsed = 0
+  const progressInterval = setInterval(() => {
+    elapsed += 3
+    onProgress?.(`PDFを解析中... (${elapsed}秒経過)`)
+  }, 3000)
+
+  let rawText = ''
+  try {
+    rawText = await runWorker({ filePath })
+  } catch {
+    // fall through to chunked
+  } finally {
+    clearInterval(progressInterval)
+  }
+
+  // テキストが取れた場合はそのまま返す
+  if (rawText.trim().length > 0) return normalize(rawText)
+
+  // 空または失敗 → ページ分割して再試行
+  onProgress?.('ページ分割して再解析中...')
+  try {
+    rawText = await extractInChunks(buf, onProgress)
+  } catch {
+    // pdf-lib でも読めない場合は諦める
+  }
+
   if (!rawText || rawText.trim().length === 0) {
     throw new Error(
       'PDFからテキストを抽出できませんでした。\n' +
@@ -70,8 +116,7 @@ export async function extractTextFromPdf(filePath: string, onProgress?: Progress
       'テキストレイヤー付きのPDFをご利用ください。'
     )
   }
-  // CJK文字間の余分なスペース（PDF抽出アーティファクト）を除去
-  return rawText.replace(/(?<=[\u3000-\u9FFF\uFF00-\uFFEF]) (?=[\u3000-\u9FFF\uFF00-\uFFEF])/g, '')
+  return normalize(rawText)
 }
 
 /**
