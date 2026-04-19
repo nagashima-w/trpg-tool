@@ -140,32 +140,79 @@ export async function reformatWithClaude(text: string, apiKey: string, onProgres
   return block.text
 }
 
-export async function reformatWithGemini(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+const GEMINI_INLINE_LIMIT = 10 * 1024 * 1024  // 10MB 未満はインライン、以上は Files API
+
+async function geminiGenerate(
+  parts: unknown[],
+  apiKey: string,
+  onProgress: ProgressCallback | undefined,
+): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
-  const body = JSON.stringify({
-    contents: [{ parts: [{ text: REFORMAT_PROMPT + text }] }],
-  })
+  const body = JSON.stringify({ contents: [{ parts }] })
+  const call = () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
 
-  const callApi = () => fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-  })
-
-  let res = await callApi()
+  let res = await call()
   if (res.status === 429) {
-    const retryAfterHeader = res.headers.get('retry-after') ?? res.headers.get('x-ratelimit-reset-requests') ?? '60'
-    await waitForRateLimit({ 'retry-after': retryAfterHeader }, onProgress)
-    res = await callApi()
+    const retryAfter = res.headers.get('retry-after') ?? res.headers.get('x-ratelimit-reset-requests') ?? '60'
+    await waitForRateLimit({ 'retry-after': retryAfter }, onProgress)
+    res = await call()
   }
-  if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`Gemini API エラー: ${res.status} ${err}`)
-  }
-  const data = await res.json() as {
-    candidates: Array<{ content: { parts: Array<{ text: string }> } }>
-  }
+  if (!res.ok) throw new Error(`Gemini API エラー: ${res.status} ${await res.text()}`)
+
+  const data = await res.json() as { candidates?: Array<{ content: { parts: Array<{ text: string }> } }> }
   const result = data.candidates?.[0]?.content?.parts?.[0]?.text
   if (!result) throw new Error('Gemini API からの応答が空です（安全フィルターでブロックされた可能性があります）')
   return result
+}
+
+async function uploadPdfToGemini(buf: Buffer, apiKey: string): Promise<string> {
+  const boundary = `part_${Date.now().toString(16)}`
+  const meta = JSON.stringify({ file: { displayName: 'document.pdf' } })
+  const bodyBuf = Buffer.concat([
+    Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/pdf\r\n\r\n`),
+    buf,
+    Buffer.from(`\r\n--${boundary}--`),
+  ])
+  const res = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/related; boundary=${boundary}`, 'X-Goog-Upload-Protocol': 'multipart' },
+    body: bodyBuf,
+  })
+  if (!res.ok) throw new Error(`Gemini Files API アップロードエラー: ${res.status} ${await res.text()}`)
+  const data = await res.json() as { file: { uri: string } }
+  return data.file.uri
+}
+
+async function deleteGeminiFile(fileUri: string, apiKey: string): Promise<void> {
+  const m = fileUri.match(/\/(files\/[^?/]+)/)
+  if (!m) return
+  await fetch(`https://generativelanguage.googleapis.com/v1beta/${m[1]}?key=${apiKey}`, { method: 'DELETE' })
+}
+
+export async function extractPdfTextWithGemini(filePath: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+  const buf = await readFile(filePath)
+
+  if (buf.length <= GEMINI_INLINE_LIMIT) {
+    onProgress?.('GeminiでPDFを解析中...')
+    return geminiGenerate([
+      { inlineData: { mimeType: 'application/pdf', data: buf.toString('base64') } },
+      { text: PDF_EXTRACT_PROMPT },
+    ], apiKey, onProgress)
+  }
+
+  onProgress?.('PDFをGeminiにアップロード中...')
+  const fileUri = await uploadPdfToGemini(buf, apiKey)
+  try {
+    onProgress?.('GeminiでPDFを解析中...')
+    return await geminiGenerate([
+      { fileData: { mimeType: 'application/pdf', fileUri } },
+      { text: PDF_EXTRACT_PROMPT },
+    ], apiKey, onProgress)
+  } finally {
+    await deleteGeminiFile(fileUri, apiKey).catch(() => {})
+  }
+}
+
+export async function reformatWithGemini(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+  return geminiGenerate([{ text: REFORMAT_PROMPT + text }], apiKey, onProgress)
 }

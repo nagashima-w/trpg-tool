@@ -225,9 +225,8 @@ async function reformatWithAI(): Promise<void> {
 
 function updateAiButtonVisibility(settings: Awaited<ReturnType<typeof api.getSettings>>): void {
   const aiEnabled = settings.aiProvider !== 'none' && settings.aiApiKey.trim() !== ''
-  const claudeReady = settings.aiProvider === 'claude' && settings.aiApiKey.trim() !== ''
   aiReformatBtn.classList.toggle('hidden', !aiEnabled)
-  aiReExtractBtn.classList.toggle('hidden', !(claudeReady && currentIsPdf))
+  aiReExtractBtn.classList.toggle('hidden', !(aiEnabled && currentIsPdf))
 }
 
 async function getSettings() {
@@ -252,9 +251,9 @@ async function reExtractWithAI(): Promise<void> {
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
 
 function updatePdfExtractToggle(): void {
-  const claudeReady = aiProviderSel.value === 'claude' && aiApikeyInput.value.trim() !== ''
-  aiPdfExtractInput.disabled = !claudeReady
-  if (!claudeReady) aiPdfExtractInput.checked = false
+  const aiReady = aiProviderSel.value !== 'none' && aiApikeyInput.value.trim() !== ''
+  aiPdfExtractInput.disabled = !aiReady
+  if (!aiReady) aiPdfExtractInput.checked = false
 }
 
 async function openSettings(): Promise<void> {

@@ -3,7 +3,7 @@ import { join } from 'path'
 import { writeFileSync } from 'fs'
 import { SettingsManager } from './settings'
 import { readTextFile, extractTextFromPdf } from './pdf'
-import { extractPdfTextWithClaude, reformatWithClaude, reformatWithGemini } from './ai'
+import { extractPdfTextWithClaude, extractPdfTextWithGemini, reformatWithClaude, reformatWithGemini } from './ai'
 import { convertText } from '../converter/convert6to7'
 import type { ConversionResult } from '../converter/types'
 import type { Settings } from './settings'
@@ -40,10 +40,14 @@ function sendProgress(msg: string): void {
 
 async function loadPdf(filePath: string): Promise<{ text: string; warning?: string }> {
   const settings = settingsManager.get()
-  if (settings.aiProvider === 'claude' && settings.aiApiKey && settings.aiPdfExtract) {
+  if (settings.aiApiKey && settings.aiPdfExtract) {
     try {
-      const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
-      return { text }
+      if (settings.aiProvider === 'claude') {
+        return { text: await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress) }
+      }
+      if (settings.aiProvider === 'gemini') {
+        return { text: await extractPdfTextWithGemini(filePath, settings.aiApiKey, sendProgress) }
+      }
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
       const text = await extractTextFromPdf(filePath, sendProgress)
@@ -112,11 +116,14 @@ function setupIpcHandlers(): void {
   // ── AI再抽出（ボタンから明示的に呼び出し） ──────────────────────────────────
   ipcMain.handle('extract-pdf-with-ai', async (_event, filePath: string): Promise<{ text: string; filePath: string }> => {
     const settings = settingsManager.get()
-    if (settings.aiProvider !== 'claude' || !settings.aiApiKey) {
-      throw new Error('Claude APIキーが設定されていません')
+    if (!settings.aiApiKey) throw new Error('APIキーが設定されていません')
+    if (settings.aiProvider === 'claude') {
+      return { text: await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress), filePath }
     }
-    const text = await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress)
-    return { text, filePath }
+    if (settings.aiProvider === 'gemini') {
+      return { text: await extractPdfTextWithGemini(filePath, settings.aiApiKey, sendProgress), filePath }
+    }
+    throw new Error('AIプロバイダーが設定されていません')
   })
 
   // ── AI整形 ──────────────────────────────────────────────────────────
