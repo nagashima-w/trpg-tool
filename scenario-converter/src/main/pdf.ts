@@ -1,6 +1,17 @@
 import { readFileSync } from 'fs'
 import { readFile } from 'fs/promises'
 
+const PDF_PARSE_TIMEOUT_MS = 30_000
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`PDFの解析がタイムアウトしました（${ms / 1000}秒）。ファイルが破損しているか、非対応の形式の可能性があります。`)), ms)
+    ),
+  ])
+}
+
 /**
  * PDFファイルからテキストを抽出する。
  * pdf-parseを動的インポートして使用。
@@ -10,7 +21,7 @@ export async function extractTextFromPdf(filePath: string): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
   const buf = await readFile(filePath)
-  const data = await pdfParse(buf)
+  const data = await withTimeout(pdfParse(buf), PDF_PARSE_TIMEOUT_MS)
   if (!data.text || data.text.trim().length === 0) {
     throw new Error(
       'PDFからテキストを抽出できませんでした。\n' +
