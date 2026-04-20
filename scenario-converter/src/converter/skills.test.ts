@@ -124,6 +124,10 @@ describe('mapSkillName', () => {
     expect(mapSkillName('飛行機操縦')).toBe('操縦（航空機）')
   })
 
+  it('アイデア → INT', () => {
+    expect(mapSkillName('アイデア')).toBe('INT')
+  })
+
   // ── 値切り ────────────────────────────────────────────────────────────
   it('値切り → 言いくるめ', () => {
     expect(mapSkillName('値切り')).toBe('言いくるめ')
