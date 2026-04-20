@@ -74,7 +74,7 @@ export function convertText(text: string): ConversionResult {
   const converted: ConvertedBlock[] = []
 
   if (blocks.length === 0) {
-    return { originalText: text, convertedText: text, blocks: [], warnings }
+    return { originalText: text, convertedText: applyNarrativeReplacements(text), blocks: [], warnings }
   }
 
   // テキストを前から順番に組み立て
@@ -94,6 +94,9 @@ export function convertText(text: string): ConversionResult {
   // 最後のブロック以降
   result += text.slice(cursor)
 
+  // 地の文の用語を一括置換（ブロック外を含む全文対象）
+  result = applyNarrativeReplacements(result)
+
   return {
     originalText:  text,
     convertedText: result,
@@ -105,6 +108,18 @@ export function convertText(text: string): ConversionResult {
 // ──────────────────────────────────────────────────────────────────────────────
 // 内部ユーティリティ
 // ──────────────────────────────────────────────────────────────────────────────
+
+/** 6版固有の用語を7版表記に置換する（全文対象） */
+const NARRATIVE_TERM_MAP: Record<string, string> = {
+  'アイデア': 'INT',
+}
+
+function applyNarrativeReplacements(text: string): string {
+  for (const [from, to] of Object.entries(NARRATIVE_TERM_MAP)) {
+    text = text.replace(new RegExp(escapeRe(from), 'g'), to)
+  }
+  return text
+}
 
 /**
  * ブロックテキスト内の能力値・技能名を置換した新しいテキストを生成する。

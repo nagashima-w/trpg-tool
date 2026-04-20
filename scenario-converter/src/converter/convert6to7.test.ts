@@ -213,6 +213,23 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('【備考】このNPCは敵対的である。')
   })
 
+  it('地の文の「アイデア」をINTに置換する', () => {
+    const result = convertText('アイデアロールに成功した場合、手がかりを得る。アイデアに失敗したら何も分からない。')
+    expect(result.convertedText).toContain('INTロールに成功した場合')
+    expect(result.convertedText).toContain('INTに失敗したら')
+    expect(result.convertedText).not.toContain('アイデア')
+  })
+
+  it('statブロック内の「アイデア」技能も変換される', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      'アイデア 65%  目星 55%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.convertedText).toContain('INT 65%')
+    expect(result.convertedText).not.toContain('アイデア')
+  })
+
   it('%なしの技能値でも変換される', () => {
     const text = [
       'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
