@@ -40,13 +40,15 @@ function sendProgress(msg: string): void {
 
 async function loadPdf(filePath: string): Promise<{ text: string; warning?: string }> {
   const settings = settingsManager.get()
-  if (settings.aiApiKey && settings.aiPdfExtract) {
+  const apiKey = settings.aiProvider === 'claude' ? settings.claudeApiKey
+    : settings.aiProvider === 'gemini' ? settings.geminiApiKey : ''
+  if (apiKey && settings.aiPdfExtract) {
     try {
       if (settings.aiProvider === 'claude') {
-        return { text: await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress) }
+        return { text: await extractPdfTextWithClaude(filePath, apiKey, sendProgress) }
       }
       if (settings.aiProvider === 'gemini') {
-        return { text: await extractPdfTextWithGemini(filePath, settings.aiApiKey, sendProgress) }
+        return { text: await extractPdfTextWithGemini(filePath, apiKey, sendProgress) }
       }
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
@@ -116,12 +118,13 @@ function setupIpcHandlers(): void {
   // ── AI再抽出（ボタンから明示的に呼び出し） ──────────────────────────────────
   ipcMain.handle('extract-pdf-with-ai', async (_event, filePath: string): Promise<{ text: string; filePath: string }> => {
     const settings = settingsManager.get()
-    if (!settings.aiApiKey) throw new Error('APIキーが設定されていません')
     if (settings.aiProvider === 'claude') {
-      return { text: await extractPdfTextWithClaude(filePath, settings.aiApiKey, sendProgress), filePath }
+      if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
+      return { text: await extractPdfTextWithClaude(filePath, settings.claudeApiKey, sendProgress), filePath }
     }
     if (settings.aiProvider === 'gemini') {
-      return { text: await extractPdfTextWithGemini(filePath, settings.aiApiKey, sendProgress), filePath }
+      if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
+      return { text: await extractPdfTextWithGemini(filePath, settings.geminiApiKey, sendProgress), filePath }
     }
     throw new Error('AIプロバイダーが設定されていません')
   })
@@ -129,9 +132,14 @@ function setupIpcHandlers(): void {
   // ── AI整形 ──────────────────────────────────────────────────────────
   ipcMain.handle('reformat-with-ai', async (_event, text: string): Promise<string> => {
     const settings = settingsManager.get()
-    if (!settings.aiApiKey) throw new Error('APIキーが設定されていません')
-    if (settings.aiProvider === 'claude') return reformatWithClaude(text, settings.aiApiKey, sendProgress)
-    if (settings.aiProvider === 'gemini') return reformatWithGemini(text, settings.aiApiKey, sendProgress)
+    if (settings.aiProvider === 'claude') {
+      if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
+      return reformatWithClaude(text, settings.claudeApiKey, sendProgress)
+    }
+    if (settings.aiProvider === 'gemini') {
+      if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
+      return reformatWithGemini(text, settings.geminiApiKey, sendProgress)
+    }
     throw new Error('AIプロバイダーが設定されていません')
   })
 

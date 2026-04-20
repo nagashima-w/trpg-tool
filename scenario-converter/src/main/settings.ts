@@ -3,13 +3,15 @@ import { join } from 'path'
 
 export interface Settings {
   aiProvider: 'none' | 'claude' | 'gemini'
-  aiApiKey: string
+  claudeApiKey: string
+  geminiApiKey: string
   aiPdfExtract: boolean
 }
 
 const DEFAULT_SETTINGS: Settings = {
   aiProvider: 'none',
-  aiApiKey: '',
+  claudeApiKey: '',
+  geminiApiKey: '',
   aiPdfExtract: false,
 }
 
@@ -24,8 +26,17 @@ export class SettingsManager {
 
   private load(): Settings {
     try {
-      const raw = JSON.parse(readFileSync(this.settingsPath, 'utf-8')) as Partial<Settings>
-      return { ...DEFAULT_SETTINGS, ...raw }
+      const raw = JSON.parse(readFileSync(this.settingsPath, 'utf-8')) as Record<string, unknown>
+      // 旧フォーマット（aiApiKey）からの移行
+      const legacy = typeof raw['aiApiKey'] === 'string' ? raw['aiApiKey'] : ''
+      return {
+        ...DEFAULT_SETTINGS,
+        ...raw,
+        claudeApiKey: typeof raw['claudeApiKey'] === 'string' ? raw['claudeApiKey']
+          : (raw['aiProvider'] === 'claude' ? legacy : ''),
+        geminiApiKey: typeof raw['geminiApiKey'] === 'string' ? raw['geminiApiKey']
+          : (raw['aiProvider'] === 'gemini' ? legacy : ''),
+      }
     } catch {
       return { ...DEFAULT_SETTINGS }
     }

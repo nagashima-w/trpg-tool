@@ -17,9 +17,10 @@ const paneConverted  = document.getElementById('pane-converted')  as HTMLDivElem
 const footer         = document.getElementById('footer')          as HTMLElement
 const saveBtn        = document.getElementById('save-btn')        as HTMLButtonElement
 const settingsModal     = document.getElementById('settings-modal')       as HTMLDivElement
-const aiProviderSel     = document.getElementById('ai-provider-select')   as HTMLSelectElement
-const aiApikeyInput     = document.getElementById('ai-apikey-input')      as HTMLInputElement
-const aiPdfExtractInput = document.getElementById('ai-pdf-extract-input') as HTMLInputElement
+const aiProviderSel      = document.getElementById('ai-provider-select')   as HTMLSelectElement
+const claudeApikeyInput  = document.getElementById('claude-apikey-input')  as HTMLInputElement
+const geminiApikeyInput  = document.getElementById('gemini-apikey-input')  as HTMLInputElement
+const aiPdfExtractInput  = document.getElementById('ai-pdf-extract-input') as HTMLInputElement
 const settingsSaveBtn   = document.getElementById('settings-save-btn')    as HTMLButtonElement
 const settingsCancelBtn = document.getElementById('settings-cancel-btn')  as HTMLButtonElement
 const aiReExtractBtn    = document.getElementById('ai-reextract-btn')     as HTMLButtonElement
@@ -224,7 +225,9 @@ async function reformatWithAI(): Promise<void> {
 }
 
 function updateAiButtonVisibility(settings: Awaited<ReturnType<typeof api.getSettings>>): void {
-  const aiEnabled = settings.aiProvider !== 'none' && settings.aiApiKey.trim() !== ''
+  const key = settings.aiProvider === 'claude' ? settings.claudeApiKey
+    : settings.aiProvider === 'gemini' ? settings.geminiApiKey : ''
+  const aiEnabled = settings.aiProvider !== 'none' && key.trim() !== ''
   aiReformatBtn.classList.toggle('hidden', !aiEnabled)
   aiReExtractBtn.classList.toggle('hidden', !(aiEnabled && currentIsPdf))
 }
@@ -251,16 +254,19 @@ async function reExtractWithAI(): Promise<void> {
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
 
 function updatePdfExtractToggle(): void {
-  const aiReady = aiProviderSel.value !== 'none' && aiApikeyInput.value.trim() !== ''
+  const key = aiProviderSel.value === 'claude' ? claudeApikeyInput.value
+    : aiProviderSel.value === 'gemini' ? geminiApikeyInput.value : ''
+  const aiReady = aiProviderSel.value !== 'none' && key.trim() !== ''
   aiPdfExtractInput.disabled = !aiReady
   if (!aiReady) aiPdfExtractInput.checked = false
 }
 
 async function openSettings(): Promise<void> {
   const settings = await getSettings()
-  aiProviderSel.value       = settings.aiProvider
-  aiApikeyInput.value       = settings.aiApiKey
-  aiPdfExtractInput.checked = settings.aiPdfExtract
+  aiProviderSel.value        = settings.aiProvider
+  claudeApikeyInput.value    = settings.claudeApiKey
+  geminiApikeyInput.value    = settings.geminiApiKey
+  aiPdfExtractInput.checked  = settings.aiPdfExtract
   updatePdfExtractToggle()
   settingsModal.classList.remove('hidden')
 }
@@ -320,13 +326,15 @@ settingsBtn.addEventListener('click', () => { void openSettings() })
 getSettings().then(updateAiButtonVisibility)
 
 aiProviderSel.addEventListener('change', updatePdfExtractToggle)
-aiApikeyInput.addEventListener('input', updatePdfExtractToggle)
+claudeApikeyInput.addEventListener('input', updatePdfExtractToggle)
+geminiApikeyInput.addEventListener('input', updatePdfExtractToggle)
 
 settingsSaveBtn.addEventListener('click', async () => {
   const settings = {
-    aiProvider:   aiProviderSel.value as 'none' | 'claude' | 'gemini',
-    aiApiKey:     aiApikeyInput.value,
-    aiPdfExtract: aiPdfExtractInput.checked,
+    aiProvider:    aiProviderSel.value as 'none' | 'claude' | 'gemini',
+    claudeApiKey:  claudeApikeyInput.value,
+    geminiApiKey:  geminiApikeyInput.value,
+    aiPdfExtract:  aiPdfExtractInput.checked,
   }
   await api.saveSettings(settings)
   cachedSettings = settings
