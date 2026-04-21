@@ -216,3 +216,56 @@ export async function extractPdfTextWithGemini(filePath: string, apiKey: string,
 export async function reformatWithGemini(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
   return geminiGenerate([{ text: REFORMAT_PROMPT + text }], apiKey, onProgress)
 }
+
+const BALANCE_PROMPT = `あなたはクトゥルフ神話TRPGのゲームマスター補佐AIです。
+以下は7版に変換されたTRPGシナリオの敵キャラクターのステータスブロックと、前後の戦闘コンテキストです。
+
+CoC7版のルールに基づき、各キャラクターの戦闘バランスを分析してください。
+特に以下の点を確認してください：
+- 能力値が7版の一般的な範囲（人間なら15〜90程度）に収まっているか
+- HP・MPが能力値と整合しているか
+- 戦闘スキル値が戦闘バランス上適切か
+- 周囲の文脈から読み取れる想定難易度との整合性
+
+調整が必要な値があれば、以下のJSON形式で提案してください。
+変更不要な場合は空配列 [] を返してください。
+
+\`\`\`json
+[
+  {
+    "blockIndex": 0,
+    "category": "ability",
+    "key": "STR",
+    "currentValue": 150,
+    "suggestedValue": 90,
+    "reason": "7版の能力値上限（90）を超えているため調整"
+  }
+]
+\`\`\`
+
+category は "ability"（STR/CON/DEX/APP/POW/SIZ/INT/EDU/MOV）、"derived"（HP/MP/SAN）、"skill"（技能名）のいずれかです。
+前置きや説明なしに、JSONのみを返してください。
+
+対象シナリオデータ:
+`
+
+export async function analyzeBalanceWithClaude(contextText: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+  const client = new Anthropic({ apiKey, maxRetries: 0 })
+  onProgress?.('戦闘バランスを分析中...')
+  const message = await callWithClaudeRetry(
+    () => client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4096,
+      messages: [{ role: 'user', content: BALANCE_PROMPT + contextText }],
+    }),
+    onProgress,
+  )
+  const block = message.content[0]
+  if (block.type !== 'text') throw new Error('予期しないレスポンス形式です')
+  return block.text
+}
+
+export async function analyzeBalanceWithGemini(contextText: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+  onProgress?.('戦闘バランスを分析中...')
+  return geminiGenerate([{ text: BALANCE_PROMPT + contextText }], apiKey, onProgress)
+}

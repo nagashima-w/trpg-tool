@@ -52,6 +52,16 @@ export interface NarrativeReplacement {
   to: string
 }
 
+/** AIによる戦闘バランス調整の提案 */
+export interface BalanceSuggestion {
+  blockIndex: number
+  category: 'ability' | 'skill' | 'derived'
+  key: string
+  currentValue: number
+  suggestedValue: number
+  reason: string
+}
+
 /** テキスト全体の変換結果 */
 export interface ConversionResult {
   originalText: string
