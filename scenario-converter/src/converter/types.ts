@@ -33,11 +33,23 @@ export interface StatBlock {
 /** 変換済みstatブロック */
 export interface ConvertedBlock {
   original: StatBlock
+  convertedStartIndex: number
+  convertedEndIndex: number
   abilities: AbilityStats
   derived: DerivedStats
   skills: SkillEntry[]
   convertedText: string
   notes: string[]
+}
+
+/** 地の文で置換された用語の位置情報 */
+export interface NarrativeReplacement {
+  originalStart: number
+  originalEnd: number
+  convertedStart: number
+  convertedEnd: number
+  from: string
+  to: string
 }
 
 /** テキスト全体の変換結果 */
@@ -46,4 +58,5 @@ export interface ConversionResult {
   convertedText: string
   blocks: ConvertedBlock[]
   warnings: string[]
+  narrativeReplacements: NarrativeReplacement[]
 }

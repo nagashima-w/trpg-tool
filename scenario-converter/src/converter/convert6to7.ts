@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  AbilityStats, DerivedStats, StatBlock, ConvertedBlock, ConversionResult
+  AbilityStats, DerivedStats, StatBlock, ConvertedBlock, ConversionResult, NarrativeReplacement
 } from './types'
 import { recalcDerived } from './rules'
 import { convertSkills } from './skills'
@@ -38,7 +38,7 @@ export function calcDerivedStats(abilities: AbilityStats): DerivedStats {
 /**
  * statブロック1件を変換する。
  */
-export function convertStatBlock(block: StatBlock): ConvertedBlock {
+export function convertStatBlock(block: StatBlock): Omit<ConvertedBlock, 'convertedStartIndex' | 'convertedEndIndex'> {
   const notes: string[] = []
 
   const convertedAbilities = convertAbilities(block.abilities)
@@ -72,36 +72,48 @@ export function convertText(text: string): ConversionResult {
   const blocks    = detectStatBlocks(text)
   const warnings: string[] = []
   const converted: ConvertedBlock[] = []
+  const narrativeReplacements: NarrativeReplacement[] = []
 
-  if (blocks.length === 0) {
-    return { originalText: text, convertedText: applyNarrativeReplacements(text), blocks: [], warnings }
-  }
-
-  // テキストを前から順番に組み立て
+  // セグメント（非ブロック区間）に地の文変換を適用し、位置を追跡しながら結果を組み立てる
   let result = ''
-  let cursor = 0
+  let origCursor = 0   // originalText 上の読み取り位置
+  let convCursor = 0   // convertedText 上の書き込み位置
+
+  const processNarrative = (origStart: number, origEnd: number) => {
+    const { output, replacements } = applyNarrativeReplacementsTracked(text.slice(origStart, origEnd))
+    for (const r of replacements) {
+      narrativeReplacements.push({
+        originalStart:  origStart + r.origStart,
+        originalEnd:    origStart + r.origEnd,
+        convertedStart: convCursor + r.convStart,
+        convertedEnd:   convCursor + r.convEnd,
+        from: r.from,
+        to:   r.to,
+      })
+    }
+    result += output
+    convCursor += output.length
+  }
 
   for (const block of blocks) {
-    // ブロック前の変更なしテキスト
-    result += text.slice(cursor, block.startIndex)
+    processNarrative(origCursor, block.startIndex)
 
     const cb = convertStatBlock(block)
-    converted.push(cb)
+    const convertedStartIndex = convCursor
     result += cb.convertedText
-    cursor = block.endIndex
+    convCursor += cb.convertedText.length
+    converted.push({ ...cb, convertedStartIndex, convertedEndIndex: convCursor })
+    origCursor = block.endIndex
   }
 
-  // 最後のブロック以降
-  result += text.slice(cursor)
-
-  // 地の文の用語を一括置換（ブロック外を含む全文対象）
-  result = applyNarrativeReplacements(result)
+  processNarrative(origCursor, text.length)
 
   return {
     originalText:  text,
     convertedText: result,
     blocks:        converted,
     warnings,
+    narrativeReplacements,
   }
 }
 
@@ -109,16 +121,45 @@ export function convertText(text: string): ConversionResult {
 // 内部ユーティリティ
 // ──────────────────────────────────────────────────────────────────────────────
 
-/** 6版固有の用語を7版表記に置換する（全文対象） */
+/** 6版固有の用語を7版表記に置換するマップ */
 const NARRATIVE_TERM_MAP: Record<string, string> = {
   'アイデア': 'INT',
 }
 
-function applyNarrativeReplacements(text: string): string {
+interface SegmentReplacement {
+  origStart: number; origEnd: number
+  convStart: number; convEnd: number
+  from: string; to: string
+}
+
+function applyNarrativeReplacementsTracked(segment: string): { output: string; replacements: SegmentReplacement[] } {
+  // 全マッチを収集してから位置順に処理
+  const matches: Array<{ from: string; to: string; start: number; end: number }> = []
   for (const [from, to] of Object.entries(NARRATIVE_TERM_MAP)) {
-    text = text.replace(new RegExp(escapeRe(from), 'g'), to)
+    const re = new RegExp(escapeRe(from), 'g')
+    let m
+    while ((m = re.exec(segment)) !== null) {
+      matches.push({ from, to, start: m.index, end: m.index + from.length })
+    }
   }
-  return text
+  matches.sort((a, b) => a.start - b.start)
+
+  const replacements: SegmentReplacement[] = []
+  let output = ''
+  let origPos = 0
+  let convPos = 0
+
+  for (const m of matches) {
+    output  += segment.slice(origPos, m.start)
+    convPos += m.start - origPos
+    replacements.push({ origStart: m.start, origEnd: m.end, convStart: convPos, convEnd: convPos + m.to.length, from: m.from, to: m.to })
+    output  += m.to
+    convPos += m.to.length
+    origPos  = m.end
+  }
+  output += segment.slice(origPos)
+
+  return { output, replacements }
 }
 
 /**

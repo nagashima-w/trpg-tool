@@ -111,6 +111,10 @@ html, body { width: 100%; height: 100%; overflow: hidden;
 .val-changed { color: var(--success); font-weight: 700; }
 /* リネームされた技能名 */
 .skill-renamed { color: #7289da; font-weight: 600; }
+/* 地の文変換（元テキスト） */
+.narrative-original { background: rgba(250,166,26,0.25); border-radius: 2px; }
+/* 地の文変換（変換後テキスト） */
+.narrative-replaced { color: #e8a020; font-weight: 600; }
 
 /* ── フッター ── */
 .footer {

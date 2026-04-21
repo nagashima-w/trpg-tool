@@ -230,6 +230,31 @@ describe('convertText', () => {
     expect(result.convertedText).not.toContain('アイデア')
   })
 
+  it('narrativeReplacementsに地の文の変換位置が記録される', () => {
+    const text = 'アイデアロールに成功した場合。'
+    const result = convertText(text)
+    expect(result.narrativeReplacements).toHaveLength(1)
+    const r = result.narrativeReplacements[0]
+    expect(r.from).toBe('アイデア')
+    expect(r.to).toBe('INT')
+    expect(result.originalText.slice(r.originalStart, r.originalEnd)).toBe('アイデア')
+    expect(result.convertedText.slice(r.convertedStart, r.convertedEnd)).toBe('INT')
+  })
+
+  it('statブロック前後の地の文変換でブロック位置がずれない', () => {
+    const text = [
+      'アイデアロール。',
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.convertedText).toContain('INTロール。')
+    expect(result.convertedText).toContain('STR 70')
+    expect(result.convertedText).not.toContain('アイデア')
+    const b = result.blocks[0]
+    expect(result.convertedText.slice(b.convertedStartIndex, b.convertedEndIndex)).toContain('STR 70')
+  })
+
   it('%なしの技能値でも変換される', () => {
     const text = [
       'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',

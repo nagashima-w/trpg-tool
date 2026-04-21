@@ -119,37 +119,65 @@ function renderDiff(result: ConversionResult): void {
   })
 }
 
-/** 元テキストのHTMLを生成（statブロック部分をオレンジハイライト） */
+/** 元テキストのHTMLを生成（statブロック・地の文変換をハイライト） */
 function buildOriginalHtml(result: ConversionResult): string {
-  const { originalText, blocks } = result
-  if (blocks.length === 0) return escHtml(originalText)
+  const { originalText, blocks, narrativeReplacements } = result
 
   let html = ''
   let cursor = 0
   for (const block of blocks) {
-    html += escHtml(originalText.slice(cursor, block.original.startIndex))
+    html += narrativeSegmentHtml(originalText, cursor, block.original.startIndex, narrativeReplacements, 'original')
     html += `<span class="block-original">${escHtml(block.original.originalText)}</span>`
     cursor = block.original.endIndex
   }
-  html += escHtml(originalText.slice(cursor))
+  html += narrativeSegmentHtml(originalText, cursor, originalText.length, narrativeReplacements, 'original')
   return html
 }
 
-/** 変換後テキストのHTMLを生成（変更値を緑・リネームを青でハイライト） */
+/** 変換後テキストのHTMLを生成（変更値を緑・リネームを青・地の文変換を黄でハイライト） */
 function buildConvertedHtml(result: ConversionResult): string {
-  const { originalText, convertedText, blocks } = result
-  if (blocks.length === 0) return escHtml(convertedText)
+  const { convertedText, blocks, narrativeReplacements } = result
 
   let html = ''
   let cursor = 0
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]
-    html += escHtml(convertedText.slice(cursor, block.original.startIndex))
+    html += narrativeSegmentHtml(convertedText, cursor, block.convertedStartIndex, narrativeReplacements, 'converted')
     const blockHtml = buildBlockHtml(block)
     html += `<span class="block-converted" data-block-idx="${i}" spellcheck="false">${blockHtml}</span>`
-    cursor = block.original.endIndex
+    cursor = block.convertedEndIndex
   }
-  html += escHtml(convertedText.slice(cursor))
+  html += narrativeSegmentHtml(convertedText, cursor, convertedText.length, narrativeReplacements, 'converted')
+  return html
+}
+
+/** 地の文セグメントのHTMLを生成（NarrativeReplacement 箇所にspan付与） */
+function narrativeSegmentHtml(
+  text: string,
+  segStart: number,
+  segEnd: number,
+  replacements: ConversionResult['narrativeReplacements'],
+  pane: 'original' | 'converted',
+): string {
+  const inSeg = replacements.filter(r =>
+    pane === 'original'
+      ? r.originalStart >= segStart && r.originalEnd <= segEnd
+      : r.convertedStart >= segStart && r.convertedEnd <= segEnd
+  )
+  if (inSeg.length === 0) return escHtml(text.slice(segStart, segEnd))
+
+  const spanClass = pane === 'original' ? 'narrative-original' : 'narrative-replaced'
+  let html = ''
+  let cursor = segStart
+  for (const r of inSeg) {
+    const start = pane === 'original' ? r.originalStart : r.convertedStart
+    const end   = pane === 'original' ? r.originalEnd   : r.convertedEnd
+    const term  = pane === 'original' ? r.from          : r.to
+    html += escHtml(text.slice(cursor, start))
+    html += `<span class="${spanClass}">${escHtml(term)}</span>`
+    cursor = end
+  }
+  html += escHtml(text.slice(cursor, segEnd))
   return html
 }
 
@@ -187,9 +215,9 @@ function syncEditedText(result: ConversionResult): void {
     .sort((a, b) => b.idx - a.idx)
   for (const { el, idx } of sorted) {
     const block = result.blocks[idx]
-    text = text.slice(0, block.original.startIndex) +
+    text = text.slice(0, block.convertedStartIndex) +
            (el.textContent ?? '') +
-           text.slice(block.original.endIndex)
+           text.slice(block.convertedEndIndex)
   }
   editedConvertedText = text
 }
