@@ -1,5 +1,6 @@
-import type { ConversionResult, ConvertedBlock } from '../../converter/types'
+import type { ConversionResult, ConvertedBlock, BalanceSuggestion } from '../../converter/types'
 import { escapeRe } from '../../converter/utils'
+import { buildCombatContextText, parseBalanceSuggestions } from '../../converter/balance'
 
 const api = window.converterAPI
 
@@ -26,6 +27,11 @@ const settingsSaveBtn   = document.getElementById('settings-save-btn')    as HTM
 const settingsCancelBtn = document.getElementById('settings-cancel-btn')  as HTMLButtonElement
 const aiReExtractBtn    = document.getElementById('ai-reextract-btn')     as HTMLButtonElement
 const aiReformatBtn     = document.getElementById('ai-reformat-btn')      as HTMLButtonElement
+const aiBalanceBtn      = document.getElementById('ai-balance-btn')        as HTMLButtonElement
+const balanceModal      = document.getElementById('balance-modal')         as HTMLDivElement
+const balanceSuggestionList = document.getElementById('balance-suggestion-list') as HTMLDivElement
+const balanceApplyAllBtn = document.getElementById('balance-apply-all-btn') as HTMLButtonElement
+const balanceCloseBtn   = document.getElementById('balance-close-btn')     as HTMLButtonElement
 const warningBanner     = document.getElementById('warning-banner')       as HTMLDivElement
 const warningText       = document.getElementById('warning-text')         as HTMLSpanElement
 const warningClose      = document.getElementById('warning-close')        as HTMLButtonElement
@@ -258,8 +264,10 @@ function updateAiButtonVisibility(settings: Awaited<ReturnType<typeof api.getSet
   const key = settings.aiProvider === 'claude' ? settings.claudeApiKey
     : settings.aiProvider === 'gemini' ? settings.geminiApiKey : ''
   const aiEnabled = settings.aiProvider !== 'none' && key.trim() !== ''
+  const hasBlocks = (currentResult?.blocks.length ?? 0) > 0
   aiReformatBtn.classList.toggle('hidden', !aiEnabled)
   aiReExtractBtn.classList.toggle('hidden', !(aiEnabled && currentIsPdf))
+  aiBalanceBtn.classList.toggle('hidden', !(aiEnabled && hasBlocks))
 }
 
 async function getSettings() {
@@ -279,6 +287,89 @@ async function reExtractWithAI(): Promise<void> {
   } finally {
     hideLoading()
   }
+}
+
+// ── 戦闘バランス分析 ─────────────────────────────────────────────────────────
+
+let pendingSuggestions: BalanceSuggestion[] = []
+
+function renderBalanceSuggestions(suggestions: BalanceSuggestion[]): void {
+  if (suggestions.length === 0) {
+    balanceSuggestionList.innerHTML = '<div class="balance-empty">バランス調整の提案はありませんでした。</div>'
+    balanceApplyAllBtn.disabled = true
+    return
+  }
+
+  balanceApplyAllBtn.disabled = false
+  balanceSuggestionList.innerHTML = suggestions.map((s, i) => {
+    const catLabel = s.category === 'ability' ? '能力値' : s.category === 'derived' ? '派生値' : '技能'
+    return `
+      <label class="balance-suggestion" id="suggestion-row-${i}">
+        <input type="checkbox" class="suggestion-check" data-idx="${i}" checked />
+        <div class="balance-suggestion-body">
+          <div class="balance-block-label">敵キャラクター #${s.blockIndex + 1} / ${catLabel}</div>
+          <div class="balance-suggestion-value">
+            <strong>${escHtml(s.key)}</strong>：
+            <span class="balance-val-from">${s.currentValue}</span>
+            <span class="balance-val-arrow">→</span>
+            <span class="balance-val-to">${s.suggestedValue}</span>
+          </div>
+          <div class="balance-suggestion-reason">${escHtml(s.reason)}</div>
+        </div>
+      </label>`
+  }).join('')
+
+  balanceSuggestionList.querySelectorAll<HTMLInputElement>('.suggestion-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const row = document.getElementById(`suggestion-row-${cb.dataset['idx']}`)
+      row?.classList.toggle('checked', cb.checked)
+    })
+    cb.dispatchEvent(new Event('change'))
+  })
+}
+
+async function analyzeBalance(): Promise<void> {
+  if (!currentResult) return
+  showLoading('戦闘バランスを分析中...')
+  try {
+    const contextText = buildCombatContextText(currentResult)
+    const response = await api.balanceCheckWithAI(contextText)
+    pendingSuggestions = parseBalanceSuggestions(response, currentResult.blocks.length)
+    renderBalanceSuggestions(pendingSuggestions)
+    balanceModal.classList.remove('hidden')
+  } catch (err) {
+    alert(`バランス分析に失敗しました:\n${err}`)
+  } finally {
+    hideLoading()
+  }
+}
+
+function applySelectedSuggestions(): void {
+  if (!currentResult) return
+  syncEditedText(currentResult)
+
+  const checked = balanceSuggestionList.querySelectorAll<HTMLInputElement>('.suggestion-check:checked')
+  const indices = Array.from(checked).map(cb => parseInt(cb.dataset['idx']!, 10))
+  const toApply = indices.map(i => pendingSuggestions[i]).filter(Boolean)
+
+  for (const s of toApply) {
+    const block = currentResult.blocks[s.blockIndex]
+    const newBlockText = replaceStatValue(block.convertedText, s.key, s.currentValue, s.suggestedValue)
+    block.convertedText = newBlockText
+    editedConvertedText = replaceStatValue(editedConvertedText, s.key, s.currentValue, s.suggestedValue)
+  }
+
+  if (toApply.length > 0) renderDiff(currentResult)
+  balanceModal.classList.add('hidden')
+}
+
+function replaceStatValue(text: string, key: string, from: number, to: number): string {
+  const escaped = escapeRe(key)
+  // 能力値・派生値: "KEY sep number"  技能: "KEY sep number%"
+  const re = new RegExp(`(${escaped}\\s*[：:／|｜│]?\\s*)${from}(%)`, 'g')
+  const withPercent = text.replace(re, `$1${to}$2`)
+  const reNoPercent = new RegExp(`(${escaped}\\s*[：:／|｜│]?\\s*)${from}(?!%)(?=\\D|$)`, 'g')
+  return withPercent.replace(reNoPercent, `$1${to}`)
 }
 
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
@@ -373,6 +464,12 @@ settingsSaveBtn.addEventListener('click', async () => {
 })
 aiReExtractBtn.addEventListener('click', () => { void reExtractWithAI() })
 aiReformatBtn.addEventListener('click', () => { void reformatWithAI() })
+aiBalanceBtn.addEventListener('click', () => { void analyzeBalance() })
+balanceApplyAllBtn.addEventListener('click', applySelectedSuggestions)
+balanceCloseBtn.addEventListener('click', () => balanceModal.classList.add('hidden'))
+balanceModal.addEventListener('click', e => {
+  if (e.target === balanceModal) balanceModal.classList.add('hidden')
+})
 settingsCancelBtn.addEventListener('click', () => settingsModal.classList.add('hidden'))
 settingsModal.addEventListener('click', e => {
   if (e.target === settingsModal) settingsModal.classList.add('hidden')

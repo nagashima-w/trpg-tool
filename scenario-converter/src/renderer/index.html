@@ -29,6 +29,7 @@
       <span>用語変換: <span id="status-narrative" class="count">0</span> 件</span>
       <button id="ai-reextract-btn" class="btn btn-ai hidden">AI再抽出</button>
       <button id="ai-reformat-btn" class="btn btn-ai hidden">AI整形</button>
+      <button id="ai-balance-btn" class="btn btn-ai hidden">AI戦闘バランス分析</button>
     </div>
 
     <!-- 警告バナー -->
@@ -85,6 +86,18 @@
       <div class="modal-footer">
         <button id="settings-save-btn" class="btn btn-primary">保存</button>
         <button id="settings-cancel-btn" class="btn btn-secondary">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- バランス分析モーダル -->
+  <div id="balance-modal" class="modal-overlay hidden">
+    <div class="modal balance-modal">
+      <h3>AI戦闘バランス分析結果</h3>
+      <div id="balance-suggestion-list" class="balance-list"></div>
+      <div class="modal-footer">
+        <button id="balance-apply-all-btn" class="btn btn-success">選択した提案を適用</button>
+        <button id="balance-close-btn" class="btn btn-secondary">閉じる</button>
       </div>
     </div>
   </div>

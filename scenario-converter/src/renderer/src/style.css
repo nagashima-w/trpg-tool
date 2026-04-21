@@ -169,6 +169,28 @@ html, body { width: 100%; height: 100%; overflow: hidden;
 .toggle-label:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
 .form-hint { font-size: 10px; color: var(--text2); }
 
+/* ── バランス分析モーダル ── */
+.balance-modal { width: 560px; max-height: 80vh; display: flex; flex-direction: column; }
+.balance-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.balance-suggestion {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: start; gap: 8px;
+  padding: 10px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 4px;
+}
+.balance-suggestion.checked { border-color: var(--accent); background: rgba(88,101,242,0.1); }
+.balance-suggestion input[type="checkbox"] { margin-top: 2px; width: 14px; height: 14px; cursor: pointer; }
+.balance-suggestion-body { display: flex; flex-direction: column; gap: 4px; }
+.balance-suggestion-value {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 12px;
+}
+.balance-val-from { color: var(--danger); text-decoration: line-through; }
+.balance-val-arrow { color: var(--text2); margin: 0 4px; }
+.balance-val-to { color: var(--success); font-weight: 700; }
+.balance-suggestion-reason { font-size: 11px; color: var(--text2); }
+.balance-block-label { font-size: 10px; color: var(--text2); }
+.balance-empty { padding: 16px; text-align: center; color: var(--text2); font-size: 12px; }
+
 /* ── ローディングオーバーレイ ── */
 .loading-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);

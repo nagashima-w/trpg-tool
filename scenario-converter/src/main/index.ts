@@ -3,7 +3,7 @@ import { join } from 'path'
 import { writeFileSync } from 'fs'
 import { SettingsManager } from './settings'
 import { readTextFile, extractTextFromPdf } from './pdf'
-import { extractPdfTextWithClaude, extractPdfTextWithGemini, reformatWithClaude, reformatWithGemini } from './ai'
+import { extractPdfTextWithClaude, extractPdfTextWithGemini, reformatWithClaude, reformatWithGemini, analyzeBalanceWithClaude, analyzeBalanceWithGemini } from './ai'
 import { convertText } from '../converter/convert6to7'
 import type { ConversionResult } from '../converter/types'
 import type { Settings } from './settings'
@@ -139,6 +139,20 @@ function setupIpcHandlers(): void {
     if (settings.aiProvider === 'gemini') {
       if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
       return reformatWithGemini(text, settings.geminiApiKey, sendProgress)
+    }
+    throw new Error('AIプロバイダーが設定されていません')
+  })
+
+  // ── AI戦闘バランス分析 ──────────────────────────────────────────────────
+  ipcMain.handle('balance-check-with-ai', async (_event, contextText: string): Promise<string> => {
+    const settings = settingsManager.get()
+    if (settings.aiProvider === 'claude') {
+      if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
+      return analyzeBalanceWithClaude(contextText, settings.claudeApiKey, sendProgress)
+    }
+    if (settings.aiProvider === 'gemini') {
+      if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
+      return analyzeBalanceWithGemini(contextText, settings.geminiApiKey, sendProgress)
     }
     throw new Error('AIプロバイダーが設定されていません')
   })
