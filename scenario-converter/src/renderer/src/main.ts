@@ -9,8 +9,9 @@ const settingsBtn    = document.getElementById('settings-btn')    as HTMLButtonE
 const dropZone       = document.getElementById('drop-zone')       as HTMLDivElement
 const statusbar      = document.getElementById('statusbar')       as HTMLDivElement
 const statusFile     = document.getElementById('status-file')     as HTMLSpanElement
-const statusBlocks   = document.getElementById('status-blocks')   as HTMLSpanElement
-const statusRenames  = document.getElementById('status-renames')  as HTMLSpanElement
+const statusBlocks    = document.getElementById('status-blocks')    as HTMLSpanElement
+const statusRenames   = document.getElementById('status-renames')   as HTMLSpanElement
+const statusNarrative = document.getElementById('status-narrative') as HTMLSpanElement
 const diffArea       = document.getElementById('diff-area')       as HTMLDivElement
 const paneOriginal   = document.getElementById('pane-original')   as HTMLDivElement
 const paneConverted  = document.getElementById('pane-converted')  as HTMLDivElement
@@ -86,9 +87,10 @@ async function processText(text: string, label: string): Promise<void> {
     const totalRenames = result.blocks.reduce(
       (acc, b) => acc + b.skills.filter(s => s.renamed).length, 0
     )
-    statusFile.textContent = label
-    statusBlocks.textContent  = String(result.blocks.length)
-    statusRenames.textContent = String(totalRenames)
+    statusFile.textContent      = label
+    statusBlocks.textContent    = String(result.blocks.length)
+    statusRenames.textContent   = String(totalRenames)
+    statusNarrative.textContent = String(result.narrativeReplacements.length)
 
     renderDiff(result)
     showDiffView()
