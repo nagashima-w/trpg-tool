@@ -18,7 +18,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.55.0",
-    "pdf-parse": "^1.1.1"
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^3.11.174"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^2.0.0",

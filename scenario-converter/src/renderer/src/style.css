@@ -41,32 +41,31 @@ html, body { width: 100%; height: 100%; overflow: hidden;
 .btn-secondary:hover { background: var(--border); }
 .btn-success { background: var(--success); color: #fff; }
 .btn-success:hover { filter: brightness(1.1); }
+.btn-ai { background: #7c3aed; color: #fff; }
+.btn-ai:hover { background: #6d28d9; }
+.btn-ai:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── ドロップゾーン ── */
 .drop-zone {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px;
-  border: 2px dashed var(--border); margin: 16px;
+  flex: 0 0 auto; height: 72px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  border: 2px dashed var(--border); margin: 6px 12px;
   border-radius: 8px; color: var(--text2);
 }
-.drop-zone.compact {
-  flex: 0 0 15vh; min-height: 56px;
-  margin: 6px 12px; gap: 4px;
-}
-.drop-zone.compact p { font-size: 13px; }
-.drop-zone.compact small { font-size: 11px; }
 .drop-zone.drag-over { border-color: var(--accent); color: var(--accent); }
-.drop-zone p { font-size: 15px; }
-.drop-zone small { font-size: 12px; }
+.drop-zone p { font-size: 13px; }
+.drop-zone small { font-size: 11px; }
 
 /* ── ステータスバー ── */
 .statusbar {
   padding: 4px 12px; background: var(--bg2);
   border-bottom: 1px solid var(--border);
   font-size: 11px; color: var(--text2);
-  flex-shrink: 0; display: flex; gap: 16px;
+  flex-shrink: 0; display: flex; gap: 16px; align-items: center;
 }
+.statusbar .btn-ai { margin-left: auto; }
 .statusbar span.count { color: var(--success); font-weight: 600; }
 
 /* ── 差分エリア ── */
@@ -112,6 +111,10 @@ html, body { width: 100%; height: 100%; overflow: hidden;
 .val-changed { color: var(--success); font-weight: 700; }
 /* リネームされた技能名 */
 .skill-renamed { color: #7289da; font-weight: 600; }
+/* 地の文変換（元テキスト） */
+.narrative-original { background: rgba(250,166,26,0.25); border-radius: 2px; }
+/* 地の文変換（変換後テキスト） */
+.narrative-replaced { color: #e8a020; font-weight: 600; }
 
 /* ── フッター ── */
 .footer {
@@ -140,6 +143,53 @@ html, body { width: 100%; height: 100%; overflow: hidden;
   border-radius: 4px; color: var(--text); font-size: 12px;
 }
 .modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── 警告バナー ── */
+.warning-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; background: rgba(250,166,26,0.15);
+  border-bottom: 1px solid var(--warn);
+  font-size: 11px; color: var(--warn); flex-shrink: 0;
+}
+.warning-banner.hidden { display: none; }
+.warning-banner span { flex: 1; }
+.warning-close {
+  background: none; border: none; color: var(--warn);
+  cursor: pointer; font-size: 12px; padding: 0 4px; opacity: 0.7;
+}
+.warning-close:hover { opacity: 1; }
+
+/* ── 設定モーダル補足 ── */
+.toggle-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text); cursor: pointer;
+}
+.toggle-label input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+.toggle-label input[type="checkbox"]:disabled { cursor: not-allowed; opacity: 0.4; }
+.toggle-label:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+.form-hint { font-size: 10px; color: var(--text2); }
+
+/* ── ローディングオーバーレイ ── */
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.loading-overlay.hidden { display: none; }
+.loading-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px 40px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.loading-box p { font-size: 13px; color: var(--text2); }
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* スクロールバー */
 ::-webkit-scrollbar { width: 6px; height: 6px; }

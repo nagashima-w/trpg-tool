@@ -9,51 +9,95 @@ const settingsBtn    = document.getElementById('settings-btn')    as HTMLButtonE
 const dropZone       = document.getElementById('drop-zone')       as HTMLDivElement
 const statusbar      = document.getElementById('statusbar')       as HTMLDivElement
 const statusFile     = document.getElementById('status-file')     as HTMLSpanElement
-const statusBlocks   = document.getElementById('status-blocks')   as HTMLSpanElement
-const statusRenames  = document.getElementById('status-renames')  as HTMLSpanElement
+const statusBlocks    = document.getElementById('status-blocks')    as HTMLSpanElement
+const statusRenames   = document.getElementById('status-renames')   as HTMLSpanElement
+const statusNarrative = document.getElementById('status-narrative') as HTMLSpanElement
 const diffArea       = document.getElementById('diff-area')       as HTMLDivElement
 const paneOriginal   = document.getElementById('pane-original')   as HTMLDivElement
 const paneConverted  = document.getElementById('pane-converted')  as HTMLDivElement
 const footer         = document.getElementById('footer')          as HTMLElement
 const saveBtn        = document.getElementById('save-btn')        as HTMLButtonElement
-const settingsModal  = document.getElementById('settings-modal')  as HTMLDivElement
-const aiProviderSel  = document.getElementById('ai-provider-select') as HTMLSelectElement
-const aiApikeyInput  = document.getElementById('ai-apikey-input') as HTMLInputElement
-const settingsSaveBtn   = document.getElementById('settings-save-btn')   as HTMLButtonElement
-const settingsCancelBtn = document.getElementById('settings-cancel-btn') as HTMLButtonElement
+const settingsModal     = document.getElementById('settings-modal')       as HTMLDivElement
+const aiProviderSel      = document.getElementById('ai-provider-select')   as HTMLSelectElement
+const claudeApikeyInput  = document.getElementById('claude-apikey-input')  as HTMLInputElement
+const geminiApikeyInput  = document.getElementById('gemini-apikey-input')  as HTMLInputElement
+const aiPdfExtractInput  = document.getElementById('ai-pdf-extract-input') as HTMLInputElement
+const settingsSaveBtn   = document.getElementById('settings-save-btn')    as HTMLButtonElement
+const settingsCancelBtn = document.getElementById('settings-cancel-btn')  as HTMLButtonElement
+const aiReExtractBtn    = document.getElementById('ai-reextract-btn')     as HTMLButtonElement
+const aiReformatBtn     = document.getElementById('ai-reformat-btn')      as HTMLButtonElement
+const warningBanner     = document.getElementById('warning-banner')       as HTMLDivElement
+const warningText       = document.getElementById('warning-text')         as HTMLSpanElement
+const warningClose      = document.getElementById('warning-close')        as HTMLButtonElement
+const loadingOverlay    = document.getElementById('loading-overlay')      as HTMLDivElement
+const loadingMsg        = document.getElementById('loading-msg')          as HTMLParagraphElement
 
 // ── 状態 ────────────────────────────────────────────────────────────────────
 let currentResult: ConversionResult | null = null
-/** ユーザーが手動編集した変換後テキスト */
 let editedConvertedText = ''
+let currentLabel = ''
+let currentFilePath = ''
+let currentIsPdf = false
+let cachedSettings: Awaited<ReturnType<typeof api.getSettings>> | null = null
+
+// ── ローディング制御 ─────────────────────────────────────────────────────────
+
+api.onLoadingProgress(msg => { loadingMsg.textContent = msg })
+
+function showLoading(msg: string): void {
+  loadingMsg.textContent = msg
+  loadingOverlay.classList.remove('hidden')
+}
+
+function hideLoading(): void {
+  loadingOverlay.classList.add('hidden')
+}
 
 // ── ファイル読み込み ─────────────────────────────────────────────────────────
 
+function applyWarning(warning: string | undefined): void {
+  warningBanner.classList.toggle('hidden', !warning)
+  warningText.textContent = warning ?? ''
+}
+
 async function loadFile(): Promise<void> {
+  showLoading('ファイルを読み込み中...')
   try {
     const file = await api.openFile()
     if (!file) return
+    applyWarning(file.warning)
+    currentFilePath = file.filePath
+    currentIsPdf = file.filePath.toLowerCase().endsWith('.pdf')
     await processText(file.text, file.filePath)
   } catch (err) {
     alert(`ファイルの読み込みに失敗しました:\n${err}`)
+  } finally {
+    hideLoading()
   }
 }
 
 async function processText(text: string, label: string): Promise<void> {
-  const result = await api.convert(text)
-  currentResult = result
-  editedConvertedText = result.convertedText
+  currentLabel = label
+  showLoading('変換処理中...')
+  try {
+    const result = await api.convert(text)
+    currentResult = result
+    editedConvertedText = result.convertedText
 
-  // ステータス更新
-  const totalRenames = result.blocks.reduce(
-    (acc, b) => acc + b.skills.filter(s => s.renamed).length, 0
-  )
-  statusFile.textContent = label
-  statusBlocks.textContent  = String(result.blocks.length)
-  statusRenames.textContent = String(totalRenames)
+    const totalRenames = result.blocks.reduce(
+      (acc, b) => acc + b.skills.filter(s => s.renamed).length, 0
+    )
+    statusFile.textContent      = label
+    statusBlocks.textContent    = String(result.blocks.length)
+    statusRenames.textContent   = String(totalRenames)
+    statusNarrative.textContent = String(result.narrativeReplacements.length)
 
-  renderDiff(result)
-  showDiffView()
+    renderDiff(result)
+    showDiffView()
+    updateAiButtonVisibility(await getSettings())
+  } finally {
+    hideLoading()
+  }
 }
 
 // ── 差分レンダリング ─────────────────────────────────────────────────────────
@@ -77,37 +121,65 @@ function renderDiff(result: ConversionResult): void {
   })
 }
 
-/** 元テキストのHTMLを生成（statブロック部分をオレンジハイライト） */
+/** 元テキストのHTMLを生成（statブロック・地の文変換をハイライト） */
 function buildOriginalHtml(result: ConversionResult): string {
-  const { originalText, blocks } = result
-  if (blocks.length === 0) return escHtml(originalText)
+  const { originalText, blocks, narrativeReplacements } = result
 
   let html = ''
   let cursor = 0
   for (const block of blocks) {
-    html += escHtml(originalText.slice(cursor, block.original.startIndex))
+    html += narrativeSegmentHtml(originalText, cursor, block.original.startIndex, narrativeReplacements, 'original')
     html += `<span class="block-original">${escHtml(block.original.originalText)}</span>`
     cursor = block.original.endIndex
   }
-  html += escHtml(originalText.slice(cursor))
+  html += narrativeSegmentHtml(originalText, cursor, originalText.length, narrativeReplacements, 'original')
   return html
 }
 
-/** 変換後テキストのHTMLを生成（変更値を緑・リネームを青でハイライト） */
+/** 変換後テキストのHTMLを生成（変更値を緑・リネームを青・地の文変換を黄でハイライト） */
 function buildConvertedHtml(result: ConversionResult): string {
-  const { originalText, convertedText, blocks } = result
-  if (blocks.length === 0) return escHtml(convertedText)
+  const { convertedText, blocks, narrativeReplacements } = result
 
   let html = ''
   let cursor = 0
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]
-    html += escHtml(convertedText.slice(cursor, block.original.startIndex))
+    html += narrativeSegmentHtml(convertedText, cursor, block.convertedStartIndex, narrativeReplacements, 'converted')
     const blockHtml = buildBlockHtml(block)
     html += `<span class="block-converted" data-block-idx="${i}" spellcheck="false">${blockHtml}</span>`
-    cursor = block.original.endIndex
+    cursor = block.convertedEndIndex
   }
-  html += escHtml(convertedText.slice(cursor))
+  html += narrativeSegmentHtml(convertedText, cursor, convertedText.length, narrativeReplacements, 'converted')
+  return html
+}
+
+/** 地の文セグメントのHTMLを生成（NarrativeReplacement 箇所にspan付与） */
+function narrativeSegmentHtml(
+  text: string,
+  segStart: number,
+  segEnd: number,
+  replacements: ConversionResult['narrativeReplacements'],
+  pane: 'original' | 'converted',
+): string {
+  const inSeg = replacements.filter(r =>
+    pane === 'original'
+      ? r.originalStart >= segStart && r.originalEnd <= segEnd
+      : r.convertedStart >= segStart && r.convertedEnd <= segEnd
+  )
+  if (inSeg.length === 0) return escHtml(text.slice(segStart, segEnd))
+
+  const spanClass = pane === 'original' ? 'narrative-original' : 'narrative-replaced'
+  let html = ''
+  let cursor = segStart
+  for (const r of inSeg) {
+    const start = pane === 'original' ? r.originalStart : r.convertedStart
+    const end   = pane === 'original' ? r.originalEnd   : r.convertedEnd
+    const term  = pane === 'original' ? r.from          : r.to
+    html += escHtml(text.slice(cursor, start))
+    html += `<span class="${spanClass}">${escHtml(term)}</span>`
+    cursor = end
+  }
+  html += escHtml(text.slice(cursor, segEnd))
   return html
 }
 
@@ -145,9 +217,9 @@ function syncEditedText(result: ConversionResult): void {
     .sort((a, b) => b.idx - a.idx)
   for (const { el, idx } of sorted) {
     const block = result.blocks[idx]
-    text = text.slice(0, block.original.startIndex) +
+    text = text.slice(0, block.convertedStartIndex) +
            (el.textContent ?? '') +
-           text.slice(block.original.endIndex)
+           text.slice(block.convertedEndIndex)
   }
   editedConvertedText = text
 }
@@ -155,17 +227,9 @@ function syncEditedText(result: ConversionResult): void {
 // ── UI 表示切り替え ─────────────────────────────────────────────────────────
 
 function showDiffView(): void {
-  dropZone.classList.add('compact')
   statusbar.classList.remove('hidden')
   diffArea.classList.remove('hidden')
   footer.classList.remove('hidden')
-}
-
-function showDropZone(): void {
-  dropZone.classList.remove('compact')
-  statusbar.classList.add('hidden')
-  diffArea.classList.add('hidden')
-  footer.classList.add('hidden')
 }
 
 // ── 保存 ────────────────────────────────────────────────────────────────────
@@ -175,12 +239,65 @@ async function saveFile(): Promise<void> {
   await api.saveFile(editedConvertedText)
 }
 
+// ── AI整形 ────────────────────────────────────────────────────────────────────
+
+async function reformatWithAI(): Promise<void> {
+  if (!currentResult) return
+  showLoading('AIで整形中...')
+  try {
+    const reformatted = await api.reformatWithAI(currentResult.originalText)
+    await processText(reformatted, currentLabel + ' (AI整形済み)')
+  } catch (err) {
+    alert(`AI整形に失敗しました:\n${err}`)
+  } finally {
+    hideLoading()
+  }
+}
+
+function updateAiButtonVisibility(settings: Awaited<ReturnType<typeof api.getSettings>>): void {
+  const key = settings.aiProvider === 'claude' ? settings.claudeApiKey
+    : settings.aiProvider === 'gemini' ? settings.geminiApiKey : ''
+  const aiEnabled = settings.aiProvider !== 'none' && key.trim() !== ''
+  aiReformatBtn.classList.toggle('hidden', !aiEnabled)
+  aiReExtractBtn.classList.toggle('hidden', !(aiEnabled && currentIsPdf))
+}
+
+async function getSettings() {
+  if (!cachedSettings) cachedSettings = await api.getSettings()
+  return cachedSettings
+}
+
+async function reExtractWithAI(): Promise<void> {
+  if (!currentFilePath) return
+  showLoading('AIでPDFを再抽出中...')
+  try {
+    const result = await api.extractPdfWithAI(currentFilePath)
+    applyWarning(undefined)
+    await processText(result.text, result.filePath)
+  } catch (err) {
+    alert(`AI再抽出に失敗しました:\n${err}`)
+  } finally {
+    hideLoading()
+  }
+}
+
 // ── 設定モーダル ─────────────────────────────────────────────────────────────
 
+function updatePdfExtractToggle(): void {
+  const key = aiProviderSel.value === 'claude' ? claudeApikeyInput.value
+    : aiProviderSel.value === 'gemini' ? geminiApikeyInput.value : ''
+  const aiReady = aiProviderSel.value !== 'none' && key.trim() !== ''
+  aiPdfExtractInput.disabled = !aiReady
+  if (!aiReady) aiPdfExtractInput.checked = false
+}
+
 async function openSettings(): Promise<void> {
-  const settings = await api.getSettings()
-  aiProviderSel.value  = settings.aiProvider
-  aiApikeyInput.value  = settings.aiApiKey
+  const settings = await getSettings()
+  aiProviderSel.value        = settings.aiProvider
+  claudeApikeyInput.value    = settings.claudeApiKey
+  geminiApikeyInput.value    = settings.geminiApiKey
+  aiPdfExtractInput.checked  = settings.aiPdfExtract
+  updatePdfExtractToggle()
   settingsModal.classList.remove('hidden')
 }
 
@@ -204,7 +321,20 @@ dropZone.addEventListener('drop', async e => {
     return
   }
   if (ext === 'pdf') {
-    alert('PDFはドロップ非対応です。「ファイルを開く」ボタンからご利用ください。')
+    const filePath = api.getPathForFile(file)
+    showLoading('PDFを読み込み中...')
+    try {
+      const result = await api.openFileByPath(filePath)
+      if (!result) return
+      applyWarning(result.warning)
+      currentFilePath = filePath
+      currentIsPdf = true
+      await processText(result.text, result.filePath)
+    } catch (err) {
+      alert(`ファイルの読み込みに失敗しました:\n${err}`)
+    } finally {
+      hideLoading()
+    }
     return
   }
   const reader = new FileReader()
@@ -212,22 +342,37 @@ dropZone.addEventListener('drop', async e => {
     if (typeof reader.result !== 'string') return
     await processText(reader.result, file.name)
   }
+  reader.onerror = () => alert('ファイルの読み込みに失敗しました。')
   reader.readAsText(file, 'utf-8')
 })
 
 // ── イベントリスナー ─────────────────────────────────────────────────────────
 
+warningClose.addEventListener('click', () => applyWarning(undefined))
 openBtn.addEventListener('click', () => { void loadFile() })
 saveBtn.addEventListener('click', () => { void saveFile() })
 settingsBtn.addEventListener('click', () => { void openSettings() })
 
+getSettings().then(updateAiButtonVisibility)
+
+aiProviderSel.addEventListener('change', updatePdfExtractToggle)
+claudeApikeyInput.addEventListener('input', updatePdfExtractToggle)
+geminiApikeyInput.addEventListener('input', updatePdfExtractToggle)
+
 settingsSaveBtn.addEventListener('click', async () => {
-  await api.saveSettings({
-    aiProvider: aiProviderSel.value as 'none' | 'claude' | 'gemini',
-    aiApiKey:   aiApikeyInput.value,
-  })
+  const settings = {
+    aiProvider:    aiProviderSel.value as 'none' | 'claude' | 'gemini',
+    claudeApiKey:  claudeApikeyInput.value,
+    geminiApiKey:  geminiApikeyInput.value,
+    aiPdfExtract:  aiPdfExtractInput.checked,
+  }
+  await api.saveSettings(settings)
+  cachedSettings = settings
   settingsModal.classList.add('hidden')
+  updateAiButtonVisibility(settings)
 })
+aiReExtractBtn.addEventListener('click', () => { void reExtractWithAI() })
+aiReformatBtn.addEventListener('click', () => { void reformatWithAI() })
 settingsCancelBtn.addEventListener('click', () => settingsModal.classList.add('hidden'))
 settingsModal.addEventListener('click', e => {
   if (e.target === settingsModal) settingsModal.classList.add('hidden')
