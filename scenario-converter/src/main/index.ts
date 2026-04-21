@@ -3,6 +3,7 @@ import { join } from 'path'
 import { writeFileSync } from 'fs'
 import { SettingsManager } from './settings'
 import { readTextFile, extractTextFromPdf } from './pdf'
+import { extractPdfTextWithClaude, extractPdfTextWithGemini, reformatWithClaude, reformatWithGemini } from './ai'
 import { convertText } from '../converter/convert6to7'
 import type { ConversionResult } from '../converter/types'
 import type { Settings } from './settings'
@@ -33,6 +34,31 @@ function createWindow(): void {
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
+function sendProgress(msg: string): void {
+  mainWindow?.webContents.send('loading-progress', msg)
+}
+
+async function loadPdf(filePath: string): Promise<{ text: string; warning?: string }> {
+  const settings = settingsManager.get()
+  const apiKey = settings.aiProvider === 'claude' ? settings.claudeApiKey
+    : settings.aiProvider === 'gemini' ? settings.geminiApiKey : ''
+  if (apiKey && settings.aiPdfExtract) {
+    try {
+      if (settings.aiProvider === 'claude') {
+        return { text: await extractPdfTextWithClaude(filePath, apiKey, sendProgress) }
+      }
+      if (settings.aiProvider === 'gemini') {
+        return { text: await extractPdfTextWithGemini(filePath, apiKey, sendProgress) }
+      }
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err)
+      const text = await extractTextFromPdf(filePath, sendProgress)
+      return { text, warning: `AIによるPDF抽出に失敗しました（${reason}）。通常のテキスト抽出を使用しています（フォントによっては文字化けが生じる場合があります）。` }
+    }
+  }
+  return { text: await extractTextFromPdf(filePath, sendProgress) }
+}
+
 function setupIpcHandlers(): void {
   // ── ファイルを開く ──────────────────────────────────────────────────
   ipcMain.handle('open-file', async (): Promise<{ text: string; filePath: string } | null> => {
@@ -49,10 +75,24 @@ function setupIpcHandlers(): void {
 
     const filePath = result.filePaths[0]
     try {
-      const text = filePath.toLowerCase().endsWith('.pdf')
-        ? await extractTextFromPdf(filePath)
-        : readTextFile(filePath)
-      return { text, filePath }
+      if (filePath.toLowerCase().endsWith('.pdf')) {
+        const { text, warning } = await loadPdf(filePath)
+        return { text, filePath, warning }
+      }
+      return { text: readTextFile(filePath), filePath }
+    } catch (err) {
+      throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
+    }
+  })
+
+  // ── パスを指定してファイルを開く（ドロップ用） ───────────────────────────────
+  ipcMain.handle('open-file-by-path', async (_event, filePath: string): Promise<{ text: string; filePath: string; warning?: string } | null> => {
+    try {
+      if (filePath.toLowerCase().endsWith('.pdf')) {
+        const { text, warning } = await loadPdf(filePath)
+        return { text, filePath, warning }
+      }
+      return { text: readTextFile(filePath), filePath }
     } catch (err) {
       throw new Error(`ファイルの読み込みに失敗しました: ${err}`)
     }
@@ -73,6 +113,34 @@ function setupIpcHandlers(): void {
     if (result.canceled || !result.filePath) return false
     writeFileSync(result.filePath, text, 'utf-8')
     return true
+  })
+
+  // ── AI再抽出（ボタンから明示的に呼び出し） ──────────────────────────────────
+  ipcMain.handle('extract-pdf-with-ai', async (_event, filePath: string): Promise<{ text: string; filePath: string }> => {
+    const settings = settingsManager.get()
+    if (settings.aiProvider === 'claude') {
+      if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
+      return { text: await extractPdfTextWithClaude(filePath, settings.claudeApiKey, sendProgress), filePath }
+    }
+    if (settings.aiProvider === 'gemini') {
+      if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
+      return { text: await extractPdfTextWithGemini(filePath, settings.geminiApiKey, sendProgress), filePath }
+    }
+    throw new Error('AIプロバイダーが設定されていません')
+  })
+
+  // ── AI整形 ──────────────────────────────────────────────────────────
+  ipcMain.handle('reformat-with-ai', async (_event, text: string): Promise<string> => {
+    const settings = settingsManager.get()
+    if (settings.aiProvider === 'claude') {
+      if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
+      return reformatWithClaude(text, settings.claudeApiKey, sendProgress)
+    }
+    if (settings.aiProvider === 'gemini') {
+      if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
+      return reformatWithGemini(text, settings.geminiApiKey, sendProgress)
+    }
+    throw new Error('AIプロバイダーが設定されていません')
   })
 
   // ── 設定 ────────────────────────────────────────────────────────────

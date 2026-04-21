@@ -1,3 +1,5 @@
 node_modules/
 discord-sound/out/
 discord-sound/dist/
+scenario-converter/out/
+scenario-converter/dist/

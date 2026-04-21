@@ -15,10 +15,10 @@
       <button id="settings-btn" class="btn btn-secondary">設定</button>
     </header>
 
-    <!-- ドロップゾーン（ファイル未読込時） -->
+    <!-- ドロップゾーン -->
     <div id="drop-zone" class="drop-zone">
-      <p>テキスト(.txt)ファイルをドロップ</p>
-      <small>PDF は「ファイルを開く」ボタンから選択</small>
+      <p>テキスト / PDF をここにドロップ</p>
+      <small>または「ファイルを開く」ボタンから選択</small>
     </div>
 
     <!-- ステータスバー（読込後に表示） -->
@@ -26,6 +26,15 @@
       <span id="status-file"></span>
       <span>変換ブロック: <span id="status-blocks" class="count">0</span> 件</span>
       <span>技能リネーム: <span id="status-renames" class="count">0</span> 件</span>
+      <span>用語変換: <span id="status-narrative" class="count">0</span> 件</span>
+      <button id="ai-reextract-btn" class="btn btn-ai hidden">AI再抽出</button>
+      <button id="ai-reformat-btn" class="btn btn-ai hidden">AI整形</button>
+    </div>
+
+    <!-- 警告バナー -->
+    <div id="warning-banner" class="warning-banner hidden">
+      <span id="warning-text"></span>
+      <button id="warning-close" class="warning-close">✕</button>
     </div>
 
     <!-- 差分ビュー（読込後に表示） -->
@@ -51,21 +60,40 @@
     <div class="modal">
       <h3>設定</h3>
       <div class="form-group">
-        <label>AI連携（将来対応）</label>
+        <label>AI連携</label>
         <select id="ai-provider-select">
           <option value="none">使用しない</option>
-          <option value="claude">Claude API（未実装）</option>
-          <option value="gemini">Gemini API（未実装）</option>
+          <option value="claude">Claude API</option>
+          <option value="gemini">Gemini API</option>
         </select>
       </div>
       <div class="form-group">
-        <label>API キー</label>
-        <input type="password" id="ai-apikey-input" placeholder="将来対応予定" disabled />
+        <label>Claude API キー</label>
+        <input type="password" id="claude-apikey-input" placeholder="Claude APIキーを入力" />
+      </div>
+      <div class="form-group">
+        <label>Gemini API キー</label>
+        <input type="password" id="gemini-apikey-input" placeholder="Gemini APIキーを入力" />
+      </div>
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox" id="ai-pdf-extract-input" />
+          PDFの内容をAIで抽出する
+        </label>
+        <small class="form-hint">Claude / Gemini のAPIキー設定時に有効。PDF読み込みにAPIが使われます。</small>
       </div>
       <div class="modal-footer">
         <button id="settings-save-btn" class="btn btn-primary">保存</button>
         <button id="settings-cancel-btn" class="btn btn-secondary">キャンセル</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ローディングオーバーレイ -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <p id="loading-msg">処理中...</p>
     </div>
   </div>
 

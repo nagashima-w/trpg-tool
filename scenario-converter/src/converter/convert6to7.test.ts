@@ -213,6 +213,48 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('【備考】このNPCは敵対的である。')
   })
 
+  it('地の文の「アイデア」をINTに置換する', () => {
+    const result = convertText('アイデアロールに成功した場合、手がかりを得る。アイデアに失敗したら何も分からない。')
+    expect(result.convertedText).toContain('INTロールに成功した場合')
+    expect(result.convertedText).toContain('INTに失敗したら')
+    expect(result.convertedText).not.toContain('アイデア')
+  })
+
+  it('statブロック内の「アイデア」技能も変換される', () => {
+    const text = [
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+      'アイデア 65%  目星 55%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.convertedText).toContain('INT 65%')
+    expect(result.convertedText).not.toContain('アイデア')
+  })
+
+  it('narrativeReplacementsに地の文の変換位置が記録される', () => {
+    const text = 'アイデアロールに成功した場合。'
+    const result = convertText(text)
+    expect(result.narrativeReplacements).toHaveLength(1)
+    const r = result.narrativeReplacements[0]
+    expect(r.from).toBe('アイデア')
+    expect(r.to).toBe('INT')
+    expect(result.originalText.slice(r.originalStart, r.originalEnd)).toBe('アイデア')
+    expect(result.convertedText.slice(r.convertedStart, r.convertedEnd)).toBe('INT')
+  })
+
+  it('statブロック前後の地の文変換でブロック位置がずれない', () => {
+    const text = [
+      'アイデアロール。',
+      'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.convertedText).toContain('INTロール。')
+    expect(result.convertedText).toContain('STR 70')
+    expect(result.convertedText).not.toContain('アイデア')
+    const b = result.blocks[0]
+    expect(result.convertedText.slice(b.convertedStartIndex, b.convertedEndIndex)).toContain('STR 70')
+  })
+
   it('%なしの技能値でも変換される', () => {
     const text = [
       'STR 14  CON 12  SIZ 15  INT 7  POW 13  DEX 11',
@@ -292,6 +334,18 @@ describe('convertText', () => {
     expect(result.convertedText).toContain('STR | 70')
     expect(result.convertedText).toContain('近接戦闘（格闘） | 75%')
     expect(result.convertedText).toContain('目星 | 55%')
+  })
+
+  it('全角数字を含むstatブロックを変換する', () => {
+    const text = [
+      'STR １４  CON １２  SIZ １５  INT ７  POW １３  DEX １１',
+      'こぶし ７５%  目星 ５５%',
+    ].join('\n')
+    const result = convertText(text)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.convertedText).toContain('STR 70')
+    expect(result.convertedText).toContain('CON 60')
+    expect(result.convertedText).toContain('近接戦闘（格闘）')
   })
 
   it('複数のstatブロックをそれぞれ変換する', () => {
