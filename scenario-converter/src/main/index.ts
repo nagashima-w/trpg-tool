@@ -45,10 +45,10 @@ async function loadPdf(filePath: string): Promise<{ text: string; warning?: stri
   if (apiKey && settings.aiPdfExtract) {
     try {
       if (settings.aiProvider === 'claude') {
-        return { text: await extractPdfTextWithClaude(filePath, apiKey, sendProgress) }
+        return { text: await extractPdfTextWithClaude(filePath, apiKey, sendProgress, settings.aiPrompts.pdfExtract || undefined) }
       }
       if (settings.aiProvider === 'gemini') {
-        return { text: await extractPdfTextWithGemini(filePath, apiKey, sendProgress) }
+        return { text: await extractPdfTextWithGemini(filePath, apiKey, sendProgress, settings.aiPrompts.pdfExtract || undefined) }
       }
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
@@ -120,11 +120,11 @@ function setupIpcHandlers(): void {
     const settings = settingsManager.get()
     if (settings.aiProvider === 'claude') {
       if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
-      return { text: await extractPdfTextWithClaude(filePath, settings.claudeApiKey, sendProgress), filePath }
+      return { text: await extractPdfTextWithClaude(filePath, settings.claudeApiKey, sendProgress, settings.aiPrompts.pdfExtract || undefined), filePath }
     }
     if (settings.aiProvider === 'gemini') {
       if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
-      return { text: await extractPdfTextWithGemini(filePath, settings.geminiApiKey, sendProgress), filePath }
+      return { text: await extractPdfTextWithGemini(filePath, settings.geminiApiKey, sendProgress, settings.aiPrompts.pdfExtract || undefined), filePath }
     }
     throw new Error('AIプロバイダーが設定されていません')
   })
@@ -134,11 +134,11 @@ function setupIpcHandlers(): void {
     const settings = settingsManager.get()
     if (settings.aiProvider === 'claude') {
       if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
-      return reformatWithClaude(text, settings.claudeApiKey, sendProgress)
+      return reformatWithClaude(text, settings.claudeApiKey, sendProgress, settings.aiPrompts.reformat || undefined)
     }
     if (settings.aiProvider === 'gemini') {
       if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
-      return reformatWithGemini(text, settings.geminiApiKey, sendProgress)
+      return reformatWithGemini(text, settings.geminiApiKey, sendProgress, settings.aiPrompts.reformat || undefined)
     }
     throw new Error('AIプロバイダーが設定されていません')
   })
@@ -148,11 +148,11 @@ function setupIpcHandlers(): void {
     const settings = settingsManager.get()
     if (settings.aiProvider === 'claude') {
       if (!settings.claudeApiKey) throw new Error('Claude APIキーが設定されていません')
-      return analyzeBalanceWithClaude(contextText, settings.claudeApiKey, sendProgress)
+      return analyzeBalanceWithClaude(contextText, settings.claudeApiKey, sendProgress, settings.aiPrompts.balance || undefined)
     }
     if (settings.aiProvider === 'gemini') {
       if (!settings.geminiApiKey) throw new Error('Gemini APIキーが設定されていません')
-      return analyzeBalanceWithGemini(contextText, settings.geminiApiKey, sendProgress)
+      return analyzeBalanceWithGemini(contextText, settings.geminiApiKey, sendProgress, settings.aiPrompts.balance || undefined)
     }
     throw new Error('AIプロバイダーが設定されていません')
   })

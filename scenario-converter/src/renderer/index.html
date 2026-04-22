@@ -83,6 +83,26 @@
         </label>
         <small class="form-hint">Claude / Gemini のAPIキー設定時に有効。PDF読み込みにAPIが使われます。</small>
       </div>
+      <div class="form-group">
+        <button id="prompts-toggle-btn" class="btn btn-secondary btn-sm prompts-toggle">プロンプトを編集する ▼</button>
+      </div>
+      <div id="prompts-section" class="prompts-section hidden">
+        <div class="form-group">
+          <label>PDF抽出プロンプト</label>
+          <textarea id="prompt-pdf-extract" class="prompt-textarea" rows="6" spellcheck="false"></textarea>
+          <button id="prompt-pdf-extract-reset" class="btn btn-secondary btn-sm">デフォルトに戻す</button>
+        </div>
+        <div class="form-group">
+          <label>整形プロンプト</label>
+          <textarea id="prompt-reformat" class="prompt-textarea" rows="6" spellcheck="false"></textarea>
+          <button id="prompt-reformat-reset" class="btn btn-secondary btn-sm">デフォルトに戻す</button>
+        </div>
+        <div class="form-group">
+          <label>バランス分析プロンプト</label>
+          <textarea id="prompt-balance" class="prompt-textarea" rows="6" spellcheck="false"></textarea>
+          <button id="prompt-balance-reset" class="btn btn-secondary btn-sm">デフォルトに戻す</button>
+        </div>
+      </div>
       <div class="modal-footer">
         <button id="settings-save-btn" class="btn btn-primary">保存</button>
         <button id="settings-cancel-btn" class="btn btn-secondary">キャンセル</button>

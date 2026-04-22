@@ -124,4 +124,14 @@ describe('extractPdfTextWithGemini', () => {
     const [url] = mockFetch.mock.calls[0]
     expect(url).toContain('key=my-api-key')
   })
+
+  it('カスタムプロンプトが指定された場合はそれをリクエストに使用する', async () => {
+    vi.mocked(readFile).mockResolvedValue(Buffer.alloc(1024) as never)
+    mockGenerateOk('カスタムプロンプト結果')
+
+    await extractPdfTextWithGemini('/dummy.pdf', 'test-key', undefined, 'カスタムプロンプト')
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.contents[0].parts[1].text).toBe('カスタムプロンプト')
+  })
 })
