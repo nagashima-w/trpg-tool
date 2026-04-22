@@ -1,6 +1,7 @@
 import type { ConversionResult, ConvertedBlock, BalanceSuggestion } from '../../converter/types'
 import { escapeRe } from '../../converter/utils'
 import { buildCombatContextText, parseBalanceSuggestions } from '../../converter/balance'
+import { DEFAULT_PDF_EXTRACT_PROMPT, DEFAULT_REFORMAT_PROMPT, DEFAULT_BALANCE_PROMPT } from '../../main/ai'
 
 const api = window.converterAPI
 
@@ -37,6 +38,14 @@ const warningText       = document.getElementById('warning-text')         as HTM
 const warningClose      = document.getElementById('warning-close')        as HTMLButtonElement
 const loadingOverlay    = document.getElementById('loading-overlay')      as HTMLDivElement
 const loadingMsg        = document.getElementById('loading-msg')          as HTMLParagraphElement
+const promptsToggleBtn       = document.getElementById('prompts-toggle-btn')       as HTMLButtonElement
+const promptsSection         = document.getElementById('prompts-section')           as HTMLDivElement
+const promptPdfExtractInput  = document.getElementById('prompt-pdf-extract')        as HTMLTextAreaElement
+const promptReformatInput    = document.getElementById('prompt-reformat')            as HTMLTextAreaElement
+const promptBalanceInput     = document.getElementById('prompt-balance')             as HTMLTextAreaElement
+const promptPdfExtractReset  = document.getElementById('prompt-pdf-extract-reset')  as HTMLButtonElement
+const promptReformatReset    = document.getElementById('prompt-reformat-reset')      as HTMLButtonElement
+const promptBalanceReset     = document.getElementById('prompt-balance-reset')       as HTMLButtonElement
 
 // ── 状態 ────────────────────────────────────────────────────────────────────
 let currentResult: ConversionResult | null = null
@@ -388,6 +397,11 @@ async function openSettings(): Promise<void> {
   claudeApikeyInput.value    = settings.claudeApiKey
   geminiApikeyInput.value    = settings.geminiApiKey
   aiPdfExtractInput.checked  = settings.aiPdfExtract
+  promptPdfExtractInput.value = settings.aiPrompts.pdfExtract
+  promptReformatInput.value   = settings.aiPrompts.reformat
+  promptBalanceInput.value    = settings.aiPrompts.balance
+  promptsSection.classList.add('hidden')
+  promptsToggleBtn.textContent = 'プロンプトを編集する ▼'
   updatePdfExtractToggle()
   settingsModal.classList.remove('hidden')
 }
@@ -456,12 +470,26 @@ settingsSaveBtn.addEventListener('click', async () => {
     claudeApiKey:  claudeApikeyInput.value,
     geminiApiKey:  geminiApikeyInput.value,
     aiPdfExtract:  aiPdfExtractInput.checked,
+    aiPrompts: {
+      pdfExtract: promptPdfExtractInput.value,
+      reformat:   promptReformatInput.value,
+      balance:    promptBalanceInput.value,
+    },
   }
   await api.saveSettings(settings)
   cachedSettings = settings
   settingsModal.classList.add('hidden')
   updateAiButtonVisibility(settings)
 })
+
+promptsToggleBtn.addEventListener('click', () => {
+  const isHidden = promptsSection.classList.toggle('hidden')
+  promptsToggleBtn.textContent = isHidden ? 'プロンプトを編集する ▼' : 'プロンプトを編集する ▲'
+})
+
+promptPdfExtractReset.addEventListener('click', () => { promptPdfExtractInput.value = DEFAULT_PDF_EXTRACT_PROMPT })
+promptReformatReset.addEventListener('click',   () => { promptReformatInput.value   = DEFAULT_REFORMAT_PROMPT })
+promptBalanceReset.addEventListener('click',    () => { promptBalanceInput.value    = DEFAULT_BALANCE_PROMPT })
 aiReExtractBtn.addEventListener('click', () => { void reExtractWithAI() })
 aiReformatBtn.addEventListener('click', () => { void reformatWithAI() })
 aiBalanceBtn.addEventListener('click', () => { void analyzeBalance() })

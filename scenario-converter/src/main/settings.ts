@@ -1,11 +1,19 @@
 import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { DEFAULT_PDF_EXTRACT_PROMPT, DEFAULT_REFORMAT_PROMPT, DEFAULT_BALANCE_PROMPT } from './ai'
+
+export interface AiPrompts {
+  pdfExtract: string
+  reformat: string
+  balance: string
+}
 
 export interface Settings {
   aiProvider: 'none' | 'claude' | 'gemini'
   claudeApiKey: string
   geminiApiKey: string
   aiPdfExtract: boolean
+  aiPrompts: AiPrompts
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -13,6 +21,11 @@ const DEFAULT_SETTINGS: Settings = {
   claudeApiKey: '',
   geminiApiKey: '',
   aiPdfExtract: false,
+  aiPrompts: {
+    pdfExtract: DEFAULT_PDF_EXTRACT_PROMPT,
+    reformat: DEFAULT_REFORMAT_PROMPT,
+    balance: DEFAULT_BALANCE_PROMPT,
+  },
 }
 
 export class SettingsManager {
@@ -29,6 +42,7 @@ export class SettingsManager {
       const raw = JSON.parse(readFileSync(this.settingsPath, 'utf-8')) as Record<string, unknown>
       // 旧フォーマット（aiApiKey）からの移行
       const legacy = typeof raw['aiApiKey'] === 'string' ? raw['aiApiKey'] : ''
+      const rawPrompts = raw['aiPrompts'] as Record<string, unknown> | undefined
       return {
         ...DEFAULT_SETTINGS,
         ...raw,
@@ -36,6 +50,11 @@ export class SettingsManager {
           : (raw['aiProvider'] === 'claude' ? legacy : ''),
         geminiApiKey: typeof raw['geminiApiKey'] === 'string' ? raw['geminiApiKey']
           : (raw['aiProvider'] === 'gemini' ? legacy : ''),
+        aiPrompts: {
+          pdfExtract: typeof rawPrompts?.['pdfExtract'] === 'string' ? rawPrompts['pdfExtract'] : DEFAULT_PDF_EXTRACT_PROMPT,
+          reformat: typeof rawPrompts?.['reformat'] === 'string' ? rawPrompts['reformat'] : DEFAULT_REFORMAT_PROMPT,
+          balance: typeof rawPrompts?.['balance'] === 'string' ? rawPrompts['balance'] : DEFAULT_BALANCE_PROMPT,
+        },
       }
     } catch {
       return { ...DEFAULT_SETTINGS }
@@ -43,11 +62,11 @@ export class SettingsManager {
   }
 
   get(): Settings {
-    return { ...this.settings }
+    return { ...this.settings, aiPrompts: { ...this.settings.aiPrompts } }
   }
 
   save(settings: Settings): void {
-    this.settings = { ...settings }
+    this.settings = { ...settings, aiPrompts: { ...settings.aiPrompts } }
     try {
       writeFileSync(this.settingsPath, JSON.stringify(this.settings, null, 2), 'utf-8')
     } catch (err) {

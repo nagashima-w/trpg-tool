@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { readFile } from 'fs/promises'
 import { PDFDocument } from 'pdf-lib'
 
-const PDF_EXTRACT_PROMPT = `このTRPGシナリオのPDFからテキストを抽出してください。
+export const DEFAULT_PDF_EXTRACT_PROMPT = `このTRPGシナリオのPDFからテキストを抽出してください。
 
 以下の点を守ってください：
 - 文章の内容を変えず、そのまま書き出す
@@ -14,7 +14,7 @@ const PDF_EXTRACT_PROMPT = `このTRPGシナリオのPDFからテキストを抽
 - マークダウン記法（#や**等）は使わない
 - 余計な説明や前置きなしに、抽出テキストのみを返す`
 
-const REFORMAT_PROMPT = `以下はPDFから抽出したTRPGシナリオのテキストです。文字間の余分なスペースや途中改行などのPDF抽出アーティファクトを修正し、自然な日本語テキストに整形してください。
+export const DEFAULT_REFORMAT_PROMPT = `以下はPDFから抽出したTRPGシナリオのテキストです。文字間の余分なスペースや途中改行などのPDF抽出アーティファクトを修正し、自然な日本語テキストに整形してください。
 
 重要な制約：
 - 能力値（STR/CON/SIZ/INT/POW/DEX/APP/EDU/MOV/HP/MP/SAN等）の数値は変更しない
@@ -73,7 +73,7 @@ async function callWithClaudeRetry<T>(
   }
 }
 
-async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined): Promise<string> {
+async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined, prompt?: string): Promise<string> {
   const client = new Anthropic({ apiKey, maxRetries: 0 })
   const base64 = buf.toString('base64')
   const requestBody = {
@@ -84,7 +84,7 @@ async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: P
       role: 'user',
       content: [
         { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-        { type: 'text', text: PDF_EXTRACT_PROMPT },
+        { type: 'text', text: prompt ?? DEFAULT_PDF_EXTRACT_PROMPT },
       ],
     }],
   }
@@ -97,23 +97,23 @@ async function extractChunkWithClaude(buf: Buffer, apiKey: string, onProgress: P
   return block.text
 }
 
-async function extractPdfInChunks(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined): Promise<string> {
+async function extractPdfInChunks(buf: Buffer, apiKey: string, onProgress: ProgressCallback | undefined, prompt?: string): Promise<string> {
   const { chunks, totalPages } = await splitPdfBufferByPages(buf, CHUNK_PAGES)
   const results: string[] = []
   for (let i = 0; i < chunks.length; i++) {
     const pageStart = i * CHUNK_PAGES + 1
     const pageEnd = Math.min((i + 1) * CHUNK_PAGES, totalPages)
     onProgress?.(`ページ ${pageStart}〜${pageEnd} / ${totalPages} を処理中...`)
-    results.push(await extractChunkWithClaude(chunks[i], apiKey, onProgress))
+    results.push(await extractChunkWithClaude(chunks[i], apiKey, onProgress, prompt))
   }
   return results.join('\n\n')
 }
 
-export async function extractPdfTextWithClaude(filePath: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+export async function extractPdfTextWithClaude(filePath: string, apiKey: string, onProgress?: ProgressCallback, prompt?: string): Promise<string> {
   const buf = await readFile(filePath)
 
   try {
-    return await extractChunkWithClaude(buf, apiKey, onProgress)
+    return await extractChunkWithClaude(buf, apiKey, onProgress, prompt)
   } catch (err) {
     const status = (err != null && typeof err === 'object' && 'status' in err)
       ? (err as { status: unknown }).status
@@ -121,18 +121,18 @@ export async function extractPdfTextWithClaude(filePath: string, apiKey: string,
     const shouldChunk = err instanceof Anthropic.RateLimitError || status === 413
     if (shouldChunk) {
       onProgress?.('PDFを分割して再処理します...')
-      return extractPdfInChunks(buf, apiKey, onProgress)
+      return extractPdfInChunks(buf, apiKey, onProgress, prompt)
     }
     throw err
   }
 }
 
-export async function reformatWithClaude(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+export async function reformatWithClaude(text: string, apiKey: string, onProgress?: ProgressCallback, prompt?: string): Promise<string> {
   const client = new Anthropic({ apiKey, maxRetries: 0 })
   const requestBody = {
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 8192,
-    messages: [{ role: 'user', content: REFORMAT_PROMPT + text }],
+    messages: [{ role: 'user', content: (prompt ?? DEFAULT_REFORMAT_PROMPT) + text }],
   }
   const message = await callWithClaudeRetry(() => client.messages.create(requestBody), onProgress)
   const block = message.content[0]
@@ -189,14 +189,15 @@ async function deleteGeminiFile(fileUri: string, apiKey: string): Promise<void> 
   await fetch(`https://generativelanguage.googleapis.com/v1beta/${m[1]}?key=${apiKey}`, { method: 'DELETE' })
 }
 
-export async function extractPdfTextWithGemini(filePath: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+export async function extractPdfTextWithGemini(filePath: string, apiKey: string, onProgress?: ProgressCallback, prompt?: string): Promise<string> {
   const buf = await readFile(filePath)
+  const extractPrompt = prompt ?? DEFAULT_PDF_EXTRACT_PROMPT
 
   if (buf.length <= GEMINI_INLINE_LIMIT) {
     onProgress?.('GeminiでPDFを解析中...')
     return geminiGenerate([
       { inlineData: { mimeType: 'application/pdf', data: buf.toString('base64') } },
-      { text: PDF_EXTRACT_PROMPT },
+      { text: extractPrompt },
     ], apiKey, onProgress)
   }
 
@@ -206,18 +207,18 @@ export async function extractPdfTextWithGemini(filePath: string, apiKey: string,
     onProgress?.('GeminiでPDFを解析中...')
     return await geminiGenerate([
       { fileData: { mimeType: 'application/pdf', fileUri } },
-      { text: PDF_EXTRACT_PROMPT },
+      { text: extractPrompt },
     ], apiKey, onProgress)
   } finally {
     await deleteGeminiFile(fileUri, apiKey).catch(() => {})
   }
 }
 
-export async function reformatWithGemini(text: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
-  return geminiGenerate([{ text: REFORMAT_PROMPT + text }], apiKey, onProgress)
+export async function reformatWithGemini(text: string, apiKey: string, onProgress?: ProgressCallback, prompt?: string): Promise<string> {
+  return geminiGenerate([{ text: (prompt ?? DEFAULT_REFORMAT_PROMPT) + text }], apiKey, onProgress)
 }
 
-const BALANCE_PROMPT = `あなたはクトゥルフ神話TRPGのゲームマスター補佐AIです。
+export const DEFAULT_BALANCE_PROMPT = `あなたはクトゥルフ神話TRPGのゲームマスター補佐AIです。
 以下は7版に変換されたTRPGシナリオの敵キャラクターのステータスブロックと、前後の戦闘コンテキストです。
 
 CoC7版のルールに基づき、各キャラクターの戦闘バランスを分析してください。
@@ -249,14 +250,14 @@ category は "ability"（STR/CON/DEX/APP/POW/SIZ/INT/EDU/MOV）、"derived"（HP
 対象シナリオデータ:
 `
 
-export async function analyzeBalanceWithClaude(contextText: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+export async function analyzeBalanceWithClaude(contextText: string, apiKey: string, onProgress?: ProgressCallback, prompt?: string): Promise<string> {
   const client = new Anthropic({ apiKey, maxRetries: 0 })
   onProgress?.('戦闘バランスを分析中...')
   const message = await callWithClaudeRetry(
     () => client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
-      messages: [{ role: 'user', content: BALANCE_PROMPT + contextText }],
+      messages: [{ role: 'user', content: (prompt ?? DEFAULT_BALANCE_PROMPT) + contextText }],
     }),
     onProgress,
   )
@@ -265,7 +266,7 @@ export async function analyzeBalanceWithClaude(contextText: string, apiKey: stri
   return block.text
 }
 
-export async function analyzeBalanceWithGemini(contextText: string, apiKey: string, onProgress?: ProgressCallback): Promise<string> {
+export async function analyzeBalanceWithGemini(contextText: string, apiKey: string, onProgress?: ProgressCallback, prompt?: string): Promise<string> {
   onProgress?.('戦闘バランスを分析中...')
-  return geminiGenerate([{ text: BALANCE_PROMPT + contextText }], apiKey, onProgress)
+  return geminiGenerate([{ text: (prompt ?? DEFAULT_BALANCE_PROMPT) + contextText }], apiKey, onProgress)
 }
