@@ -1,7 +1,7 @@
 import type { ConversionResult, ConvertedBlock, BalanceSuggestion } from '../../converter/types'
 import { escapeRe } from '../../converter/utils'
 import { buildCombatContextText, parseBalanceSuggestions } from '../../converter/balance'
-import { DEFAULT_PDF_EXTRACT_PROMPT, DEFAULT_REFORMAT_PROMPT, DEFAULT_BALANCE_PROMPT } from '../../main/ai'
+import { DEFAULT_PDF_EXTRACT_PROMPT, DEFAULT_REFORMAT_PROMPT, DEFAULT_BALANCE_PROMPT } from '../../main/defaultPrompts'
 
 const api = window.converterAPI
 
